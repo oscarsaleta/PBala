@@ -1,4 +1,4 @@
-PARALLELLIZATION AND DISTRIBUTED EXECUTION SOFTWARE FOR ANTZ
+# PARALLELLIZATION AND DISTRIBUTED EXECUTION SOFTWARE FOR ANTZ
 
 This C program uses PVM libraries in order to create a parallellization interface for
  - Maple scripts
