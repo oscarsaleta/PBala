@@ -14,3 +14,4 @@
 
 int getLineCount(char *prName, char *inp_dataFile);
 int memcheck(int flag, long int max_task_size);
+int prusage(int pid, int taskNumber, char *out_dir, struct rusage usage);
