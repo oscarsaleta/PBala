@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
         /* Race condition. Mitigated by executing few CPUs on each node
          * Explanation: 2 tasks could check memory simultaneously and
          *  both conclude that there is enough because they see the same
-         *  output, but maybe there is not  enough for 2 tasks to be executed.
+         *  output, but maybe there is not enough memory for 2 tasks.
          */
         if (memcheck(memcheck_flag,max_task_size) == 1) {
             sleep(60); // arbitrary number that could be much lower
@@ -69,8 +69,16 @@ int main(int argc, char *argv[]) {
          * and then report resource usage via getrusage()
          */
         pid_t pid = fork();
+        // If fork fails, notify master and exit
         if (pid<0) {
-            fprintf(stderr,"ERROR - task %d could not spawn memory monitor\n",taskNumber);
+            fprintf(stderr,"ERROR - task %d could not spawn execution process\n",taskNumber);
+            int state=1;
+            pvm_initsend(PVM_ENCODING);
+            pvm_pkint(&me,1,1);
+            pvm_pkint(&taskNumber,1,1);
+            pvm_pkint(&state,1,1);
+            pvm_send(myparent,MSG_RESULT);
+            pvm_exit();
             return 1;
         }
         //Child code (work done here)
@@ -170,7 +178,7 @@ int main(int argc, char *argv[]) {
         waitid(P_PID,pid,&infop,WEXITED);
         struct rusage usage;
         getrusage(RUSAGE_CHILDREN,&usage);
-        prusage(pid,taskNumber,out_dir,usage);
+        prtusage(pid,taskNumber,out_dir,usage);
 
         // Send response to master
         int state=0;

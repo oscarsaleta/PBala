@@ -92,8 +92,6 @@ int main (int argc, char *argv[]) {
     logfile = fopen(logfilename,"w");
     fprintf(logfile,"# NODE CODENAMES\n");
 
-
-    
     /* Read node configuration file */
     // Get file length (number of nodes)
     nNodes = getLineCount(argv[0],inp_nodes);
@@ -141,7 +139,6 @@ int main (int argc, char *argv[]) {
     }
     
     pvm_catchout(f_out);
-
 
 
     // Spawn all the tasks
