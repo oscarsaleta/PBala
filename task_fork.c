@@ -38,29 +38,36 @@ int main(int argc, char *argv[]) {
 	pvm_upklong(&max_task_size,1,1);
 
 	/* Perform generic check or use specific size info?
-	 * memcheck_flag = 0 means generic check
-	 * memcheck_flag = 1 means specific info
+	 *  memcheck_flag = 0 means generic check
+	 *  memcheck_flag = 1 means specific info
 	 */
 	int memcheck_flag = max_task_size > 0 ? 1 : 0;
 
 	// Work work work
 	while (1) {
-		// Race condition. Mitigated by executing few CPUs on each node
+		/* Race condition. Mitigated by executing few CPUs on each node
+         * Explanation: 2 tasks could check memory simultaneously and
+         *  both conclude that there is enough because they see the same
+         *  output, but maybe there is not  enough for 2 tasks to be executed.
+         */
 		if (memcheck(memcheck_flag,max_task_size) == 1) {
-			sleep(60);
+			sleep(60); // arbitrary number that could be much lower
 			continue;
 		}
 		// Receive inputs
 		pvm_recv(myparent,MSG_WORK);
 		pvm_upkint(&work_code,1,1);
-		if (work_code == MSG_STOP)
+		if (work_code == MSG_STOP) // if master tells task to shutdown
 			break;
 		pvm_upkint(&taskNumber,1,1);
 		pvm_upkstr(inp_programFile);
 		pvm_upkstr(out_dir);
-		pvm_upkstr(arguments);
+		pvm_upkstr(arguments); // string of comma-separated arguments read from datafile
 
-
+        /* Fork one process that will do the execution
+         * the "parent task" will only wait for this process to end
+         * and then report resource usage via getrusage()
+         */
 		pid_t pid = fork();
 		if (pid<0) {
 			fprintf(stderr,"ERROR - task %d could not spawn memory monitor\n",taskNumber);
@@ -68,87 +75,98 @@ int main(int argc, char *argv[]) {
 		}
 		//Child code (work done here)
 		if (pid == 0) {
+            // Variables for holding command line arguments passed to execlp
 			char arg0[BUFFER_SIZE],arg1[BUFFER_SIZE],arg2[BUFFER_SIZE],
 				arg3[BUFFER_SIZE];
 			char output_file[BUFFER_SIZE];
+			// Move stdout and stderr to output_file
 			sprintf(output_file,"%s/%d_out.txt",out_dir,taskNumber);
-
-			// Move stdout to output_file
 			int fd = open(output_file,O_WRONLY|O_CREAT,0666);
 			dup2(fd,1);
 			close(fd);
 
-			// Generate execution
-			char *replaced;
-			size_t arglen = strlen(arguments);
-			switch (task_type) {
-				case 0:
-					sprintf(arg0,"maple");
-					sprintf(arg1,"-qc \"taskId:=%d\"",taskNumber);
-					sprintf(arg2,"-c \"X:=[%s]\"",arguments);
-					sprintf(arg3,"%s",inp_programFile);
+            /*
+             * GENERATE EXECUTION OF PROGRAM
+             */
+            /* MAPLE */
+            if (task_type == 0) {
+                // Very simple because we can pass arguments directly with commas
+                sprintf(arg0,"maple");
+                sprintf(arg1,"-qc \"taskId:=%d\"",taskNumber);
+                sprintf(arg2,"-c \"X:=[%s]\"",arguments);
+                sprintf(arg3,"%s",inp_programFile);
 
-					execlp(arg0,arg0,arg1,arg2,arg3,NULL);
-					break;
-				case 1:
-					// TODO: parse arguments (no haurien de venir separats per coma)
-					
-					replaced = (char*)malloc(arglen);
-					for (i=0; i<arglen; i++) {
-						if (arguments[i]==',')
-							replaced[i]=' ';
-						else
-							replaced[i]=arguments[i];
-					}
-					sprintf(arg0,"%s",inp_programFile);
-					sprintf(arg1,"%d",taskNumber);
-					sprintf(arg2,"%s",replaced);
+                execlp(arg0,arg0,arg1,arg2,arg3,NULL);
+            } else {
+                // Preparations for C or Python execution 
+                char *arguments_cpy;
+                arguments_cpy=malloc(strlen(arguments));
+                strcpy(arguments_cpy,arguments);
+                // This counts how many commas there are in arguments, giving the number
+                // of arguments passed to the program
+                for(i=0;arguments_cpy[i];arguments_cpy[i]==','?i++:*arguments_cpy++);
+                int nargs = i+1; // i = number of commas
+                int nargs_tot; // will be the total number of arguments (nargs+program name+etc)
+                char *token; // used for tokenizing arguments
+                char **args; // this is the NULL-terminated array of strings
 
-					execlp(arg0,arg0,arg1,arg2,NULL);
-					break;
-				case 2:
-					sprintf(arg0,"python");
-					sprintf(arg1,"%s",inp_programFile);
-					sprintf(arg2,"%d",taskNumber);
-					sprintf(arg3,"%s",arguments);
-					
-					execlp(arg0,arg0,arg1,arg2,arg3,NULL);
-					break;
-				default:
-					return 1;
-			}
-		}
+                /* C */
+                if (task_type == 1) {
+                    /* In this case it's necessary to parse the arguments string
+                     * breaking it into tokens and then arranging the args of the
+                     * system call in a NULL-terminated array of strings which we
+                     * pass to execvp
+                     */
+                    // Tokenizing breaks the original string so we make a copy
+                    strcpy(arguments_cpy,arguments);
+                    // Args in system call are (program tasknum arguments), so 2+nargs
+                    nargs_tot = 2+nargs;
+                    args = (char**)malloc((nargs_tot+1)*sizeof(char*));
+                    args[nargs_tot]=NULL; // NULL-termination of args
+                    for (i=0;i<nargs_tot;i++)
+                        args[i] = malloc(BUFFER_SIZE);
+                    // Two first command line arguments
+                    strcpy(args[0],inp_programFile);
+                    sprintf(args[1],"%d",taskNumber);
+                    // Tokenize arguments_cpy
+                    token = strtok(arguments_cpy,",");
+                    // Copy the token to its place in args
+                    for (i=2;i<nargs_tot;i++) {
+                        strcpy(args[i],token);
+                        token = strtok(NULL,",");
+                    }
 
-		int state;
-		/*id_t wpid;
-		do {
-			fprintf(stderr,"Waiting for %d...\n",pid);
-			wpid = waitpid(pid,&state,WEXITED | WNOHANG);
-			if (wpid == -1) {
-				perror("waitpid");
-				exit(EXIT_FAILURE);
-			}
-			char memcmd[BUFFER_SIZE];
-			sprintf(memcmd,"cat /proc/%d/status | grep VmPeak > %s/mem%d.log",pid,out_dir,taskNumber);
-			system(memcmd);
-			sleep(30);
-		} while (!WIFEXITED(state) && !WIFSIGNALED(state));*/
+                    execvp(args[0],args);
+                }
+                /* PYTHON */
+                else if (task_type == 2) {
+                    // Same as in C, but adding "python" as first argument
+                    // Tokenizing breaks the original string so we make a copy
+                    strcpy(arguments_cpy,arguments);
+                    // Args in system call are (program tasknum arguments), so 2+nargs
+                    nargs_tot = 3+nargs;
+                    args = (char**)malloc((nargs_tot+1)*sizeof(char*));
+                    args[nargs_tot]=NULL; // NULL-termination of args
+                    for (i=0;i<nargs_tot;i++)
+                        args[i] = malloc(BUFFER_SIZE);
+                    // Two first command line arguments
+                    strcpy(args[0],"python");
+                    strcpy(args[1],inp_programFile);
+                    sprintf(args[2],"%d",taskNumber);
+                    // Tokenize arguments_cpy
+                    token = strtok(arguments_cpy,",");
+                    // Copy the token to its place in args
+                    for (i=3;i<nargs_tot;i++) {
+                        strcpy(args[i],token);
+                        token = strtok(NULL,",");
+                    }
 
-		siginfo_t infop;
-		/*do {
-			fprintf(stderr,"Waiting for %d...\n",pid);
-			infop.si_pid = 0;
-			state = waitid(P_PID,pid,&infop,WEXITED | WNOWAIT | WNOHANG);
-			if (state == -1) {
-				perror("waitpid");
-				exit(EXIT_FAILURE);
-			}
-			char memcmd[BUFFER_SIZE];
-			sprintf(memcmd,"cat /proc/%d/status | grep VmPeak >> %s/mem%d.log",pid,out_dir,taskNumber);
-			system(memcmd);
-			sleep(5);
-		} while (infop.si_pid == 0);
-		waitid(P_PID,pid,&infop,WEXITED | WNOHANG);*/
+                    execvp(args[0],args);
+                }
+            }
+        }
+
+        siginfo_t infop;
 		waitid(P_PID,pid,&infop,WEXITED);
 		struct rusage usage;
 		getrusage(RUSAGE_CHILDREN,&usage);
@@ -157,19 +175,19 @@ int main(int argc, char *argv[]) {
 		char memlogfilename[FNAME_SIZE];
 		sprintf(memlogfilename,"%s/mem%d.log",out_dir,taskNumber);
 		memlog = fopen(memlogfilename,"w");
-		fprintf(memlog,"TASK %d RESOURCE USAGE\n",taskNumber);
+		fprintf(memlog,"TASK %d RESOURCE USAGE (PID %d)\n",taskNumber,pid);
 		fprintf(memlog,"----------------------\n");
 		fprintf(memlog,"User CPU time used:               %20.10g\n",
 			usage.ru_utime.tv_sec+usage.ru_utime.tv_usec/1e6);
 		fprintf(memlog,"System CPU time used:             %20.10g\n",
 			usage.ru_stime.tv_sec+usage.ru_stime.tv_usec/1e6);
-		fprintf(memlog,"Maximum resident set size:        %20ld\n",
+		fprintf(memlog,"Maximum resident set size (KB):   %20ld\n",
 			usage.ru_maxrss);
-		fprintf(memlog,"Integral shared memory size:      %20ld\n",
+		fprintf(memlog,"Integral shared memory size (KB): %20ld\n",
 			usage.ru_ixrss);
-		fprintf(memlog,"Integral unshared data size:      %20ld\n",
+		fprintf(memlog,"Integral unshared data size (KB)  %20ld\n",
 			usage.ru_idrss);
-		fprintf(memlog,"Integral shared stack size:       %20ld\n",
+		fprintf(memlog,"Integral shared stack size (KB):  %20ld\n",
 			usage.ru_isrss);
 		fprintf(memlog,"Page reclaims (soft page faults): %20ld\n",
 			usage.ru_minflt);
@@ -194,7 +212,7 @@ int main(int argc, char *argv[]) {
 		fclose(memlog);
 
 		// Send response to master
-		state=0;
+		int state=0;
 		pvm_initsend(PVM_ENCODING);
 		pvm_pkint(&me,1,1);
 		pvm_pkint(&taskNumber,1,1);

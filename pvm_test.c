@@ -187,10 +187,12 @@ int main (int argc, char *argv[]) {
             pvm_pkint(&taskNumber,1,1);
             pvm_pkstr(inp_programFile);
             pvm_pkstr(out_dir);
+            /* parse arguments (skip tasknumber) */
             sprintf(aux_char,"%d",taskNumber);
             aux_size = strlen(aux_char);
             buffer[strlen(buffer)-1]=0;
-            sprintf(aux_char,"%s",&buffer[aux_size+1]);
+            // copy to aux_char the data line from after the first ","
+            sprintf(aux_char,"%s",&buffer[aux_size+1]); 
             pvm_pkstr(aux_char);
             pvm_send(taskId[i],MSG_WORK);
             fprintf(stderr,"%s:: INFO - sent task %d for execution\n",argv[0],taskNumber);
