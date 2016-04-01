@@ -7,12 +7,6 @@ LIBS=-lpvm3 -lm
 
 all : pvm_test task_fork
 
-# ========
-# Execucio
-# ========
-run : pvm_test
-	./pvm_test 0 mapletest.mpl datafile.txt nodefile.txt out 22000
-
 # ======
 # Master
 # ======
