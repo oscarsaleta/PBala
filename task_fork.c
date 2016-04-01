@@ -21,69 +21,69 @@
  * \return 0 if successful
  */
 int main(int argc, char *argv[]) {
-	int myparent,taskNumber;
-	int me,work_code;
-	char inp_programFile[FNAME_SIZE];
-	char out_dir[FNAME_SIZE];
-	char arguments[BUFFER_SIZE];
-	int task_type; //0:maple,1:C,2:python
-	long int max_task_size;
-	int i;
+    int myparent,taskNumber;
+    int me,work_code;
+    char inp_programFile[FNAME_SIZE];
+    char out_dir[FNAME_SIZE];
+    char arguments[BUFFER_SIZE];
+    int task_type; //0:maple,1:C,2:python
+    long int max_task_size;
+    int i;
 
-	myparent = pvm_parent();
-	// Be greeted by master
-	pvm_recv(myparent,MSG_GREETING);
-	pvm_upkint(&me,1,1);
-	pvm_upkint(&task_type,1,1);
-	pvm_upklong(&max_task_size,1,1);
+    myparent = pvm_parent();
+    // Be greeted by master
+    pvm_recv(myparent,MSG_GREETING);
+    pvm_upkint(&me,1,1);
+    pvm_upkint(&task_type,1,1);
+    pvm_upklong(&max_task_size,1,1);
 
-	/* Perform generic check or use specific size info?
-	 *  memcheck_flag = 0 means generic check
-	 *  memcheck_flag = 1 means specific info
-	 */
-	int memcheck_flag = max_task_size > 0 ? 1 : 0;
+    /* Perform generic check or use specific size info?
+     *  memcheck_flag = 0 means generic check
+     *  memcheck_flag = 1 means specific info
+     */
+    int memcheck_flag = max_task_size > 0 ? 1 : 0;
 
-	// Work work work
-	while (1) {
-		/* Race condition. Mitigated by executing few CPUs on each node
+    // Work work work
+    while (1) {
+        /* Race condition. Mitigated by executing few CPUs on each node
          * Explanation: 2 tasks could check memory simultaneously and
          *  both conclude that there is enough because they see the same
          *  output, but maybe there is not  enough for 2 tasks to be executed.
          */
-		if (memcheck(memcheck_flag,max_task_size) == 1) {
-			sleep(60); // arbitrary number that could be much lower
-			continue;
-		}
-		// Receive inputs
-		pvm_recv(myparent,MSG_WORK);
-		pvm_upkint(&work_code,1,1);
-		if (work_code == MSG_STOP) // if master tells task to shutdown
-			break;
-		pvm_upkint(&taskNumber,1,1);
-		pvm_upkstr(inp_programFile);
-		pvm_upkstr(out_dir);
-		pvm_upkstr(arguments); // string of comma-separated arguments read from datafile
+        if (memcheck(memcheck_flag,max_task_size) == 1) {
+            sleep(60); // arbitrary number that could be much lower
+            continue;
+        }
+        // Receive inputs
+        pvm_recv(myparent,MSG_WORK);
+        pvm_upkint(&work_code,1,1);
+        if (work_code == MSG_STOP) // if master tells task to shutdown
+            break;
+        pvm_upkint(&taskNumber,1,1);
+        pvm_upkstr(inp_programFile);
+        pvm_upkstr(out_dir);
+        pvm_upkstr(arguments); // string of comma-separated arguments read from datafile
 
         /* Fork one process that will do the execution
          * the "parent task" will only wait for this process to end
          * and then report resource usage via getrusage()
          */
-		pid_t pid = fork();
-		if (pid<0) {
-			fprintf(stderr,"ERROR - task %d could not spawn memory monitor\n",taskNumber);
-			return 1;
-		}
-		//Child code (work done here)
-		if (pid == 0) {
+        pid_t pid = fork();
+        if (pid<0) {
+            fprintf(stderr,"ERROR - task %d could not spawn memory monitor\n",taskNumber);
+            return 1;
+        }
+        //Child code (work done here)
+        if (pid == 0) {
             // Variables for holding command line arguments passed to execlp
-			char arg0[BUFFER_SIZE],arg1[BUFFER_SIZE],arg2[BUFFER_SIZE],
-				arg3[BUFFER_SIZE];
-			char output_file[BUFFER_SIZE];
-			// Move stdout and stderr to output_file
-			sprintf(output_file,"%s/%d_out.txt",out_dir,taskNumber);
-			int fd = open(output_file,O_WRONLY|O_CREAT,0666);
-			dup2(fd,1);
-			close(fd);
+            char arg0[BUFFER_SIZE],arg1[BUFFER_SIZE],arg2[BUFFER_SIZE],
+                arg3[BUFFER_SIZE];
+            char output_file[BUFFER_SIZE];
+            // Move stdout and stderr to output_file
+            sprintf(output_file,"%s/%d_out.txt",out_dir,taskNumber);
+            int fd = open(output_file,O_WRONLY|O_CREAT,0666);
+            dup2(fd,1);
+            close(fd);
 
             /*
              * GENERATE EXECUTION OF PROGRAM
@@ -167,19 +167,19 @@ int main(int argc, char *argv[]) {
         }
 
         siginfo_t infop;
-		waitid(P_PID,pid,&infop,WEXITED);
-		struct rusage usage;
-		getrusage(RUSAGE_CHILDREN,&usage);
-		prusage(pid,taskNumber,out_dir,usage);
+        waitid(P_PID,pid,&infop,WEXITED);
+        struct rusage usage;
+        getrusage(RUSAGE_CHILDREN,&usage);
+        prusage(pid,taskNumber,out_dir,usage);
 
-		// Send response to master
-		int state=0;
-		pvm_initsend(PVM_ENCODING);
-		pvm_pkint(&me,1,1);
-		pvm_pkint(&taskNumber,1,1);
-		pvm_pkint(&state,1,1);
-		pvm_send(myparent,MSG_RESULT);
-	}
-	pvm_exit();
-	return 0;
+        // Send response to master
+        int state=0;
+        pvm_initsend(PVM_ENCODING);
+        pvm_pkint(&me,1,1);
+        pvm_pkint(&taskNumber,1,1);
+        pvm_pkint(&state,1,1);
+        pvm_send(myparent,MSG_RESULT);
+    }
+    pvm_exit();
+    return 0;
 }
