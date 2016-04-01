@@ -82,7 +82,7 @@ int memcheck(int flag, long int max_task_size) {
  *
  * \returns 0 if successful
  */
-int prusage(int pid, int taskNumber, char *out_dir, struct rusage usage) {
+int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage) {
     FILE *memlog;
     char memlogfilename[FNAME_SIZE];
     
