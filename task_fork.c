@@ -108,8 +108,10 @@ int main(int argc, char *argv[]) {
 
                 char **args;
                 args = (char**)malloc(5*sizeof(char*));
+                for (i=0;i<4;i++)
+                    args[i] = malloc(BUFFER_SIZE);
                 sprintf(args[0],"maple");
-                sprintf(args[1],"-qc 'taskId:=%d'",taskNumber);
+                sprintf(args[1],"-tc 'taskId:=%d'",taskNumber);
                 sprintf(args[2],"-c 'X:=[%s]'",arguments);
                 sprintf(args[3],"2> %s/%d_err.txt",out_dir,taskNumber);
                 args[4] = NULL;
