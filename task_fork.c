@@ -83,9 +83,6 @@ int main(int argc, char *argv[]) {
         }
         //Child code (work done here)
         if (pid == 0) {
-            // Variables for holding command line arguments passed to execlp
-            char arg0[BUFFER_SIZE],arg1[BUFFER_SIZE],arg2[BUFFER_SIZE],
-                arg3[BUFFER_SIZE];
             char output_file[BUFFER_SIZE];
             // Move stdout and stderr to output_file
             sprintf(output_file,"%s/%d_out.txt",out_dir,taskNumber);
@@ -98,13 +95,28 @@ int main(int argc, char *argv[]) {
              */
             /* MAPLE */
             if (task_type == 0) {
+                // Variables for holding command line arguments passed to execlp
+                /*char arg0[BUFFER_SIZE],arg1[BUFFER_SIZE],arg2[BUFFER_SIZE],
+                    arg3[BUFFER_SIZE];
                 // Very simple because we can pass arguments directly with commas
                 sprintf(arg0,"maple");
-                sprintf(arg1,"-qc \"taskId:=%d\"",taskNumber);
+                sprintf(arg1,"-tc \"taskId:=%d\"",taskNumber);
                 sprintf(arg2,"-c \"X:=[%s]\"",arguments);
                 sprintf(arg3,"%s",inp_programFile);
 
-                execlp(arg0,arg0,arg1,arg2,arg3,NULL);
+                execlp(arg0,arg0,arg1,arg2,arg3,NULL);*/
+
+                char **args;
+                args = (char**)malloc(5*sizeof(char*));
+                sprintf(args[0],"maple");
+                sprintf(args[1],"-qc 'taskId:=%d'",taskNumber);
+                sprintf(args[2],"-c 'X:=[%s]'",arguments);
+                sprintf(args[3],"2> %s/%d_err.txt",out_dir,taskNumber);
+                args[4] = NULL;
+                for (i=0;i<5;i++)
+                    fprintf(stderr,"'%s' ",args[i]);
+                fprintf(stderr,"\n");
+                execvp(args[0],args);
             } else {
                 // Preparations for C or Python execution 
                 char *arguments_cpy;
