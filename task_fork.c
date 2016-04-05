@@ -104,28 +104,22 @@ int main(int argc, char *argv[]) {
              */
             /* MAPLE */
             if (task_type == 0) {
-                // Variables for holding command line arguments passed to execlp
-                /*char arg0[BUFFER_SIZE],arg1[BUFFER_SIZE],arg2[BUFFER_SIZE],
-                    arg3[BUFFER_SIZE];
-                // Very simple because we can pass arguments directly with commas
-                sprintf(arg0,"maple");
-                sprintf(arg1,"-tc \"taskId:=%d\"",taskNumber);
-                sprintf(arg2,"-c \"X:=[%s]\"",arguments);
-                sprintf(arg3,"%s",inp_programFile);
-
-                err = execlp(arg0,arg0,arg1,arg2,arg3,NULL);*/
-
+                // NULL-terminated array of strings for calling the Maple script
                 char **args;
+                // 0: maple, 1: taskid, 2: X, 3: input, 4: NULL
                 int nargs=4;
                 args = (char**)malloc((nargs+1)*sizeof(char*));
+                // Do not malloc for NULL
                 for (i=0;i<nargs;i++)
                     args[i] = malloc(BUFFER_SIZE);
+                // Fill up the array with strings
                 sprintf(args[0],"maple");
                 sprintf(args[1],"-tc \"taskId:=%d\"",taskNumber);
                 sprintf(args[2],"-c \"X:=[%s]\"",arguments);
                 sprintf(args[3],"%s",inp_programFile);
                 args[4] = NULL;
 
+                // Call the execution and check for errors
                 err = execvp(args[0],args);
                 perror("ERROR:: child Maple process");
                 exit(err);
@@ -169,6 +163,7 @@ int main(int argc, char *argv[]) {
                         token = strtok(NULL,",");
                     }
 
+                    // Call the execution and check for errors
                     err = execvp(args[0],args);
                     perror("ERROR:: child Maple process");
                     exit(err);
@@ -178,7 +173,7 @@ int main(int argc, char *argv[]) {
                     // Same as in C, but adding "python" as first argument
                     // Tokenizing breaks the original string so we make a copy
                     strcpy(arguments_cpy,arguments);
-                    // Args in system call are (program tasknum arguments), so 2+nargs
+                    // args: (0)-python (1)-program (2)-tasknumber (3..nargs+3)-arguments
                     nargs_tot = 3+nargs;
                     args = (char**)malloc((nargs_tot+1)*sizeof(char*));
                     args[nargs_tot]=NULL; // NULL-termination of args
@@ -196,6 +191,7 @@ int main(int argc, char *argv[]) {
                         token = strtok(NULL,",");
                     }
 
+                    // Call the execution and check for errors
                     err = execvp(args[0],args);
                     perror("ERROR:: child Maple process");
                     exit(err);
@@ -203,11 +199,12 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        siginfo_t infop;
-        waitid(P_PID,pid,&infop,WEXITED);
-        struct rusage usage;
-        getrusage(RUSAGE_CHILDREN,&usage);
-        prtusage(pid,taskNumber,out_dir,usage);
+        /* Attempt at measuring memory usage for the child process */
+        siginfo_t infop; // Stores information about the child execution
+        waitid(P_PID,pid,&infop,WEXITED); // Wait for the execution to end
+        struct rusage usage; // Stores information about the child's resource usage
+        getrusage(RUSAGE_CHILDREN,&usage); // Get child resource usage
+        prtusage(pid,taskNumber,out_dir,usage); // Print resource usage to file
 
         // Send response to master
         int state=0;
@@ -218,5 +215,5 @@ int main(int argc, char *argv[]) {
         pvm_send(myparent,MSG_RESULT);
     }
     pvm_exit();
-    return 0;
+    exit(0);
 }
