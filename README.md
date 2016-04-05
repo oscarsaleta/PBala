@@ -1,18 +1,18 @@
 # PARALLELLIZATION AND DISTRIBUTED EXECUTION SOFTWARE FOR ANTZ
 
 This C program uses PVM libraries in order to create a parallellization interface for
- - *Maple* scripts
- - *C* programs
- - *Python* scripts
- - *Pari*: Pari is supported through gp2c by manually editing the output C code and compiling as a C program using the command provided by gp2c. Then the executable can be run using the C module of this software.
+ - **Maple** scripts
+ - **C** programs
+ - **Python** scripts
+ - **Pari**: Pari is supported through gp2c by manually editing the output C code and compiling as a C program using the command provided by gp2c. Then the executable can be run using the C module of this software.
 
 This interface lets the user execute a same script/program over multiple input data in several CPUs located at the antz computing server. It sports memory management so nodes do not run out of RAM due to too many processes being started in the same node. It also reports resource usage data after execution (work in progres...).
 
-*Compilation:* Makefile takes care.
+**Compilation:** Makefile takes care.
 
-*Documentation:* run $doxigen and take a look at html/index.html for documentation
+**Documentation:** run $doxigen and take a look at html/index.html for documentation
 
-*Usage:* ./pvm_test flag program datafile nodefile outputdir [memory]
+**Usage:** ./pvm_test flag program datafile nodefile outputdir [memory]
  - Flag:
   - 0 = Maple
   - 1 = C
