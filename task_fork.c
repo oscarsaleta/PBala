@@ -21,14 +21,16 @@
  * \return 0 if successful
  */
 int main(int argc, char *argv[]) {
-    int myparent,taskNumber;
-    int me,work_code;
-    char inp_programFile[FNAME_SIZE];
-    char out_dir[FNAME_SIZE];
-    char arguments[BUFFER_SIZE];
+    int myparent,taskNumber; // myparent is the master
+    int me; // me is the PVM id of this child
+    // work_code is a flag that tells the child what to do
+    int work_code;
+    char inp_programFile[FNAME_SIZE]; // name of the program
+    char out_dir[FNAME_SIZE]; // name of output directory
+    char arguments[BUFFER_SIZE]; // string of arguments as read from data file
     int task_type; //0:maple,1:C,2:python
-    long int max_task_size;
-    int i;
+    long int max_task_size; // if given, max size in KB of a spawned process
+    int i; // for loops
 
     myparent = pvm_parent();
     // Be greeted by master
@@ -84,12 +86,14 @@ int main(int argc, char *argv[]) {
         //Child code (work done here)
         if (pid == 0) {
             char output_file[BUFFER_SIZE];
-            // Move stdout to output_file
+            int err; // for executions
+
+            // Move stdout to taskNumber_out.txt
             sprintf(output_file,"%s/%d_out.txt",out_dir,taskNumber);
             int fd = open(output_file,O_WRONLY|O_CREAT,0666);
             dup2(fd,1);
             close(fd);
-            // Move stderr to output_file
+            // Move stderr to taskNumber_err.txt
             sprintf(output_file,"%s/%d_err.txt",out_dir,taskNumber);
             fd = open(output_file,O_WRONLY|O_CREAT,0666);
             dup2(fd,2);
@@ -109,22 +113,20 @@ int main(int argc, char *argv[]) {
                 sprintf(arg2,"-c \"X:=[%s]\"",arguments);
                 sprintf(arg3,"%s",inp_programFile);
 
-                execlp(arg0,arg0,arg1,arg2,arg3,NULL);*/
+                err = execlp(arg0,arg0,arg1,arg2,arg3,NULL);*/
 
                 char **args;
-                args = (char**)malloc(6*sizeof(char*));
-                for (i=0;i<6;i++)
+                int nargs=4;
+                args = (char**)malloc((nargs+1)*sizeof(char*));
+                for (i=0;i<nargs;i++)
                     args[i] = malloc(BUFFER_SIZE);
                 sprintf(args[0],"maple");
-                sprintf(args[1],"-tc 'taskId:=%d'",taskNumber);
-                sprintf(args[2],"-c 'X:=[%s]'",arguments);
-                sprintf(args[3],">&2");
-                sprintf(args[4],"%s/%d_err.txt",out_dir,taskNumber);
-                args[5] = NULL;
-                for (i=0;i<6;i++)
-                    fprintf(stderr,"'%s' ",args[i]);
-                fprintf(stderr,"\n");
-                int err = execvp(args[0],args);
+                sprintf(args[1],"-tc \"taskId:=%d\"",taskNumber);
+                sprintf(args[2],"-c \"X:=[%s]\"",arguments);
+                sprintf(args[3],"%s",inp_programFile);
+                args[4] = NULL;
+
+                err = execvp(args[0],args);
                 perror("ERROR:: child Maple process");
                 exit(err);
 
@@ -167,7 +169,9 @@ int main(int argc, char *argv[]) {
                         token = strtok(NULL,",");
                     }
 
-                    execvp(args[0],args);
+                    err = execvp(args[0],args);
+                    perror("ERROR:: child Maple process");
+                    exit(err);
                 }
                 /* PYTHON */
                 else if (task_type == 2) {
@@ -192,7 +196,9 @@ int main(int argc, char *argv[]) {
                         token = strtok(NULL,",");
                     }
 
-                    execvp(args[0],args);
+                    err = execvp(args[0],args);
+                    perror("ERROR:: child Maple process");
+                    exit(err);
                 }
             }
         }
