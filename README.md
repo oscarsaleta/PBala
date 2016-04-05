@@ -28,4 +28,4 @@ This interface lets the user execute a same script/program over multiple input d
 
 **Memory reporting:**
  - *Maple*: Maple uses multithreading to parallelize the executions by default. This is good for performance but bad for resource management, because the PVM task loses control of the processes spawned. Therefore, the output file mem\*.log doesn't show accurate values for resource usage of the program, because it can only track the parent Maple process, which doesn't do any work besides spawning and controlling its child processes. *Workaround*: execute maple with the -t flag, so in \*\_err.txt (output error file) we can see the kernelopts line that reports memory usage and computation time directly from maple.
- - *C* and *Python*: as long as the program to be executed is sequential, the PVM task will be able to get resource usage from the execution (using POSIX call *getrusage()*) and print it to the mem\*.log file.
+ - *C* and *Python*: as long as the program to be executed is sequential, the PVM task will be able to get resource usage from the execution (using C system call *getrusage()*) and print it to the mem\*.log file.
