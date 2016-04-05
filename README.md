@@ -23,6 +23,5 @@ Usage: ./pvm_test flag program datafile nodefile outputdir [memory]
  - nodefile: absolute path to PVM node file
   - Line format is "nodename numerofprocesses"
  - outputdir: absolute path to output directory
-  - Remark: do not end the path with "/" (eg /home/user/data/out/ should be /home/user/data/out instead).
  - memory: (optional) max amount of RAM (in KB) that a single execution can require
-  - Remark: if this argument is not used, the program picks a 25% of max RAM threshold for assigning jobs (this is not optimal for nodes with much RAM)
+  - Remark: if this argument is not used, the program picks a 25% of max RAM threshold for assigning jobs (this is not optimal for nodes with much RAM such as a05 and a08, but it is safe and not too bad for the rest).
