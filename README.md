@@ -13,15 +13,15 @@ This interface lets the user execute a same script/program over multiple input d
 **Documentation:** run $doxigen and take a look at html/index.html for documentation
 
 **Usage:** ./pvm_test flag program datafile nodefile outputdir [memory]
- - Flag:
+ - *flag*:
   - 0 = Maple
   - 1 = C
   - 2 = Python
- - program: absolute path to program file
- - datafile: absolute path to data file
+ - *program*: absolute path to program file
+ - *datafile*: absolute path to data file
   - Line format is "tasknumber,arg1,arg2,...,argN"
- - nodefile: absolute path to PVM node file
+ - *nodefile*: absolute path to PVM node file
   - Line format is "nodename numerofprocesses"
- - outputdir: absolute path to output directory
- - memory: (optional) max amount of RAM (in KB) that a single execution can require
+ - *outputdir*: absolute path to output directory
+ - *memory*: (optional) max amount of RAM (in KB) that a single execution can require
   - Remark: if this argument is not used, the program picks a 25% of max RAM threshold for assigning jobs (this is not optimal for nodes with much RAM such as a05 and a08, but it is safe and not too bad for the rest).
