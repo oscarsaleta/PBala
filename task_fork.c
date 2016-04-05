@@ -79,15 +79,20 @@ int main(int argc, char *argv[]) {
             pvm_pkint(&state,1,1);
             pvm_send(myparent,MSG_RESULT);
             pvm_exit();
-            return 1;
+            exit(1);
         }
         //Child code (work done here)
         if (pid == 0) {
             char output_file[BUFFER_SIZE];
-            // Move stdout and stderr to output_file
+            // Move stdout to output_file
             sprintf(output_file,"%s/%d_out.txt",out_dir,taskNumber);
             int fd = open(output_file,O_WRONLY|O_CREAT,0666);
             dup2(fd,1);
+            close(fd);
+            // Move stderr to output_file
+            sprintf(output_file,"%s/%d_err.txt",out_dir,taskNumber);
+            fd = open(output_file,O_WRONLY|O_CREAT,0666);
+            dup2(fd,2);
             close(fd);
 
             /*
@@ -107,18 +112,22 @@ int main(int argc, char *argv[]) {
                 execlp(arg0,arg0,arg1,arg2,arg3,NULL);*/
 
                 char **args;
-                args = (char**)malloc(5*sizeof(char*));
-                for (i=0;i<4;i++)
+                args = (char**)malloc(6*sizeof(char*));
+                for (i=0;i<6;i++)
                     args[i] = malloc(BUFFER_SIZE);
                 sprintf(args[0],"maple");
                 sprintf(args[1],"-tc 'taskId:=%d'",taskNumber);
                 sprintf(args[2],"-c 'X:=[%s]'",arguments);
-                sprintf(args[3],"2> %s/%d_err.txt",out_dir,taskNumber);
-                args[4] = NULL;
-                for (i=0;i<5;i++)
+                sprintf(args[3],">&2");
+                sprintf(args[4],"%s/%d_err.txt",out_dir,taskNumber);
+                args[5] = NULL;
+                for (i=0;i<6;i++)
                     fprintf(stderr,"'%s' ",args[i]);
                 fprintf(stderr,"\n");
-                execvp(args[0],args);
+                int err = execvp(args[0],args);
+                perror("ERROR:: child Maple process");
+                exit(err);
+
             } else {
                 // Preparations for C or Python execution 
                 char *arguments_cpy;
