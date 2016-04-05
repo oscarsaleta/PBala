@@ -5,6 +5,7 @@ This C program uses PVM libraries in order to create a parallellization interfac
  - C programs
  - Python scripts
  - (Pari support coming soon)
+
 This interface lets the user execute a same script/program over multiple input data in several CPUs located at the antz computing server. It sports memory management so nodes do not run out of RAM due to too many processes being started in the same node. It also reports resource usage data after execution (work in progres...).
 
 Compilation: Makefile takes care.
