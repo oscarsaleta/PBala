@@ -19,9 +19,9 @@ Usage: ./pvm_test flag program datafile nodefile outputdir [memory]
   - 2 = Python
  - program: absolute path to program file
  - datafile: absolute path to data file
-  - Format is "tasknumber,arg1,arg2,...,argN"
+  - Line format is "tasknumber,arg1,arg2,...,argN"
  - nodefile: absolute path to PVM node file
-  - Format is "nodename numerofprocesses"
+  - Line format is "nodename numerofprocesses"
  - outputdir: absolute path to output directory
   - Remark: do not end the path with "/" (eg /home/user/data/out/ should be /home/user/data/out instead).
  - memory: (optional) max amount of RAM (in KB) that a single execution can require
