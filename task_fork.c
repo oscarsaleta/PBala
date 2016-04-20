@@ -47,7 +47,6 @@ int main(int argc, char *argv[]) {
     char out_dir[FNAME_SIZE]; // name of output directory
     char arguments[BUFFER_SIZE]; // string of arguments as read from data file
     int task_type; // 0:maple, 1:C, 2:python
-    int maple_single_cpu; // 0:no, 1:yes
     long int max_task_size; // if given, max size in KB of a spawned process
     int i; // for loops
 
@@ -56,8 +55,6 @@ int main(int argc, char *argv[]) {
     pvm_recv(myparent,MSG_GREETING);
     pvm_upkint(&me,1,1);
     pvm_upkint(&task_type,1,1);
-    if (task_type == 0)
-        pvm_upkint(&maple_single_cpu,1,1);
     pvm_upklong(&max_task_size,1,1);
 
     /* Perform generic check or use specific size info?
@@ -127,30 +124,18 @@ int main(int argc, char *argv[]) {
             if (task_type == 0) {
                 // NULL-terminated array of strings for calling the Maple script
                 char **args;
-                if (maple_single_cpu == 0) {
-                    // 0: maple, 1: taskid, 2: X, 3: input, 4: NULL
-                    int nargs=4;
-                    args = (char**)malloc((nargs+1)*sizeof(char*));
-                    // Do not malloc for NULL
-                    for (i=0;i<nargs;i++)
-                        args[i] = malloc(BUFFER_SIZE);
-                    // Fill up the array with strings
-                    sprintf(args[0],"maple");
-                    sprintf(args[1],"-tc \"taskId:=%d\"",taskNumber);
-                    sprintf(args[2],"-c \"taskArgs:=[%s]\"",arguments);
-                    sprintf(args[3],"%s",inp_programFile);
-                    args[4] = NULL;
-                } else {
-                    int nargs=5;
-                    for (i=0;i<nargs;i++)
-                        args[i] = malloc(BUFFER_SIZE);
-                    sprintf(args[0],"maple");
-                    sprintf(args[1],"-qc \"kernelopts(numcpus=1)\"");
-                    sprintf(args[2],"-c \"taskId:=%d\"",taskNumber);
-                    sprintf(args[3],"-c \"taskArgs:=[%s]\"",arguments);
-                    sprintf(args[4],"%s",inp_programFile);
-                    args[5] = NULL;
-                }
+                // 0: maple, 1: taskid, 2: X, 3: input, 4: NULL
+                int nargs=4;
+                args = (char**)malloc((nargs+1)*sizeof(char*));
+                // Do not malloc for NULL
+                for (i=0;i<nargs;i++)
+                    args[i] = malloc(BUFFER_SIZE);
+                // Fill up the array with strings
+                sprintf(args[0],"maple");
+                sprintf(args[1],"-tc \"taskId:=%d\"",taskNumber);
+                sprintf(args[2],"-c \"taskArgs:=[%s]\"",arguments);
+                sprintf(args[3],"%s",inp_programFile);
+                args[4] = NULL;
 
                 // Call the execution and check for errors
                 err = execvp(args[0],args);

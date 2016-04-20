@@ -99,14 +99,21 @@ int main (int argc, char *argv[]) {
         || sscanf(argv[3],"%s",inp_dataFile)!=1
         || sscanf(argv[4],"%s",inp_nodes)!=1
         || sscanf(argv[5],"%s",out_dir)!=1
-        || ( argc > 6 && sscanf(argv[7],"%ld",&maxMemSize)!=1 )
-        || ( argc > 7 && sscanf(argv[8],"%d",&maple_single_cpu)!=1 )
+        || ( argc > 6 && sscanf(argv[6],"%ld",&maxMemSize)!=1 )
+        || ( argc > 7 && sscanf(argv[7],"%d",&maple_single_cpu)!=1 )
         || argc > 8
         ) {
         fprintf(stderr,"%s:: exec_flag [maple_single_cpu] program_file data_file node_file out_dir [max_mem_size (KB)] [maple_single_cpu]\n",argv[0]);
         pvm_exit();
         return 1;
     }
+    // sanitize maple library if single cpu is required
+    if (maple_single_cpu!=0) {
+        sprintf(aux_char,"grep -q -F 'kernelopts(numcpus=1)' %s || sed '1ikernelopts(numcpus=1);' %s > %s_tmp",inp_programFile,inp_programFile,inp_programFile);
+        system(aux_char);
+    }
+    strcat(inp_programFile,"_tmp");
+
     
     strcpy(logfilename,out_dir);
     strcat(logfilename,"/node_info.log");
@@ -180,8 +187,6 @@ int main (int argc, char *argv[]) {
             pvm_initsend(PVM_ENCODING);
             pvm_pkint(&itid,1,1);
             pvm_pkint(&task_type,1,1);
-            if (task_type==0)
-                pvm_pkint(&maple_single_cpu,1,1);
             pvm_pklong(&maxMemSize,1,1);
             /* msgtag=1 used for greeting slave */
             pvm_send(taskId[itid],MSG_GREETING);
@@ -289,6 +294,12 @@ int main (int argc, char *argv[]) {
     fclose(f_out);
     pvm_catchout(0);
     
+    
+    // remove tmp program (if modified)
+    if (maple_single_cpu) {
+        sprintf(aux_char,"rm %s",inp_programFile);
+        system(aux_char);
+    }
 
     pvm_exit();
 
