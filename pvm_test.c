@@ -93,17 +93,17 @@ int main (int argc, char *argv[]) {
     /* MASTER CODE */
 
     /* Read command line arguments */
-    if (argc < 7
+    if (argc < 6
         || sscanf(argv[1],"%d",&task_type)!=1
-        || sscanf(argv[2],"%d",&maple_single_cpu)!=1
-        || sscanf(argv[3],"%s",inp_programFile)!=1
-        || sscanf(argv[4],"%s",inp_dataFile)!=1
-        || sscanf(argv[5],"%s",inp_nodes)!=1
-        || sscanf(argv[6],"%s",out_dir)!=1
-        || ( argc == 8 && sscanf(argv[7],"%ld",&maxMemSize)!=1 )
+        || sscanf(argv[2],"%s",inp_programFile)!=1
+        || sscanf(argv[3],"%s",inp_dataFile)!=1
+        || sscanf(argv[4],"%s",inp_nodes)!=1
+        || sscanf(argv[5],"%s",out_dir)!=1
+        || ( argc > 6 && sscanf(argv[7],"%ld",&maxMemSize)!=1 )
+        || ( argc > 7 && sscanf(argv[8],"%d",&maple_single_cpu)!=1 )
         || argc > 8
         ) {
-        fprintf(stderr,"%s:: exec_flag [maple_single_cpu] program_file data_file node_file out_dir [max_mem_size (KB)]\n",argv[0]);
+        fprintf(stderr,"%s:: exec_flag [maple_single_cpu] program_file data_file node_file out_dir [max_mem_size (KB)] [maple_single_cpu]\n",argv[0]);
         pvm_exit();
         return 1;
     }
