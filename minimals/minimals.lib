@@ -1,4 +1,5 @@
 N:=taskId:
+X:=taskArgs:
 ii:=[X[1],X[2],X[3]]:
 x0:=[X[4],X[5],X[6]]:
 

@@ -73,6 +73,7 @@ int main (int argc, char *argv[]) {
     size_t aux_size;
     // Task variables
     int task_type;
+    int maple_single_cpu=0;
     long int maxMemSize=0;
 
     // Error task id
@@ -92,16 +93,17 @@ int main (int argc, char *argv[]) {
     /* MASTER CODE */
 
     /* Read command line arguments */
-    if (argc < 6
+    if (argc < 7
         || sscanf(argv[1],"%d",&task_type)!=1
-        || sscanf(argv[2],"%s",inp_programFile)!=1
-        || sscanf(argv[3],"%s",inp_dataFile)!=1
-        || sscanf(argv[4],"%s",inp_nodes)!=1
-        || sscanf(argv[5],"%s",out_dir)!=1
-        || ( argc == 7 && sscanf(argv[6],"%ld",&maxMemSize)!=1 )
-        || argc > 7
+        || sscanf(argv[2],"%d",&maple_single_cpu)!=1
+        || sscanf(argv[3],"%s",inp_programFile)!=1
+        || sscanf(argv[4],"%s",inp_dataFile)!=1
+        || sscanf(argv[5],"%s",inp_nodes)!=1
+        || sscanf(argv[6],"%s",out_dir)!=1
+        || ( argc == 8 && sscanf(argv[7],"%ld",&maxMemSize)!=1 )
+        || argc > 8
         ) {
-        fprintf(stderr,"%s:: programFile dataFile nodeFile outDir [maxMemSize (KB)]\n",argv[0]);
+        fprintf(stderr,"%s:: exec_flag [maple_single_cpu] program_file data_file node_file out_dir [max_mem_size (KB)]\n",argv[0]);
         pvm_exit();
         return 1;
     }
@@ -178,6 +180,8 @@ int main (int argc, char *argv[]) {
             pvm_initsend(PVM_ENCODING);
             pvm_pkint(&itid,1,1);
             pvm_pkint(&task_type,1,1);
+            if (task_type==0)
+                pvm_pkint(&maple_single_cpu,1,1);
             pvm_pklong(&maxMemSize,1,1);
             /* msgtag=1 used for greeting slave */
             pvm_send(taskId[itid],MSG_GREETING);
