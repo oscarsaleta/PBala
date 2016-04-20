@@ -12,7 +12,7 @@ This interface lets the user execute a same script/program over multiple input d
 
 **Documentation:** run $doxigen and take a look at html/index.html for documentation
 
-**Usage:** ./pvm_test flag program datafile nodefile outputdir [memory]
+**Usage:** ./pvm\_test exec\_type program datafile nodefile outputdir [memory] [maple\_flag]
  - *flag*:
   - 0 = Maple
   - 1 = C
