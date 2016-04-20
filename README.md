@@ -13,7 +13,7 @@ This interface lets the user execute a same script/program over multiple input d
 **Documentation:** run $doxigen and take a look at html/index.html for documentation
 
 **Usage:** ./pvm\_test exec\_type program datafile nodefile outputdir [memory] [maple\_flag]
- - *flag*:
+ - *exec_type*:
   - 0 = Maple
   - 1 = C
   - 2 = Python
@@ -25,6 +25,9 @@ This interface lets the user execute a same script/program over multiple input d
  - *outputdir*: absolute path to output directory
  - *memory*: (optional) max amount of RAM (in KB) that a single execution can require
   - Remark: if this argument is not used, the program picks a 25% of max RAM threshold for assigning jobs (this is not optimal for nodes with much RAM such as a05 and a08, but it is safe and not too bad for the rest).
+ - *maple_flag*:
+  - 0 = multicore execution (default)
+  - 1 = single core execution
 
 **Memory reporting:**
  - *Maple*: Maple uses multithreading to parallelize the executions by default. This is good for performance but bad for resource management, because the PVM task loses control of the processes spawned. Therefore, the output file mem\*.log doesn't show accurate values for resource usage of the program, because it can only track the parent Maple process, which doesn't do any work besides spawning and controlling its child processes. *Workaround*: we execute maple with the -t flag, so in \*\_err.txt (output error file) we can see the kernelopts line that reports memory usage and computation time directly from maple.
