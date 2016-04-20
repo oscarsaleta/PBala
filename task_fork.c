@@ -49,8 +49,12 @@ int main(int argc, char *argv[]) {
     int task_type; //0:maple,1:C,2:python
     long int max_task_size; // if given, max size in KB of a spawned process
     int i; // for loops
+    time_t init_time,end_time;
+    double diff_time, total_time=0;
 
     myparent = pvm_parent();
+
+
     // Be greeted by master
     pvm_recv(myparent,MSG_GREETING);
     pvm_upkint(&me,1,1);
@@ -121,6 +125,7 @@ int main(int argc, char *argv[]) {
              * GENERATE EXECUTION OF PROGRAM
              */
             /* MAPLE */
+            init_time = time(NULL);
             if (task_type == 0) {
                 // NULL-terminated array of strings for calling the Maple script
                 char **args;
@@ -224,14 +229,27 @@ int main(int argc, char *argv[]) {
         getrusage(RUSAGE_CHILDREN,&usage); // Get child resource usage
         prtusage(pid,taskNumber,out_dir,usage); // Print resource usage to file
 
+
+        end_time = time(NULL);
+        diff_time = difftime(init_time,end_time);
         // Send response to master
         int state=0;
         pvm_initsend(PVM_ENCODING);
         pvm_pkint(&me,1,1);
         pvm_pkint(&taskNumber,1,1);
         pvm_pkint(&state,1,1);
+        pvm_pkdbl(&diff_time,1,1);
         pvm_send(myparent,MSG_RESULT);
+        total_time += diff_time;
     }
+
+    // Report total time spent
+    pvm_initsend(PVM_ENCODING);
+    pvm_pkint(&me,1,1);
+    pvm_pkdbl(&total_time,1,1);
+    pvm_send(myparent,MSG_RESULT);
+
+    // Dismantle slave
     pvm_exit();
     exit(0);
 }

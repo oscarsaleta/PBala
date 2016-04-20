@@ -219,6 +219,7 @@ int main (int argc, char *argv[]) {
     fclose(logfile);
     // Keep assigning work to nodes if needed
     int status;
+    double exc_time;
     if (nTasks > maxConcurrentTasks) {
         for (j=maxConcurrentTasks; j<nTasks; j++) {
             // Receive answer from slaves
@@ -231,7 +232,8 @@ int main (int argc, char *argv[]) {
                 pvm_perror(argv[0]);
                 return 1;
             }
-            fprintf(stderr,"%s:: INFO - task %d completed\n",argv[0],taskNumber);
+            pvm_upkint(&exc_time,1,1);
+            fprintf(stderr,"%s:: INFO - task %d completed in %10.5G seconds\n",argv[0],taskNumber);
             
             // Assign more work until we're done
             if (fgets(buffer,BUFFER_SIZE,f_data)!=NULL) {
@@ -276,7 +278,10 @@ int main (int argc, char *argv[]) {
         pvm_initsend(PVM_ENCODING);
         pvm_pkint(&work_code,1,1);
         pvm_send(taskId[itid],MSG_STOP);
-        fprintf(stderr,"%s:: INFO - shutting down slave %d\n",argv[0],itid);
+        pvm_recv(taskId[itid],MSG_RESULT);
+        pvm_upkint(&itid,1,1);
+        pvm_upkdbl(&total_time,1,1);
+        fprintf(stderr,"%s:: INFO - shutting down slave %d (total execution time: %13.5G seconds)\n",argv[0],itid);
     }
 
     free(nodes);
