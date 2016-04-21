@@ -76,6 +76,9 @@ int main (int argc, char *argv[]) {
     int task_type;
     int maple_single_cpu=0;
     long int maxMemSize=0;
+    // Execution time variables
+    double exec_time,total_time;
+    double total_total_time=0;
 
     // Error task id
     mytid = pvm_mytid();
@@ -167,7 +170,7 @@ int main (int argc, char *argv[]) {
         return 1;
     }
     
-    pvm_catchout(f_out);
+    //pvm_catchout(f_out);
 
 
     // Spawn all the tasks
@@ -229,7 +232,6 @@ int main (int argc, char *argv[]) {
     fclose(logfile);
     // Keep assigning work to nodes if needed
     int status;
-    double exc_time;
     if (nTasks > maxConcurrentTasks) {
         for (j=maxConcurrentTasks; j<nTasks; j++) {
             // Receive answer from slaves
@@ -242,8 +244,8 @@ int main (int argc, char *argv[]) {
                 pvm_perror(argv[0]);
                 return 1;
             }
-            pvm_upkint(&exc_time,1,1);
-            fprintf(stderr,"%s:: INFO - task %d completed in %10.5G seconds\n",argv[0],taskNumber);
+            pvm_upkdouble(&exec_time,1,1);
+            fprintf(stderr,"%s:: INFO - task %d completed in %10.5g seconds\n",argv[0],taskNumber,exec_time);
             
             // Assign more work until we're done
             if (fgets(buffer,BUFFER_SIZE,f_data)!=NULL) {
@@ -283,22 +285,34 @@ int main (int argc, char *argv[]) {
             pvm_perror(argv[0]);
             return 1;
         }
-        fprintf(stderr,"%s:: INFO - task %d completed\n",argv[0],taskNumber);
-        // Shut down node
+        pvm_upkdouble(&exec_time,1,1);
+        fprintf(stderr,"%s:: INFO - task %d completed in %10.5g seconds\n",argv[0],taskNumber,exec_time);
+        // Shut down slave
         pvm_initsend(PVM_ENCODING);
         pvm_pkint(&work_code,1,1);
         pvm_send(taskId[itid],MSG_STOP);
-        pvm_recv(taskId[itid],MSG_RESULT);
-        pvm_upkint(&itid,1,1);
-        pvm_upkdbl(&total_time,1,1);
-        fprintf(stderr,"%s:: INFO - shutting down slave %d (total execution time: %13.5G seconds)\n",argv[0],itid);
     }
+
+    // Receive total working time from slaves
+    fprintf(stderr,"rebo temps\n");
+    for (i=0; i<maxConcurrentTasks; i++) {
+        // Recieve total time spent
+        pvm_recv(-1,-1);
+        fprintf(stderr,"missatge rebut\n");
+        pvm_upkint(&itid,1,1);
+        fprintf(stderr,"itid llegiti %d\n",itid);
+        pvm_upkdouble(&total_time,1,1);
+        fprintf(stderr,"%s:: INFO - shutting down slave %d (total execution time: %13.5g seconds)\n",argv[0],itid,total_time);
+        total_total_time += total_time;
+    }
+
+    // Final message
+    fprintf(stderr,"%s:: INFO - END OF EXECUTION. Total time: %13.5g seconds.\n",argv[0],total_total_time);
 
     free(nodes);
     free(nodeCores);
     fclose(f_data);
     fclose(f_out);
-    pvm_catchout(0);
     
     
     // remove tmp program (if modified)
@@ -307,6 +321,7 @@ int main (int argc, char *argv[]) {
         system(aux_char);
     }
 
+    pvm_catchout(0);
     pvm_exit();
 
     return 0;

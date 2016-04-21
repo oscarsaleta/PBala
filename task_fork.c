@@ -24,12 +24,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
+#include <fcntl.h>
+
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/time.h>
+//#include <sys/time.h>
 #include <sys/resource.h>
-#include <fcntl.h>
+
 #include <pvm3.h>
 #include "antz_lib.h"
 
@@ -49,8 +52,8 @@ int main(int argc, char *argv[]) {
     int task_type; // 0:maple, 1:C, 2:python
     long int max_task_size; // if given, max size in KB of a spawned process
     int i; // for loops
-    time_t init_time,end_time;
-    double diff_time, total_time=0;
+    clock_t init_t,end_t;
+    double diff_t, total_t=0;
 
     myparent = pvm_parent();
 
@@ -81,8 +84,10 @@ int main(int argc, char *argv[]) {
         // Receive inputs
         pvm_recv(myparent,MSG_WORK);
         pvm_upkint(&work_code,1,1);
-        if (work_code == MSG_STOP) // if master tells task to shutdown
+        if (work_code == MSG_STOP) { // if master tells task to shutdown
+            fprintf(stderr,"breaking\n");
             break;
+        }
         pvm_upkint(&taskNumber,1,1);
         pvm_upkstr(inp_programFile);
         pvm_upkstr(out_dir);
@@ -125,7 +130,7 @@ int main(int argc, char *argv[]) {
              * GENERATE EXECUTION OF PROGRAM
              */
             /* MAPLE */
-            init_time = time(NULL);
+            init_t = clock();
             if (task_type == 0) {
                 // NULL-terminated array of strings for calling the Maple script
                 char **args;
@@ -188,7 +193,7 @@ int main(int argc, char *argv[]) {
 
                     // Call the execution and check for errors
                     err = execvp(args[0],args);
-                    perror("ERROR:: child Maple process");
+                    perror("ERROR:: child C process");
                     exit(err);
                 }
                 /* PYTHON */
@@ -216,7 +221,7 @@ int main(int argc, char *argv[]) {
 
                     // Call the execution and check for errors
                     err = execvp(args[0],args);
-                    perror("ERROR:: child Maple process");
+                    perror("ERROR:: child Python process");
                     exit(err);
                 }
             }
@@ -230,23 +235,33 @@ int main(int argc, char *argv[]) {
         prtusage(pid,taskNumber,out_dir,usage); // Print resource usage to file
 
 
-        end_time = time(NULL);
-        diff_time = difftime(init_time,end_time);
+        end_t = clock();
+        diff_t = (double)(end_t-init_t)/CLOCKS_PER_SEC;
         // Send response to master
         int state=0;
         pvm_initsend(PVM_ENCODING);
         pvm_pkint(&me,1,1);
         pvm_pkint(&taskNumber,1,1);
         pvm_pkint(&state,1,1);
-        pvm_pkdbl(&diff_time,1,1);
+        pvm_pkdouble(&diff_t,1,1);
         pvm_send(myparent,MSG_RESULT);
-        total_time += diff_time;
+        total_t += diff_t;
     }
+    
+    char output_file[BUFFER_SIZE];
+    
+    // Move stderr to taskNumber_err.txt
+    sprintf(output_file,"%s/slave%d_err.txt",out_dir,me);
+    int fd = open(output_file,O_WRONLY|O_CREAT,0666);
+    dup2(fd,2);
+    close(fd);
+
+    fprintf(stderr,"hi\n");
 
     // Report total time spent
     pvm_initsend(PVM_ENCODING);
     pvm_pkint(&me,1,1);
-    pvm_pkdbl(&total_time,1,1);
+    pvm_pkdouble(&total_t,1,1);
     pvm_send(myparent,MSG_RESULT);
 
     // Dismantle slave
