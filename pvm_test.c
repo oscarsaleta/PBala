@@ -35,7 +35,7 @@
 
 /**
  * Main PVM function. Handles task creation and result gathering.
- * Call: ./pvm_test programFlag programFile dataFile nodeFile outDir [maxMemSize (KB)]
+ * Call: ./pvm_test programFlag programFile dataFile nodeFile outDir [maxMemSize (KB)] [maple_single_core]
  *
  * \param[in] argv[1] flag for program type (0=maple,1=C,2=python,3=pari)
  * \param[in] argv[2] program file (maple library, c executable, etc)
@@ -43,6 +43,7 @@
  * \param[in] argv[4] nodes file (2 cols: node cpus)
  * \param[in] argv[5] output file directory
  * \param[in] argv[6] (optional) aprox max memory size of biggest execution in KB
+ * \param[in] argv[7] (optional) flag for single core execution (Maple only: 0=no, 1=yes)
  *
  * \return 0 if successful
  */
@@ -114,7 +115,7 @@ int main (int argc, char *argv[]) {
     }
     strcat(inp_programFile,"_tmp");
 
-    
+    // prepare node_info.log file
     strcpy(logfilename,out_dir);
     strcat(logfilename,"/node_info.log");
     logfile = fopen(logfilename,"w");
