@@ -35,7 +35,7 @@
 
 /**
  * Main PVM function. Handles task creation and result gathering.
- * Call: ./pvm_test programFlag programFile dataFile nodeFile outDir [maxMemSize (KB)]
+ * Call: ./pvm_test programFlag programFile dataFile nodeFile outDir [maxMemSize (KB)] [maple_single_core]
  *
  * \param[in] argv[1] flag for program type (0=maple,1=C,2=python,3=pari)
  * \param[in] argv[2] program file (maple library, c executable, etc)
@@ -43,6 +43,7 @@
  * \param[in] argv[4] nodes file (2 cols: node cpus)
  * \param[in] argv[5] output file directory
  * \param[in] argv[6] (optional) aprox max memory size of biggest execution in KB
+ * \param[in] argv[7] (optional) flag for single core execution (Maple only: 0=no, 1=yes)
  *
  * \return 0 if successful
  */
@@ -73,6 +74,7 @@ int main (int argc, char *argv[]) {
     size_t aux_size;
     // Task variables
     int task_type;
+    int maple_single_cpu=0;
     long int maxMemSize=0;
 
     // Error task id
@@ -98,14 +100,22 @@ int main (int argc, char *argv[]) {
         || sscanf(argv[3],"%s",inp_dataFile)!=1
         || sscanf(argv[4],"%s",inp_nodes)!=1
         || sscanf(argv[5],"%s",out_dir)!=1
-        || ( argc == 7 && sscanf(argv[6],"%ld",&maxMemSize)!=1 )
-        || argc > 7
+        || ( argc > 6 && sscanf(argv[6],"%ld",&maxMemSize)!=1 )
+        || ( argc > 7 && sscanf(argv[7],"%d",&maple_single_cpu)!=1 )
+        || argc > 8
         ) {
-        fprintf(stderr,"%s:: programFile dataFile nodeFile outDir [maxMemSize (KB)]\n",argv[0]);
+        fprintf(stderr,"%s:: exec_flag [maple_single_cpu] program_file data_file node_file out_dir [max_mem_size (KB)] [maple_single_cpu]\n",argv[0]);
         pvm_exit();
         return 1;
     }
-    
+    // sanitize maple library if single cpu is required
+    if (maple_single_cpu!=0) {
+        sprintf(aux_char,"grep -q -F 'kernelopts(numcpus=1)' %s || sed '1ikernelopts(numcpus=1);' %s > %s_tmp",inp_programFile,inp_programFile,inp_programFile);
+        system(aux_char);
+    }
+    strcat(inp_programFile,"_tmp");
+
+    // prepare node_info.log file
     strcpy(logfilename,out_dir);
     strcat(logfilename,"/node_info.log");
     logfile = fopen(logfilename,"w");
@@ -290,6 +300,12 @@ int main (int argc, char *argv[]) {
     fclose(f_out);
     pvm_catchout(0);
     
+    
+    // remove tmp program (if modified)
+    if (maple_single_cpu) {
+        sprintf(aux_char,"rm %s",inp_programFile);
+        system(aux_char);
+    }
 
     pvm_exit();
 

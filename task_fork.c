@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
     char inp_programFile[FNAME_SIZE]; // name of the program
     char out_dir[FNAME_SIZE]; // name of output directory
     char arguments[BUFFER_SIZE]; // string of arguments as read from data file
-    int task_type; //0:maple,1:C,2:python
+    int task_type; // 0:maple, 1:C, 2:python
     long int max_task_size; // if given, max size in KB of a spawned process
     int i; // for loops
     time_t init_time,end_time;
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
                 // Fill up the array with strings
                 sprintf(args[0],"maple");
                 sprintf(args[1],"-tc \"taskId:=%d\"",taskNumber);
-                sprintf(args[2],"-c \"X:=[%s]\"",arguments);
+                sprintf(args[2],"-c \"taskArgs:=[%s]\"",arguments);
                 sprintf(args[3],"%s",inp_programFile);
                 args[4] = NULL;
 
