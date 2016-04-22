@@ -113,6 +113,7 @@ int main (int argc, char *argv[]) {
         || argc > 8
         ) {
         fprintf(stderr,"%s:: exec_flag [maple_single_cpu] program_file data_file node_file out_dir [max_mem_size (KB)] [maple_single_cpu]\n",argv[0]);
+        fflush(stderr);
         pvm_exit();
         return 1;
     }
@@ -136,6 +137,7 @@ int main (int argc, char *argv[]) {
     f_nodes = fopen(inp_nodes,"r");
     if (f_nodes == NULL) {
         fprintf(stderr,"%s:: ERROR - invalid node file %s\n",argv[0],inp_nodes);
+        fflush(stderr);
         return -1;
     }
     // Allocate memory for node and cpu array
@@ -147,6 +149,7 @@ int main (int argc, char *argv[]) {
     for (i=0; i<nNodes; i++) {
         if (fscanf(f_nodes,"%s %d",nodes[i],&nodeCores[i]) != 2) {
             fprintf(stderr,"%s:: ERROR - while reading node file %s\n",argv[0],inp_nodes);
+            fflush(stderr);
             return -1;
         }
     }
@@ -167,11 +170,13 @@ int main (int argc, char *argv[]) {
         fprintf(stderr,"%s (%d), ",nodes[i],nodeCores[i]);
     fprintf(stderr,"%s (%d)\n",nodes[nNodes-1],nodeCores[nNodes-1]);
     fprintf(stderr,"%s:: INFO - will create %d tasks\n",argv[0],nTasks);
+    fflush(stderr);
 
     
     sprintf(out_file,"%s/outfile.txt",out_dir);
     if ((f_out = fopen(out_file,"w")) == NULL) {
         fprintf(stderr,"%s:: ERROR - cannot open output file %s\n",argv[0],out_file);
+        fflush(stderr);
         return 1;
     }
     pvm_catchout(f_out);
@@ -187,6 +192,7 @@ int main (int argc, char *argv[]) {
             numt = pvm_spawn("task",NULL,PvmTaskHost,nodes[i],1,&taskId[itid]);
             if (numt != 1) {
                 fprintf(stderr,"%s:: ERROR - %d creating task %4d in node %s\n",
+                fflush(stderr);
                     argv[0],numt,taskId[itid],nodes[i]);
                 pvm_perror(argv[0]);
                 return 1;
@@ -199,6 +205,7 @@ int main (int argc, char *argv[]) {
             /* msgtag=1 used for greeting slave */
             pvm_send(taskId[itid],MSG_GREETING);
             fprintf(stderr,"%s:: INFO - created slave %d\n",argv[0],itid);
+            fflush(stderr);
             fprintf(logfile,"# Node %2d -> %s\n",numnode,nodes[i]);
             numnode++;
             itid++;
@@ -213,6 +220,7 @@ int main (int argc, char *argv[]) {
         if (fgets(buffer,BUFFER_SIZE,f_data)!=NULL) {
             if (sscanf(buffer,"%d",&taskNumber)!=1) {
                 fprintf(stderr,"%s:: ERROR - first column of data file must be task id\n",argv[0]);
+                fflush(stderr);
                 return 1;
             }
             pvm_initsend(PVM_ENCODING);
@@ -229,6 +237,7 @@ int main (int argc, char *argv[]) {
             pvm_pkstr(aux_char);
             pvm_send(taskId[i],MSG_WORK);
             fprintf(stderr,"%s:: INFO - sent task %4d for execution\n",argv[0],taskNumber);
+            fflush(stderr);
             fprintf(logfile,"%2d,%4d\n",i,taskNumber);
         }
     }
@@ -245,11 +254,13 @@ int main (int argc, char *argv[]) {
             pvm_upkint(&status,1,1);
             if (status != 0) {
                 fprintf(stderr,"%s:: ERROR - task %4d failed at execution\n",argv[0],taskNumber);
+                fflush(stderr);
                 pvm_perror(argv[0]);
                 return 1;
             }
             pvm_upkdouble(&exec_time,1,1);
             fprintf(stderr,"%s:: INFO - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
+            fflush(stderr);
             
             // Assign more work until we're done
             if (fgets(buffer,BUFFER_SIZE,f_data)!=NULL) {
@@ -257,6 +268,7 @@ int main (int argc, char *argv[]) {
                 logfile = fopen(logfilename,"a");
                 if (sscanf(buffer,"%d",&taskNumber)!=1) {
                     fprintf(stderr,"%s:: ERROR - first column of data file must be task id\n",argv[0]);
+                    fflush(stderr);
                     return 1;
                 }
                 pvm_initsend(PVM_ENCODING);
@@ -271,6 +283,7 @@ int main (int argc, char *argv[]) {
                 pvm_pkstr(aux_char);
                 pvm_send(taskId[itid],MSG_WORK);
                 fprintf(stderr,"%s:: INFO - sent task %3d for execution\n",argv[0],taskNumber);
+                fflush(stderr);
                 fprintf(logfile,"%2d,%4d\n",itid,taskNumber);
                 fclose(logfile);
             }
@@ -286,17 +299,20 @@ int main (int argc, char *argv[]) {
         pvm_upkint(&status,1,1);
         if (status != 0) {
             fprintf(stderr,"%s:: ERROR - task %4d failed at execution\n",argv[0],taskNumber);
+            fflush(stderr);
             pvm_perror(argv[0]);
             return 1;
         }
         pvm_upkdouble(&exec_time,1,1);
         fprintf(stderr,"%s:: INFO - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
+        fflush(stderr);
         pvm_upkdouble(&total_time,1,1);
         // Shut down slave
         pvm_initsend(PVM_ENCODING);
         pvm_pkint(&work_code,1,1);
         pvm_send(taskId[itid],MSG_STOP);
         fprintf(stderr,"%s:: INFO - shutting down slave %2d (total execution time: %13.5G seconds)\n",argv[0],itid,total_time);
+        fflush(stderr);
         total_total_time += total_time;
     }
 
@@ -304,6 +320,7 @@ int main (int argc, char *argv[]) {
     time(&endt);
     difft = difftime(endt,initt);
     fprintf(stderr,"\n%s:: INFO - END OF EXECUTION.\nCombined computing time: %13.5G seconds.\nTotal execution time:    %13.5G seconds.\n",argv[0],total_total_time,difft);
+        fflush(stderr);
 
     free(nodes);
     free(nodeCores);
