@@ -84,14 +84,8 @@ int main(int argc, char *argv[]) {
         // Receive inputs
         pvm_recv(myparent,MSG_WORK);
         pvm_upkint(&work_code,1,1);
-        if (work_code == MSG_STOP) { // if master tells task to shutdown
-            /*// Report total time spent
-            pvm_initsend(PVM_ENCODING);
-            pvm_pkint(&me,1,1);
-            pvm_pkdouble(&totalt,1,1);
-            pvm_send(myparent,MSG_RESULT);*/
+        if (work_code == MSG_STOP) // if master tells task to shutdown
             break;
-        }
         pvm_upkint(&taskNumber,1,1);
         pvm_upkstr(inp_programFile);
         pvm_upkstr(out_dir);
