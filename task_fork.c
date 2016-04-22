@@ -116,12 +116,12 @@ int main(int argc, char *argv[]) {
 
             // Move stdout to taskNumber_out.txt
             sprintf(output_file,"%s/%d_out.txt",out_dir,taskNumber);
-            int fd = open(output_file,O_WRONLY|O_CREAT,0666);
+            int fd = open(output_file,O_WRONLY|O_CREAT|O_TRUNC,0666);
             dup2(fd,1);
             close(fd);
             // Move stderr to taskNumber_err.txt
             sprintf(output_file,"%s/%d_err.txt",out_dir,taskNumber);
-            fd = open(output_file,O_WRONLY|O_CREAT,0666);
+            fd = open(output_file,O_WRONLY|O_CREAT|O_TRUNC,0666);
             dup2(fd,2);
             close(fd);
 
