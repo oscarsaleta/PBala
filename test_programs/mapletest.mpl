@@ -1,6 +1,6 @@
 taskId;
-X;
-Y:=sum(X[i],i=1..nops(X));
+taskArgs;
+Y:=sum(taskArgs[i],i=1..nops(taskArgs));
 Y;
 
 with(LinearAlgebra):
