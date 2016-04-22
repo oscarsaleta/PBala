@@ -8,9 +8,9 @@ This C program uses PVM libraries in order to create a parallellization interfac
 
 This interface lets the user execute a same script/program over multiple input data in several CPUs located at the antz computing server. It sports memory management so nodes do not run out of RAM due to too many processes being started in the same node. It also reports resource usage data after execution.
 
-**Compilation:** Makefile takes care.
+**Compilation:** `make` takes care.
 
-**Documentation:** run $doxigen and take a look at html/index.html for documentation
+**Documentation:** run `doxigen` and take a look at html/index.html for documentation
 
 **Usage:** ./pvm\_test exec\_type program datafile nodefile outputdir [memory] [maple\_flag]
  - *exec_type*:
