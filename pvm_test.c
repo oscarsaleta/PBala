@@ -189,6 +189,7 @@ int main (int argc, char *argv[]) {
             if (numt != 1) {
                 fprintf(stderr,"%s:: ERROR - %d creating task %4d in node %s\n",
                     argv[0],numt,taskId[itid],nodes[i]);
+                fflush(stderr);
                 pvm_perror(argv[0]);
                 return 1;
             }
