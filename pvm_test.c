@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <pvm3.h>
 #include "antz_lib.h"
 
@@ -79,6 +80,10 @@ int main (int argc, char *argv[]) {
     // Execution time variables
     double exec_time,total_time;
     double total_total_time=0;
+    time_t initt,endt;
+    double difft;
+
+    time(&initt);
 
     // Error task id
     mytid = pvm_mytid();
@@ -169,8 +174,7 @@ int main (int argc, char *argv[]) {
         fprintf(stderr,"%s:: ERROR - cannot open output file %s\n",argv[0],out_file);
         return 1;
     }
-    
-    //pvm_catchout(f_out);
+    pvm_catchout(f_out);
 
 
     // Spawn all the tasks
@@ -182,7 +186,7 @@ int main (int argc, char *argv[]) {
         for (j=0; j<nodeCores[i]; j++) {
             numt = pvm_spawn("task",NULL,PvmTaskHost,nodes[i],1,&taskId[itid]);
             if (numt != 1) {
-                fprintf(stderr,"%s:: ERROR - %d creating task %d in node %s\n",
+                fprintf(stderr,"%s:: ERROR - %d creating task %4d in node %s\n",
                     argv[0],numt,taskId[itid],nodes[i]);
                 pvm_perror(argv[0]);
                 return 1;
@@ -195,7 +199,7 @@ int main (int argc, char *argv[]) {
             /* msgtag=1 used for greeting slave */
             pvm_send(taskId[itid],MSG_GREETING);
             fprintf(stderr,"%s:: INFO - created slave %d\n",argv[0],itid);
-            fprintf(logfile,"# Node %d -> %s\n",numnode,nodes[i]);
+            fprintf(logfile,"# Node %2d -> %s\n",numnode,nodes[i]);
             numnode++;
             itid++;
         }
@@ -224,8 +228,8 @@ int main (int argc, char *argv[]) {
             sprintf(aux_char,"%s",&buffer[aux_size+1]); 
             pvm_pkstr(aux_char);
             pvm_send(taskId[i],MSG_WORK);
-            fprintf(stderr,"%s:: INFO - sent task %d for execution\n",argv[0],taskNumber);
-            fprintf(logfile,"%d,%d\n",i,taskNumber);
+            fprintf(stderr,"%s:: INFO - sent task %4d for execution\n",argv[0],taskNumber);
+            fprintf(logfile,"%2d,%4d\n",i,taskNumber);
         }
     }
     // Close logfile so it updates in file system
@@ -240,12 +244,12 @@ int main (int argc, char *argv[]) {
             pvm_upkint(&taskNumber,1,1);
             pvm_upkint(&status,1,1);
             if (status != 0) {
-                fprintf(stderr,"%s:: ERROR - task %d failed at execution\n",argv[0],taskNumber);
+                fprintf(stderr,"%s:: ERROR - task %4d failed at execution\n",argv[0],taskNumber);
                 pvm_perror(argv[0]);
                 return 1;
             }
             pvm_upkdouble(&exec_time,1,1);
-            fprintf(stderr,"%s:: INFO - task %d completed in %10.5g seconds\n",argv[0],taskNumber,exec_time);
+            fprintf(stderr,"%s:: INFO - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
             
             // Assign more work until we're done
             if (fgets(buffer,BUFFER_SIZE,f_data)!=NULL) {
@@ -266,8 +270,8 @@ int main (int argc, char *argv[]) {
                 sprintf(aux_char,"%s",&buffer[aux_size+1]);
                 pvm_pkstr(aux_char);
                 pvm_send(taskId[itid],MSG_WORK);
-                fprintf(stderr,"%s:: INFO - sent task %d for execution\n",argv[0],taskNumber);
-                fprintf(logfile,"%d,%d\n",itid,taskNumber);
+                fprintf(stderr,"%s:: INFO - sent task %3d for execution\n",argv[0],taskNumber);
+                fprintf(logfile,"%2d,%4d\n",itid,taskNumber);
                 fclose(logfile);
             }
         }
@@ -281,33 +285,25 @@ int main (int argc, char *argv[]) {
         pvm_upkint(&taskNumber,1,1);
         pvm_upkint(&status,1,1);
         if (status != 0) {
-            fprintf(stderr,"%s:: ERROR - task %d failed at execution\n",argv[0],itid);
+            fprintf(stderr,"%s:: ERROR - task %4d failed at execution\n",argv[0],taskNumber);
             pvm_perror(argv[0]);
             return 1;
         }
         pvm_upkdouble(&exec_time,1,1);
-        fprintf(stderr,"%s:: INFO - task %d completed in %10.5g seconds\n",argv[0],taskNumber,exec_time);
+        fprintf(stderr,"%s:: INFO - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
+        pvm_upkdouble(&total_time,1,1);
         // Shut down slave
         pvm_initsend(PVM_ENCODING);
         pvm_pkint(&work_code,1,1);
         pvm_send(taskId[itid],MSG_STOP);
-    }
-
-    // Receive total working time from slaves
-    fprintf(stderr,"rebo temps\n");
-    for (i=0; i<maxConcurrentTasks; i++) {
-        // Recieve total time spent
-        pvm_recv(-1,-1);
-        fprintf(stderr,"missatge rebut\n");
-        pvm_upkint(&itid,1,1);
-        fprintf(stderr,"itid llegiti %d\n",itid);
-        pvm_upkdouble(&total_time,1,1);
-        fprintf(stderr,"%s:: INFO - shutting down slave %d (total execution time: %13.5g seconds)\n",argv[0],itid,total_time);
+        fprintf(stderr,"%s:: INFO - shutting down slave %2d (total execution time: %13.5G seconds)\n",argv[0],itid,total_time);
         total_total_time += total_time;
     }
 
     // Final message
-    fprintf(stderr,"%s:: INFO - END OF EXECUTION. Total time: %13.5g seconds.\n",argv[0],total_total_time);
+    time(&endt);
+    difft = difftime(endt,initt);
+    fprintf(stderr,"\n%s:: INFO - END OF EXECUTION.\nCombined computing time: %13.5G seconds.\nTotal execution time:    %13.5G seconds.\n",argv[0],total_total_time,difft);
 
     free(nodes);
     free(nodeCores);

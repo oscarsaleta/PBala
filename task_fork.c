@@ -52,8 +52,8 @@ int main(int argc, char *argv[]) {
     int task_type; // 0:maple, 1:C, 2:python
     long int max_task_size; // if given, max size in KB of a spawned process
     int i; // for loops
-    clock_t init_t,end_t;
-    double diff_t, total_t=0;
+    clock_t initt,endt;
+    double difft, totalt=0;
 
     myparent = pvm_parent();
 
@@ -85,7 +85,11 @@ int main(int argc, char *argv[]) {
         pvm_recv(myparent,MSG_WORK);
         pvm_upkint(&work_code,1,1);
         if (work_code == MSG_STOP) { // if master tells task to shutdown
-            fprintf(stderr,"breaking\n");
+            /*// Report total time spent
+            pvm_initsend(PVM_ENCODING);
+            pvm_pkint(&me,1,1);
+            pvm_pkdouble(&totalt,1,1);
+            pvm_send(myparent,MSG_RESULT);*/
             break;
         }
         pvm_upkint(&taskNumber,1,1);
@@ -93,6 +97,7 @@ int main(int argc, char *argv[]) {
         pvm_upkstr(out_dir);
         pvm_upkstr(arguments); // string of comma-separated arguments read from datafile
 
+        time(&initt);
         /* Fork one process that will do the execution
          * the "parent task" will only wait for this process to end
          * and then report resource usage via getrusage()
@@ -130,7 +135,6 @@ int main(int argc, char *argv[]) {
              * GENERATE EXECUTION OF PROGRAM
              */
             /* MAPLE */
-            init_t = clock();
             if (task_type == 0) {
                 // NULL-terminated array of strings for calling the Maple script
                 char **args;
@@ -227,6 +231,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
+
         /* Attempt at measuring memory usage for the child process */
         siginfo_t infop; // Stores information about the child execution
         waitid(P_PID,pid,&infop,WEXITED); // Wait for the execution to end
@@ -234,35 +239,21 @@ int main(int argc, char *argv[]) {
         getrusage(RUSAGE_CHILDREN,&usage); // Get child resource usage
         prtusage(pid,taskNumber,out_dir,usage); // Print resource usage to file
 
-
-        end_t = clock();
-        diff_t = (double)(end_t-init_t)/CLOCKS_PER_SEC;
+        // Computation time
+        time(&endt);
+        difft = difftime(endt,initt);
+        totalt += difft;
         // Send response to master
         int state=0;
         pvm_initsend(PVM_ENCODING);
         pvm_pkint(&me,1,1);
         pvm_pkint(&taskNumber,1,1);
         pvm_pkint(&state,1,1);
-        pvm_pkdouble(&diff_t,1,1);
+        pvm_pkdouble(&difft,1,1);
+        pvm_pkdouble(&totalt,1,1);
         pvm_send(myparent,MSG_RESULT);
-        total_t += diff_t;
     }
-    
-    char output_file[BUFFER_SIZE];
-    
-    // Move stderr to taskNumber_err.txt
-    sprintf(output_file,"%s/slave%d_err.txt",out_dir,me);
-    int fd = open(output_file,O_WRONLY|O_CREAT,0666);
-    dup2(fd,2);
-    close(fd);
 
-    fprintf(stderr,"hi\n");
-
-    // Report total time spent
-    pvm_initsend(PVM_ENCODING);
-    pvm_pkint(&me,1,1);
-    pvm_pkdouble(&total_t,1,1);
-    pvm_send(myparent,MSG_RESULT);
 
     // Dismantle slave
     pvm_exit();
