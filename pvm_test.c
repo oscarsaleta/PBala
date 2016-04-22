@@ -192,8 +192,8 @@ int main (int argc, char *argv[]) {
             numt = pvm_spawn("task",NULL,PvmTaskHost,nodes[i],1,&taskId[itid]);
             if (numt != 1) {
                 fprintf(stderr,"%s:: ERROR - %d creating task %4d in node %s\n",
-                fflush(stderr);
                     argv[0],numt,taskId[itid],nodes[i]);
+                fflush(stderr);
                 pvm_perror(argv[0]);
                 return 1;
             }
