@@ -305,7 +305,7 @@ int main (int argc, char *argv[]) {
     // Final message
     time(&endt);
     difft = difftime(endt,initt);
-    fprintf(stderr,"\n%s:: INFO - END OF EXECUTION.\nCombined computing time: %13.5G seconds.\nTotal execution time:    %13.5G seconds.\n",argv[0],total_total_time,difft);
+    fprintf(stderr,"\n%s:: INFO - END OF EXECUTION.\nCombined computing time: %14.5G seconds.\nTotal execution time:    %14.5G seconds.\n",argv[0],total_total_time,difft);
 
     free(nodes);
     free(nodeCores);
