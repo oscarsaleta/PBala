@@ -118,11 +118,13 @@ int main (int argc, char *argv[]) {
         return 1;
     }
     // sanitize maple library if single cpu is required
-    if (maple_single_cpu!=0) {
-        sprintf(aux_char,"grep -q -F 'kernelopts(numcpus=1)' %s || sed '1ikernelopts(numcpus=1);' %s > %s_tmp",inp_programFile,inp_programFile,inp_programFile);
+    if (maple_single_cpu) {
+        sprintf(aux_char,"grep -q -F 'kernelopts(numcpus=1)' %s || (sed '1ikernelopts(numcpus=1);' %s > %s_tmp && mv %s %s.bak && mv %s_tmp %s)",
+                inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile);
         system(aux_char);
+        /*sprintf(aux_char,"mv %s %s.bak && mv %s_tmp %s",inp_programFile,inp_programFile,inp_programFile,inp_programFile);
+        system(aux_char);*/
     }
-    strcat(inp_programFile,"_tmp");
 
     // prepare node_info.log file
     strcpy(logfilename,out_dir);
@@ -315,7 +317,7 @@ int main (int argc, char *argv[]) {
     
     // remove tmp program (if modified)
     if (maple_single_cpu) {
-        sprintf(aux_char,"rm %s",inp_programFile);
+        sprintf(aux_char,"[ ! -f %s.bak ] || mv %s.bak %s",inp_programFile,inp_programFile,inp_programFile);
         system(aux_char);
     }
 
