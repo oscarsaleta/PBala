@@ -231,6 +231,10 @@ int main (int argc, char *argv[]) {
             // copy to aux_char the data line from after the first ","
             sprintf(aux_char,"%s",&buffer[aux_size+1]); 
             pvm_pkstr(aux_char);
+            // create file for pari execution if needed
+            if (task_type == 3)
+                parifile(taskNumber,aux_char,inp_programFile,out_dir);
+            // send the job
             pvm_send(taskId[i],MSG_WORK);
             fprintf(stderr,"%s:: INFO - sent task %4d for execution\n",argv[0],taskNumber);
             fprintf(logfile,"%2d,%4d\n",i,taskNumber);
@@ -273,6 +277,10 @@ int main (int argc, char *argv[]) {
                 buffer[strlen(buffer)-1]=0;
                 sprintf(aux_char,"%s",&buffer[aux_size+1]);
                 pvm_pkstr(aux_char);
+                // create file for pari execution if needed
+                if (task_type == 3)
+                    parifile(taskNumber,aux_char,inp_programFile,out_dir);
+                // send the job
                 pvm_send(taskId[itid],MSG_WORK);
                 fprintf(stderr,"%s:: INFO - sent task %3d for execution\n",argv[0],taskNumber);
                 fprintf(logfile,"%2d,%4d\n",itid,taskNumber);

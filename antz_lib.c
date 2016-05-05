@@ -126,3 +126,30 @@ int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage) {
 
     return 0;
 }
+
+
+/**
+ * Creates an auxiliary program for PARI execution
+ *
+ * \param[in] taskId Task number
+ * \param[in] args Arguments string separated by commas
+ * \param[in] programfile Absolute path to PARI script
+ * \param[in] directory Absolute path to results directory
+ *
+ * \returns Nothing
+ */
+void parifile(int taskId, char *args, char *programfile, char *directory) {
+    FILE *f;
+    char aux[FNAME_SIZE];
+
+    sprintf(aux,"%s/auxprog-%d.gp",directory,taskId);
+    f = fopen(aux,"w");
+    fprintf(f,"taskId=%d;\n",taskId);
+    fprintf(f,"taskArgs=[%s];\n",args);
+    fprintf(f,"\\r %s\n",programfile);
+    fprintf(f,"\\q\n");
+
+    fclose(f);
+    return;
+}
+
