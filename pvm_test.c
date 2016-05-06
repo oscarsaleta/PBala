@@ -85,19 +85,6 @@ int main (int argc, char *argv[]) {
 
     time(&initt);
 
-    // Error task id
-    mytid = pvm_mytid();
-    if (mytid<0) {
-        pvm_perror(argv[0]);
-        return -1;
-    }
-    // Error parent id
-    myparent = pvm_parent();
-    if (myparent<0 && myparent != PvmNoParent) {
-        pvm_perror(argv[0]);
-        pvm_exit();
-        return -1;
-    }
 
     /* MASTER CODE */
     setvbuf(stderr,NULL,_IOLBF,BUFFER_SIZE);
@@ -113,8 +100,7 @@ int main (int argc, char *argv[]) {
         || ( argc > 7 && sscanf(argv[7],"%d",&maple_single_cpu)!=1 )
         || argc > 8
         ) {
-        fprintf(stderr,"%s:: exec_flag [maple_single_cpu] program_file data_file node_file out_dir [max_mem_size (KB)] [maple_single_cpu]\n",argv[0]);
-        pvm_exit();
+        fprintf(stderr,"%s:: exec_flag program_file data_file node_file out_dir [max_mem_size (KB)] [maple_single_cpu]\n",argv[0]);
         return 1;
     }
     // sanitize maple library if single cpu is required
@@ -125,6 +111,21 @@ int main (int argc, char *argv[]) {
         /*sprintf(aux_char,"mv %s %s.bak && mv %s_tmp %s",inp_programFile,inp_programFile,inp_programFile,inp_programFile);
         system(aux_char);*/
     }
+
+    // Error task id
+    mytid = pvm_mytid();
+    if (mytid<0) {
+        pvm_perror(argv[0]);
+        return -1;
+    }
+    // Error parent id
+    myparent = pvm_parent();
+    if (myparent<0 && myparent != PvmNoParent) {
+        pvm_perror(argv[0]);
+        pvm_exit();
+        return -1;
+    }
+
 
     // prepare node_info.log file
     strcpy(logfilename,out_dir);

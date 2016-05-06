@@ -150,7 +150,8 @@ int main(int argc, char *argv[]) {
                 perror("ERROR:: child Maple process");
                 exit(err);
 
-            } else {
+            /* C */
+            } else if (task_type == 1) {
                 // Preparations for C or Python execution 
                 char *arguments_cpy;
                 arguments_cpy=malloc(strlen(arguments));
@@ -163,65 +164,97 @@ int main(int argc, char *argv[]) {
                 char *token; // used for tokenizing arguments
                 char **args; // this is the NULL-terminated array of strings
 
-                /* C */
-                if (task_type == 1) {
-                    /* In this case it's necessary to parse the arguments string
-                     * breaking it into tokens and then arranging the args of the
-                     * system call in a NULL-terminated array of strings which we
-                     * pass to execvp
-                     */
-                    // Tokenizing breaks the original string so we make a copy
-                    strcpy(arguments_cpy,arguments);
-                    // Args in system call are (program tasknum arguments), so 2+nargs
-                    nargs_tot = 2+nargs;
-                    args = (char**)malloc((nargs_tot+1)*sizeof(char*));
-                    args[nargs_tot]=NULL; // NULL-termination of args
-                    for (i=0;i<nargs_tot;i++)
-                        args[i] = malloc(BUFFER_SIZE);
-                    // Two first command line arguments
-                    strcpy(args[0],inp_programFile);
-                    sprintf(args[1],"%d",taskNumber);
-                    // Tokenize arguments_cpy
-                    token = strtok(arguments_cpy,",");
-                    // Copy the token to its place in args
-                    for (i=2;i<nargs_tot;i++) {
-                        strcpy(args[i],token);
-                        token = strtok(NULL,",");
-                    }
-
-                    // Call the execution and check for errors
-                    err = execvp(args[0],args);
-                    perror("ERROR:: child C process");
-                    exit(err);
+                /* In this case it's necessary to parse the arguments string
+                 * breaking it into tokens and then arranging the args of the
+                 * system call in a NULL-terminated array of strings which we
+                 * pass to execvp
+                 */
+                // Tokenizing breaks the original string so we make a copy
+                strcpy(arguments_cpy,arguments);
+                // Args in system call are (program tasknum arguments), so 2+nargs
+                nargs_tot = 2+nargs;
+                args = (char**)malloc((nargs_tot+1)*sizeof(char*));
+                args[nargs_tot]=NULL; // NULL-termination of args
+                for (i=0;i<nargs_tot;i++)
+                    args[i] = malloc(BUFFER_SIZE);
+                // Two first command line arguments
+                strcpy(args[0],inp_programFile);
+                sprintf(args[1],"%d",taskNumber);
+                // Tokenize arguments_cpy
+                token = strtok(arguments_cpy,",");
+                // Copy the token to its place in args
+                for (i=2;i<nargs_tot;i++) {
+                    strcpy(args[i],token);
+                    token = strtok(NULL,",");
                 }
-                /* PYTHON */
-                else if (task_type == 2) {
-                    // Same as in C, but adding "python" as first argument
-                    // Tokenizing breaks the original string so we make a copy
-                    strcpy(arguments_cpy,arguments);
-                    // args: (0)-python (1)-program (2)-tasknumber (3..nargs+3)-arguments
-                    nargs_tot = 3+nargs;
-                    args = (char**)malloc((nargs_tot+1)*sizeof(char*));
-                    args[nargs_tot]=NULL; // NULL-termination of args
-                    for (i=0;i<nargs_tot;i++)
-                        args[i] = malloc(BUFFER_SIZE);
-                    // Two first command line arguments
-                    strcpy(args[0],"python");
-                    strcpy(args[1],inp_programFile);
-                    sprintf(args[2],"%d",taskNumber);
-                    // Tokenize arguments_cpy
-                    token = strtok(arguments_cpy,",");
-                    // Copy the token to its place in args
-                    for (i=3;i<nargs_tot;i++) {
-                        strcpy(args[i],token);
-                        token = strtok(NULL,",");
-                    }
+                // Call the execution and check for errors
+                err = execvp(args[0],args);
+                perror("ERROR:: child C process");
+                exit(err);
 
-                    // Call the execution and check for errors
-                    err = execvp(args[0],args);
-                    perror("ERROR:: child Python process");
-                    exit(err);
+            /* PYTHON */
+            } else if (task_type == 2) {
+                // Preparations for C or Python execution 
+                char *arguments_cpy;
+                arguments_cpy=malloc(strlen(arguments));
+                strcpy(arguments_cpy,arguments);
+                // This counts how many commas there are in arguments, giving the number
+                // of arguments passed to the program
+                for(i=0;arguments_cpy[i];arguments_cpy[i]==','?i++:*arguments_cpy++);
+                int nargs = i+1; // i = number of commas
+                int nargs_tot; // will be the total number of arguments (nargs+program name+etc)
+                char *token; // used for tokenizing arguments
+                char **args; // this is the NULL-terminated array of strings
+
+                // Same as in C, but adding "python" as first argument
+                // Tokenizing breaks the original string so we make a copy
+                strcpy(arguments_cpy,arguments);
+                // args: (0)-python (1)-program (2)-tasknumber (3..nargs+3)-arguments
+                nargs_tot = 3+nargs;
+                args = (char**)malloc((nargs_tot+1)*sizeof(char*));
+                args[nargs_tot]=NULL; // NULL-termination of args
+                for (i=0;i<nargs_tot;i++)
+                    args[i] = malloc(BUFFER_SIZE);
+                // Two first command line arguments
+                strcpy(args[0],"python");
+                strcpy(args[1],inp_programFile);
+                sprintf(args[2],"%d",taskNumber);
+                // Tokenize arguments_cpy
+                token = strtok(arguments_cpy,",");
+                // Copy the token to its place in args
+                for (i=3;i<nargs_tot;i++) {
+                    strcpy(args[i],token);
+                    token = strtok(NULL,",");
                 }
+
+                // Call the execution and check for errors
+                err = execvp(args[0],args);
+                perror("ERROR:: child Python process");
+                exit(err);
+
+            /* PARI/GP */
+            } else if (task_type == 3) {
+                // NULL-terminated array of strings for calling the Maple script
+                char **args;
+                char filename[FNAME_SIZE];
+                sprintf(filename,"%s/auxprog-%d.gp",out_dir,taskNumber);
+                // 0: gp, 1: -f, 2: -s400G, 3: file, 4: NULL
+                int nargs=4;
+                args = (char**)malloc((nargs+1)*sizeof(char*));
+                // Do not malloc for NULL
+                for (i=0;i<nargs;i++)
+                    args[i] = malloc(BUFFER_SIZE);
+                // Fill up the array with strings
+                sprintf(args[0],"gp");
+                sprintf(args[1],"-f");
+                sprintf(args[2],"-s400G");
+                sprintf(args[3],"%s",filename);
+                args[4] = NULL;
+
+                // Call the execution and check for errors
+                err = execvp(args[0],args);
+                perror("ERROR:: child PARI process");
+                exit(err);
             }
         }
 
