@@ -329,6 +329,11 @@ int main (int argc, char *argv[]) {
         sprintf(aux_char,"[ ! -f %s.bak ] || mv %s.bak %s",inp_programFile,inp_programFile,inp_programFile);
         system(aux_char);
     }
+    // remove tmp pari programs (if created)
+    if (task_type == 3) {
+        sprintf(aux_char,"rm %s/auxprog-*",out_dir);
+        system(aux_char);
+    }
 
     pvm_catchout(0);
     pvm_exit();
