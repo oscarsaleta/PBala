@@ -6,7 +6,7 @@ This C program uses PVM libraries in order to create a parallellization interfac
  - **Maple** scripts
  - **C** programs
  - **Python** scripts
- - **Pari**: scripts (although Pari is supported through the Pari C/C++ library or through gp2c by manually editing the output C code and compiling as a C program using the command provided by gp2c. The executable can then be run using the C module of this software.)
+ - **Pari**: scripts (although Pari should be also supported through the Pari C/C++ library or through gp2c by manually editing the output C code and compiling as a C program using the command provided by gp2c. The executable can then be run using the C module of this software.)
 
 This interface lets the user execute a same script/program over multiple input data in several CPUs located at the antz computing server. It sports memory management so nodes do not run out of RAM due to too many processes being started in the same node. It also reports resource usage data after execution.
 
