@@ -18,7 +18,6 @@ pvm_test : pvm_test.c antz_lib.o
 # =======
 task_fork: task_fork.c antz_lib.o
 	$(COMPILER) -o task $(OPT) task_fork.c antz_lib.o $(LIBS)
-	cp task ~/pvm3/bin/LINUX64
 
 # ============
 # Biblioteques
@@ -32,4 +31,3 @@ antz_lib.o : antz_lib.c
 clean :
 	rm -f pvm_test
 	rm -f antz_lib.o
-	rm -f task ~/pvm3/bin/LINUX64/task
