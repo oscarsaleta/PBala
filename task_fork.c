@@ -30,7 +30,6 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-//#include <sys/time.h>
 #include <sys/resource.h>
 
 #include <pvm3.h>
@@ -148,6 +147,9 @@ int main(int argc, char *argv[]) {
                 // Call the execution and check for errors
                 err = execvp(args[0],args);
                 perror("ERROR:: child Maple process");
+                char aux[FNAME_SIZE];
+                getcwd(aux,FNAME_SIZE);
+                fprintf(stderr,"cwd=%s\n",aux);
                 exit(err);
 
             /* C */
@@ -178,7 +180,8 @@ int main(int argc, char *argv[]) {
                 for (i=0;i<nargs_tot;i++)
                     args[i] = malloc(BUFFER_SIZE);
                 // Two first command line arguments
-                strcpy(args[0],inp_programFile);
+                //strcpy(args[0],inp_programFile);
+                sprintf(args[0],"./%s",inp_programFile);
                 sprintf(args[1],"%d",taskNumber);
                 // Tokenize arguments_cpy
                 token = strtok(arguments_cpy,",");
@@ -190,6 +193,9 @@ int main(int argc, char *argv[]) {
                 // Call the execution and check for errors
                 err = execvp(args[0],args);
                 perror("ERROR:: child C process");
+                char aux[FNAME_SIZE];
+                getcwd(aux,FNAME_SIZE);
+                fprintf(stderr,"cwd=%s/%s\n",aux,inp_programFile);
                 exit(err);
 
             /* PYTHON */
