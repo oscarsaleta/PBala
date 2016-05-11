@@ -140,6 +140,10 @@ int main (int argc, char *argv[]) {
     }
     sprintf(aux_char,"echo '* ep=%s wd=%s' > hostfile",cwd,cwd);
     system(aux_char);
+    for (i=0; i<nNodes; i++) {
+        sprintf(aux_char,"echo '%s' >> hostfile",nodes[i]);
+        system(aux_char);
+    }
     char *pvmd_argv[1] = {"hostfile"};
     int pvmd_argc = 1;
     pvm_start_pvmd(pvmd_argc,pvmd_argv,1);
