@@ -13,7 +13,6 @@
 /**
  * Count how many lines a textfile has
  *
- * \param[in] *prName name of program that calls the function
  * \param[in] *fileName name of file to be counted
  *
  * \return int lineCount
@@ -34,25 +33,33 @@ int getLineCount(char *fileName) {
     return lineCount;
 }
 
-
-int parseNodefile(char *nodefile, int nNodes, char **nodes, int *nodeCores) {
+/**
+ * Parse the node file and return an array of strings containing the names
+ * of the nodes, and an array of ints containing their number of CPUs
+ *
+ * \param[in] *nodefile name of node file
+ * \param[in] nNodes number of nodes
+ * \param[in] ***nodes pointer to array of strings of node names
+ * \param[in] **nodeCores pointer to array of ints of CPUs per node
+ *
+ * \returns 0 if successful, 1 if error opening file, 2 if error reading
+ */
+int parseNodefile(char *nodefile, int nNodes, char ***nodes, int **nodeCores) {
     int i;
     FILE *f_nodes;
     // Open node file
     f_nodes = fopen(nodefile,"r");
     if (f_nodes == NULL) {
-        fprintf(stderr,"%s:: ERROR - invalid node file %s\n",prName,nodefile);
         return 1;
     }
     // Allocate memory for node and cpu array
-    nodes = (char**)malloc(nNodes*sizeof(char*));
+    *nodes = (char**)malloc(nNodes*sizeof(char*));
     for (i=0; i<nNodes; i++)
-        nodes[i] = (char*)malloc(MAX_NODE_LENGTH*sizeof(char));
-    nodeCores = (int*)malloc(nNodes*sizeof(int));
+        (*nodes)[i] = (char*)malloc(MAX_NODE_LENGTH*sizeof(char));
+    *nodeCores = (int*)malloc(nNodes*sizeof(int));
     // Read node file and store the info
     for (i=0; i<nNodes; i++) {
-        if (fscanf(f_nodes,"%s %d",nodes[i],&nodeCores[i])!=2) {
-            fprintf(stderr,"%s:: ERROR - while reading node file %s\n",prName,nodefile);
+        if (fscanf(f_nodes,"%s %d",(*nodes)[i],&(*nodeCores)[i])!=2) {
             return 2;
         }
     }

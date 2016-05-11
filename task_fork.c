@@ -147,9 +147,6 @@ int main(int argc, char *argv[]) {
                 // Call the execution and check for errors
                 err = execvp(args[0],args);
                 perror("ERROR:: child Maple process");
-                char aux[FNAME_SIZE];
-                getcwd(aux,FNAME_SIZE);
-                fprintf(stderr,"cwd=%s\n",aux);
                 exit(err);
 
             /* C */
@@ -193,9 +190,6 @@ int main(int argc, char *argv[]) {
                 // Call the execution and check for errors
                 err = execvp(args[0],args);
                 perror("ERROR:: child C process");
-                char aux[FNAME_SIZE];
-                getcwd(aux,FNAME_SIZE);
-                fprintf(stderr,"cwd=%s/%s\n",aux,inp_programFile);
                 exit(err);
 
             /* PYTHON */

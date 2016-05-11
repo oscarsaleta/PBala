@@ -120,18 +120,20 @@ int main (int argc, char *argv[]) {
 
     /* Read node configuration file */
     // Get file length (number of nodes)
-    if ((nNodes = getLineCount(argv[0],inp_nodes))==1) {
+    if ((nNodes = getLineCount(inp_nodes))==1) {
         fprintf(stderr,"%s:: ERROR - cannot open file %s\n",argv[0],inp_nodes);
         return -1;
     }
     // Read node file
-    if ((err=parseNodefile(inp_nodes,nNodes,nodes,nodeCores)) == 1) {
+    if ((err=parseNodefile(inp_nodes,nNodes,&nodes,&nodeCores)) == 1) {
         fprintf(stderr,"%s:: ERROR - cannot open file %s\n",argv[0],inp_nodes);
         return -1;
     } else if (err==2) {
         fprintf(stderr,"%s:: ERROR - while reading node file %s\n",argv[0],inp_nodes);
         return -1;
     }
+    for (i=0;i<nNodes;i++)
+        fprintf(stderr,"%s %d\n",nodes[i],nodeCores[i]);
 
     /* INITIALIZE PVMD */
     if (getcwd(cwd,FNAME_SIZE)==NULL) {
@@ -170,7 +172,10 @@ int main (int argc, char *argv[]) {
     }
     
     // Read how many tasks we have to perform
-    nTasks = getLineCount(argv[0],inp_dataFile);
+    if((nTasks = getLineCount(inp_dataFile))==1) {
+        fprintf(stderr,"%s:: cannot open data file %s\n",argv[0],inp_dataFile);
+        return -1;
+    }
 
     fprintf(stderr,"%s:: INFO - will use nodes ",argv[0]);
     for (i=0; i<nNodes-1; i++)
