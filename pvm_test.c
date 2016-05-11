@@ -108,24 +108,7 @@ int main (int argc, char *argv[]) {
         sprintf(aux_char,"grep -q -F 'kernelopts(numcpus=1)' %s || (sed '1ikernelopts(numcpus=1);' %s > %s_tmp && mv %s %s.bak && mv %s_tmp %s)",
                 inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile);
         system(aux_char);
-        /*sprintf(aux_char,"mv %s %s.bak && mv %s_tmp %s",inp_programFile,inp_programFile,inp_programFile,inp_programFile);
-        system(aux_char);*/
     }
-
-    // Error task id
-    mytid = pvm_mytid();
-    if (mytid<0) {
-        pvm_perror(argv[0]);
-        return -1;
-    }
-    // Error parent id
-    myparent = pvm_parent();
-    if (myparent<0 && myparent != PvmNoParent) {
-        pvm_perror(argv[0]);
-        pvm_exit();
-        return -1;
-    }
-
 
     // prepare node_info.log file
     strcpy(logfilename,out_dir);
@@ -156,6 +139,26 @@ int main (int argc, char *argv[]) {
     }
     // Close the nodes file
     fclose(f_nodes);
+
+
+    /* INITIALIZE PVMD */
+    int hostinfos;
+    pvm_start_pvmd(0,NULL,1);
+    pvm_addhosts(nodes,nNodes,&hostinfos);
+    // Error task id
+    mytid = pvm_mytid();
+    if (mytid<0) {
+        pvm_perror(argv[0]);
+        return -1;
+    }
+    // Error parent id
+    myparent = pvm_parent();
+    if (myparent<0 && myparent != PvmNoParent) {
+        pvm_perror(argv[0]);
+        pvm_exit();
+        return -1;
+    }
+    /***/
 
     // Max number of tasks running at once
     maxConcurrentTasks = 0;
@@ -336,7 +339,7 @@ int main (int argc, char *argv[]) {
     }
 
     pvm_catchout(0);
-    pvm_exit();
+    pvm_halt();
 
     return 0;
 }
