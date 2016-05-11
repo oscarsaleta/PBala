@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 #include <pvm3.h>
 #include "antz_lib.h"
 
@@ -143,7 +144,16 @@ int main (int argc, char *argv[]) {
 
     /* INITIALIZE PVMD */
     int hostinfos;
-    pvm_start_pvmd(0,NULL,1);
+    char cwd[FNAME_SIZE];
+    if (getcwd(cwd,FNAME_SIZE)==NULL) {
+        fprintf(stderr,"%s:: ERROR - cannot resolve current directory\n",argv[0]);
+        return -1;
+    }
+    sprintf(aux_char,"echo '* ep=%s wd=%s' > hostfile",cwd,cwd);
+    system(aux_char);
+    char *pvmd_argv[1] = {"hostfile"};
+    int pvmd_argc = 1;
+    pvm_start_pvmd(pvmd_argc,pvmd_argv,1);
     pvm_addhosts(nodes,nNodes,&hostinfos);
     // Error task id
     mytid = pvm_mytid();
