@@ -59,19 +59,20 @@ int main (int argc, char *argv[]) {
     char inp_dataFile[FNAME_SIZE];
     FILE *f_data;
     char inp_nodes[FNAME_SIZE];
-    FILE *f_nodes;
     char out_dir[FNAME_SIZE];
     char logfilename[FNAME_SIZE];
     FILE *logfile;
     char out_file[FNAME_SIZE];
     FILE *f_out;
+    char cwd[FNAME_SIZE];
     // Nodes variables
+    int hostinfos;
     char **nodes;
     int *nodeCores;
     int nNodes,maxConcurrentTasks;
     // Aux variables
     char buffer[BUFFER_SIZE];
-    int i,j;
+    int i,j,err;
     char aux_char[BUFFER_SIZE];
     size_t aux_size;
     // Task variables
@@ -119,32 +120,20 @@ int main (int argc, char *argv[]) {
 
     /* Read node configuration file */
     // Get file length (number of nodes)
-    nNodes = getLineCount(argv[0],inp_nodes);
-    // Open nodes file
-    f_nodes = fopen(inp_nodes,"r");
-    if (f_nodes == NULL) {
-        fprintf(stderr,"%s:: ERROR - invalid node file %s\n",argv[0],inp_nodes);
+    if ((nNodes = getLineCount(argv[0],inp_nodes))==1) {
+        fprintf(stderr,"%s:: ERROR - cannot open file %s\n",argv[0],inp_nodes);
         return -1;
     }
-    // Allocate memory for node and cpu array
-    nodes = (char**)malloc(nNodes*sizeof(char*));
-    for (i=0; i<nNodes; i++)
-        nodes[i] = (char*)malloc(MAX_NODE_LENGTH*sizeof(char));
-    nodeCores = (int*)malloc(nNodes*sizeof(int));
-    // Rewind and read again to store nodes and cores
-    for (i=0; i<nNodes; i++) {
-        if (fscanf(f_nodes,"%s %d",nodes[i],&nodeCores[i]) != 2) {
-            fprintf(stderr,"%s:: ERROR - while reading node file %s\n",argv[0],inp_nodes);
-            return -1;
-        }
+    // Read node file
+    if ((err=parseNodefile(inp_nodes,nNodes,nodes,nodeCores)) == 1) {
+        fprintf(stderr,"%s:: ERROR - cannot open file %s\n",argv[0],inp_nodes);
+        return -1;
+    } else if (err==2) {
+        fprintf(stderr,"%s:: ERROR - while reading node file %s\n",argv[0],inp_nodes);
+        return -1;
     }
-    // Close the nodes file
-    fclose(f_nodes);
-
 
     /* INITIALIZE PVMD */
-    int hostinfos;
-    char cwd[FNAME_SIZE];
     if (getcwd(cwd,FNAME_SIZE)==NULL) {
         fprintf(stderr,"%s:: ERROR - cannot resolve current directory\n",argv[0]);
         return -1;

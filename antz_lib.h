@@ -12,7 +12,8 @@
 #define MSG_RESULT 3 ///< Flag that indicates that message contains results
 #define MSG_STOP 4 ///< Flag for stopping a task
 
-int getLineCount(char *prName, char *inp_dataFile);
+int getLineCount(char *inp_dataFile);
+int parseNodefile(char *nodefile, int nNodes, char **nodes, int *nodeCores);
 int memcheck(int flag, long int max_task_size);
 int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage);
 void parifile(int taskId, char *args, char *programfile, char *directory);

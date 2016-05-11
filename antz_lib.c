@@ -18,17 +18,15 @@
  *
  * \return int lineCount
  */
-int getLineCount(char *prName, char *fileName) {
+int getLineCount(char *fileName) {
     FILE *f_aux;
     char str_tmp[BUFFER_SIZE];
     int lineCount;
 
     sprintf(str_tmp,"wc -l %s",fileName);
     f_aux = popen(str_tmp,"r");
-    if (f_aux == NULL) {
-        fprintf(stderr,"%s:: ERROR - cannot open file %s\n",prName,fileName);
+    if (f_aux == NULL) 
         return 1;
-    }
     fgets(str_tmp,1024,f_aux);
     sscanf(str_tmp,"%d",&lineCount);
     fclose(f_aux);
@@ -36,6 +34,33 @@ int getLineCount(char *prName, char *fileName) {
     return lineCount;
 }
 
+
+int parseNodefile(char *nodefile, int nNodes, char **nodes, int *nodeCores) {
+    int i;
+    FILE *f_nodes;
+    // Open node file
+    f_nodes = fopen(nodefile,"r");
+    if (f_nodes == NULL) {
+        fprintf(stderr,"%s:: ERROR - invalid node file %s\n",prName,nodefile);
+        return 1;
+    }
+    // Allocate memory for node and cpu array
+    nodes = (char**)malloc(nNodes*sizeof(char*));
+    for (i=0; i<nNodes; i++)
+        nodes[i] = (char*)malloc(MAX_NODE_LENGTH*sizeof(char));
+    nodeCores = (int*)malloc(nNodes*sizeof(int));
+    // Read node file and store the info
+    for (i=0; i<nNodes; i++) {
+        if (fscanf(f_nodes,"%s %d",nodes[i],&nodeCores[i])!=2) {
+            fprintf(stderr,"%s:: ERROR - while reading node file %s\n",prName,nodefile);
+            return 2;
+        }
+    }
+    fclose(f_nodes);
+    return 0;
+}
+
+        
 
 /**
  * Memory check for tasks. If no guess is given, limit to 25% of max RAM
