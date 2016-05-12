@@ -132,8 +132,6 @@ int main (int argc, char *argv[]) {
         fprintf(stderr,"%s:: ERROR - while reading node file %s\n",argv[0],inp_nodes);
         return -1;
     }
-    for (i=0;i<nNodes;i++)
-        fprintf(stderr,"%s %d\n",nodes[i],nodeCores[i]);
 
     /* INITIALIZE PVMD */
     if (getcwd(cwd,FNAME_SIZE)==NULL) {
