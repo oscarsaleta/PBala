@@ -1,4 +1,16 @@
-# PBala: DISTRIBUTED EXECUTION SOFTWARE FOR ANTZ
+# PBala (Princess Bala): DISTRIBUTED EXECUTION SOFTWARE FOR ANTZ
+
+# Releases and changelog
+
+- v1.0.0: First release
+ - **Changelog**:
+  - New name: *Princess Bala* (because this software makes Antz work much harder)
+  - Paths no longer need to be absolute
+  - PVM path is the current dir, so the executables work out of the box
+  - PVM automatically starts and stops, no need of prior startup or halt to clean task processes. Hostfile is automatically created from nodefile.
+  - Pari *.gp* (not compiled) scripts can be executed using flag 3
+
+# Explanation of the software
 
 ## Introduction
 
@@ -26,12 +38,12 @@ Run `doxigen` and take a look at html/index.html for documentation
   - 1 = C
   - 2 = Python
   - 3 = Pari
- - *program*: absolute path to program file
- - *datafile*: absolute path to data file
+ - *program*: path to program file
+ - *datafile*: path to data file
   - Line format is "tasknumber,arg1,arg2,...,argN"
- - *nodefile*: absolute path to PVM node file
+ - *nodefile*: path to PVM node file
   - Line format is "nodename numerofprocesses"
- - *outputdir*: absolute path to output directory
+ - *outputdir*: path to output directory
  - *memory*: (optional) max amount of RAM (in KB) that a single execution can require
   - Remark: if this argument is not used, the program picks a 25% of max RAM threshold for assigning jobs (this is not optimal for nodes with much RAM such as a05 and a08, but it is safe and not too bad for the rest).
  - *maple_flag*:
@@ -45,6 +57,8 @@ Run `doxigen` and take a look at html/index.html for documentation
   For C and Python we use the argv arrays so make sure the program can read and use those variables (and perform the error checking because this software has no way of knowing if the data file is suitable for your program).
 
 ### Procedure of execution
+
+  *As of v1.0.0, there is no need of starting PVM using a hostfile (it is actually advised **not** to do so). Instead, execute the program and we will start PVM for you, using the information extracted from the nodefile.*
 
   - First, you will need to execute PVM and add all the nodes that you want to use. This is done easily with `pvm hostfile`, where *hostfile* is simply a file with all the names of the nodes we will use in it (exactly the same names that appear in *nodefile*, but without the 2nd column). From inside the PVM cmd, type `quit` to leave the application and have the PVM daemon running in the background.
   - Now compile the software (if you have not done so yet) with `make`, and your own program if needed. Also, `mkdir resultdir` if it does not exist.
