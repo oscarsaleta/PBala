@@ -21,7 +21,7 @@
  * \author Oscar Saleta Reig
  */
 
-/*! \file pvm_test.c 
+/*! \file PBala.c 
  * \brief Main PVM program. Distributes executions of SDMP in antz
  * \author Oscar Saleta Reig
  */
@@ -37,7 +37,7 @@
 
 /**
  * Main PVM function. Handles task creation and result gathering.
- * Call: ./pvm_test programFlag programFile dataFile nodeFile outDir [maxMemSize (KB)] [maple_single_core]
+ * Call: ./PBala programFlag programFile dataFile nodeFile outDir [maxMemSize (KB)] [maple_single_core]
  *
  * \param[in] argv[1] flag for program type (0=maple,1=C,2=python,3=pari)
  * \param[in] argv[2] program file (maple library, c executable, etc)

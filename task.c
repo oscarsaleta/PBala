@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file task_fork.c 
+/*! \file task.c 
  * \brief PVM task. Adapts to different programs, forks execution to track mem usage
  * \author Oscar Saleta Reig
  */
