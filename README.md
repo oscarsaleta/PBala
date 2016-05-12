@@ -58,7 +58,7 @@ Run `doxigen` and take a look at html/index.html for documentation
 
 ### Procedure of execution
 
-  *As of v1.0.0, there is no need of starting PVM using a hostfile (it is actually advised **not** to do so). Instead, execute the program and we will start PVM for you, using the information extracted from the nodefile.*
+  *As of v1.0.0, there is no need of starting PVM using a hostfile (it is actually advised not to do so). Instead, execute the program and we will start PVM for you, using the information extracted from the nodefile.*
 
   - First, you will need to execute PVM and add all the nodes that you want to use. This is done easily with `pvm hostfile`, where *hostfile* is simply a file with all the names of the nodes we will use in it (exactly the same names that appear in *nodefile*, but without the 2nd column). From inside the PVM cmd, type `quit` to leave the application and have the PVM daemon running in the background.
   - Now compile the software (if you have not done so yet) with `make`, and your own program if needed. Also, `mkdir resultdir` if it does not exist.
