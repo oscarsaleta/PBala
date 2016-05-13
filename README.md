@@ -32,7 +32,7 @@ Run `doxigen` and take a look at html/index.html for documentation
 
 ## Usage
 
-`./PBala exec\_type program datafile nodefile outputdir [memory] [maple\_flag]`
+`./PBala exec_type program datafile nodefile outputdir [memory] [maple_flag]`
  - *exec_type*:
   - 0 = Maple
   - 1 = C
