@@ -2,13 +2,17 @@
 
 # Releases and changelog
 
+- v1.1.0:
+ - Added ability to detect if a task was killed or stopped.
+ - Changed format files, now there are 4 different files: task\*_stdout, task\*_stderr, task\*_mem and task\*_killed (this last one just for tasks that *have been killed*). This way all the files for the same task can be easily located.
+ - Fixed a bug that caused nodefiles of a single node to stop the execution.
+ 
 - v1.0.0: First release
- - **Changelog**:
-  - New name: *Princess Bala* (because this software makes Antz work much harder)
-  - Paths no longer need to be absolute
-  - PVM path is the current dir, so the executables work out of the box
-  - PVM automatically starts and stops, no need of prior startup or halt to clean task processes. Hostfile is automatically created from nodefile.
-  - Pari *.gp* (not compiled) scripts can be executed using flag 3
+ - New name: *Princess Bala* (because this software makes Antz work much harder).
+ - Paths no longer need to be absolute.
+ - PVM path is the current dir, so the executables work out of the box.
+ - PVM automatically starts and stops, no need of prior startup or halt to clean task processes. Hostfile is automatically created from nodefile.
+ - Pari *.gp* (not compiled) scripts can be executed using flag 3.
 
 # Explanation of the software
 
