@@ -120,7 +120,7 @@ int main (int argc, char *argv[]) {
 
     /* Read node configuration file */
     // Get file length (number of nodes)
-    if ((nNodes = getLineCount(inp_nodes))==1) {
+    if ((nNodes = getLineCount(inp_nodes))==-1) {
         fprintf(stderr,"%s:: ERROR - cannot open file %s\n",argv[0],inp_nodes);
         return -1;
     }
@@ -261,13 +261,11 @@ int main (int argc, char *argv[]) {
             pvm_upkint(&itid,1,1);
             pvm_upkint(&taskNumber,1,1);
             pvm_upkint(&status,1,1);
-            if (status != 0) {
-                fprintf(stderr,"%s:: ERROR - task %4d failed at execution\n",argv[0],taskNumber);
-                pvm_perror(argv[0]);
-                return 1;
-            }
             pvm_upkdouble(&exec_time,1,1);
-            fprintf(stderr,"%s:: INFO - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
+            if (status != 0)
+                fprintf(stderr,"%s:: ERROR - task %4d was stopped or killed\n",argv[0],taskNumber);
+            else
+                fprintf(stderr,"%s:: INFO - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
             
             // Assign more work until we're done
             if (fgets(buffer,BUFFER_SIZE,f_data)!=NULL) {
@@ -306,13 +304,11 @@ int main (int argc, char *argv[]) {
         pvm_upkint(&itid,1,1);
         pvm_upkint(&taskNumber,1,1);
         pvm_upkint(&status,1,1);
-        if (status != 0) {
-            fprintf(stderr,"%s:: ERROR - task %4d failed at execution\n",argv[0],taskNumber);
-            pvm_perror(argv[0]);
-            return 1;
-        }
         pvm_upkdouble(&exec_time,1,1);
-        fprintf(stderr,"%s:: INFO - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
+        if (status != 0)
+            fprintf(stderr,"%s:: ERROR - task %4d was stopped or killed\n",argv[0],taskNumber);
+        else
+            fprintf(stderr,"%s:: INFO - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
         pvm_upkdouble(&total_time,1,1);
         // Shut down slave
         pvm_initsend(PVM_ENCODING);
