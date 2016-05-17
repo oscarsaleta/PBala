@@ -25,7 +25,7 @@ int getLineCount(char *fileName) {
     sprintf(str_tmp,"wc -l %s",fileName);
     f_aux = popen(str_tmp,"r");
     if (f_aux == NULL) 
-        return 1;
+        return -1;
     fgets(str_tmp,1024,f_aux);
     sscanf(str_tmp,"%d",&lineCount);
     fclose(f_aux);
