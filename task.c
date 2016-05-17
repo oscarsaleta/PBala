@@ -53,6 +53,7 @@ int main(int argc, char *argv[]) {
     int i; // for loops
     clock_t initt,endt;
     double difft, totalt=0;
+    int state;
 
     myparent = pvm_parent();
 
@@ -114,12 +115,12 @@ int main(int argc, char *argv[]) {
             int err; // for executions
 
             // Move stdout to taskNumber_out.txt
-            sprintf(output_file,"%s/%d_out.txt",out_dir,taskNumber);
+            sprintf(output_file,"%s/task%d_stdout.txt",out_dir,taskNumber);
             int fd = open(output_file,O_WRONLY|O_CREAT|O_TRUNC,0666);
             dup2(fd,1);
             close(fd);
             // Move stderr to taskNumber_err.txt
-            sprintf(output_file,"%s/%d_err.txt",out_dir,taskNumber);
+            sprintf(output_file,"%s/task%d_stderr.txt",out_dir,taskNumber);
             fd = open(output_file,O_WRONLY|O_CREAT|O_TRUNC,0666);
             dup2(fd,2);
             close(fd);
@@ -261,17 +262,24 @@ int main(int argc, char *argv[]) {
 
         /* Attempt at measuring memory usage for the child process */
         siginfo_t infop; // Stores information about the child execution
-        waitid(P_PID,pid,&infop,WEXITED); // Wait for the execution to end
-        struct rusage usage; // Stores information about the child's resource usage
-        getrusage(RUSAGE_CHILDREN,&usage); // Get child resource usage
-        prtusage(pid,taskNumber,out_dir,usage); // Print resource usage to file
-
+        waitid(P_PID,pid,&infop,WEXITED|WSTOPPED); // Wait for the execution to end
         // Computation time
         time(&endt);
         difft = difftime(endt,initt);
         totalt += difft;
+        if (infop.si_code == CLD_KILLED
+                || infop.si_code == CLD_DUMPED
+                || infop.si_code == CLD_STOPPED) {
+            prterror(pid,taskNumber,out_dir,difft);
+            state=1;
+        } else {
+            struct rusage usage; // Stores information about the child's resource usage
+            getrusage(RUSAGE_CHILDREN,&usage); // Get child resource usage
+            prtusage(pid,taskNumber,out_dir,usage); // Print resource usage to file
+            state=0;
+        }
+
         // Send response to master
-        int state=0;
         pvm_initsend(PVM_ENCODING);
         pvm_pkint(&me,1,1);
         pvm_pkint(&taskNumber,1,1);

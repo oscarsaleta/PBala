@@ -118,7 +118,7 @@ int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage) {
     FILE *memlog;
     char memlogfilename[FNAME_SIZE];
     
-    sprintf(memlogfilename,"%s/mem%d.log",out_dir,taskNumber);
+    sprintf(memlogfilename,"%s/task%d_mem.log",out_dir,taskNumber);
     memlog = fopen(memlogfilename,"w");
     fprintf(memlog,"TASK %d RESOURCE USAGE (PID %d)\n",taskNumber,pid);
     fprintf(memlog,"----------------------\n");
@@ -168,9 +168,9 @@ int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage) {
  * \param[in] programfile Absolute path to PARI script
  * \param[in] directory Absolute path to results directory
  *
- * \returns Nothing
+ * \returns 0 if successful
  */
-void parifile(int taskId, char *args, char *programfile, char *directory) {
+int parifile(int taskId, char *args, char *programfile, char *directory) {
     FILE *f;
     char aux[FNAME_SIZE];
 
@@ -182,6 +182,30 @@ void parifile(int taskId, char *args, char *programfile, char *directory) {
     fprintf(f,"\\q\n");
 
     fclose(f);
-    return;
+    return 0;
 }
 
+
+/**
+ * Informs that a process has been killed or stopped
+ * this function runs instead of prtusage()
+ *
+ * \param[in] pid Proccess identifier (within system)
+ * \param[in] taskNumber Task identifier (within our program)
+ * \param[in] out_dir Output file name
+ *
+ * \returns 0 if successful
+ */
+int prterror (int pid, int taskNumber, char *out_dir, double time) {
+    FILE *memlog;
+    char memlogfname[FNAME_SIZE];
+
+    sprintf(memlogfname,"%s/task%d_killed.log",out_dir,taskNumber);
+    memlog = fopen(memlogfname,"w");
+    fprintf(memlog,"TASK %d (PID %d) ERROR REPORT\n",taskNumber,pid);
+    fprintf(memlog,"----------------------\n");
+    fprintf(memlog,"Task was killed or stopped after %10.5G seconds.\n",time);
+    
+    fclose(memlog);
+    return 0;
+}

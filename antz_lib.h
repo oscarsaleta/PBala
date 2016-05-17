@@ -16,4 +16,5 @@ int getLineCount(char *inp_dataFile);
 int parseNodefile(char *nodefile, int nNodes, char ***nodes, int **nodeCores);
 int memcheck(int flag, long int max_task_size);
 int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage);
-void parifile(int taskId, char *args, char *programfile, char *directory);
+int parifile(int taskId, char *args, char *programfile, char *directory);
+int prterror (int pid, int taskNumber, char *out_dir, double time);
