@@ -262,14 +262,14 @@ int main(int argc, char *argv[]) {
 
         /* Attempt at measuring memory usage for the child process */
         siginfo_t infop; // Stores information about the child execution
-        waitid(P_PID,pid,&infop,WEXITED|WSTOPPED); // Wait for the execution to end
+        waitid(P_PID,pid,&infop,WEXITED/*|WSTOPPED*/); // Wait for the execution to end
         // Computation time
         time(&endt);
         difft = difftime(endt,initt);
         totalt += difft;
         if (infop.si_code == CLD_KILLED
                 || infop.si_code == CLD_DUMPED
-                || infop.si_code == CLD_STOPPED) {
+                /*|| infop.si_code == CLD_STOPPED*/) {
             prterror(pid,taskNumber,out_dir,difft);
             state=1;
         } else {
