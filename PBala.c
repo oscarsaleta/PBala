@@ -242,8 +242,10 @@ int main (int argc, char *argv[]) {
             sprintf(aux_char,"%s",&buffer[aux_size+1]); 
             pvm_pkstr(aux_char);
             // create file for pari execution if needed
-            if (task_type == 3)
+            if (task_type == 3) {
                 parifile(taskNumber,aux_char,inp_programFile,out_dir);
+                fprintf(stderr,"%s:: INFO - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
+            }
             // send the job
             pvm_send(taskId[i],MSG_WORK);
             fprintf(stderr,"%s:: INFO - sent task %4d for execution\n",argv[0],taskNumber);
@@ -286,8 +288,10 @@ int main (int argc, char *argv[]) {
                 sprintf(aux_char,"%s",&buffer[aux_size+1]);
                 pvm_pkstr(aux_char);
                 // create file for pari execution if needed
-                if (task_type == 3)
+                if (task_type == 3) {
                     parifile(taskNumber,aux_char,inp_programFile,out_dir);
+                    fprintf(stderr,"%s:: INFO - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
+                }
                 // send the job
                 pvm_send(taskId[itid],MSG_WORK);
                 fprintf(stderr,"%s:: INFO - sent task %3d for execution\n",argv[0],taskNumber);
