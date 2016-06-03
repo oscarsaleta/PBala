@@ -2,6 +2,13 @@
 
 # Releases and changelog
 
+-v1.2.1:
+ - Solved a long standing segfault problem that triggered when the output_dir did not exist.
+ - Added one more error code
+
+- v1.2.0:
+ - Added error codes (see bottom of this file) to better inform of what made your execution crash.
+
 - v1.1.0:
  - Added ability to detect if a task was killed or stopped.
  - Changed format files, now there are 4 different files: task\*_stdout, task\*_stderr, task\*_mem and task\*_killed (this last one just for tasks that *have been killed*). This way all the files for the same task can be easily located.
