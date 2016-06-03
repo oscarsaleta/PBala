@@ -118,7 +118,7 @@ int main (int argc, char *argv[]) {
     strcat(logfilename,"/node_info.log");
     logfile = fopen(logfilename,"w");
     if (logfile==NULL) {
-        fprintf(stderr,"%s:: ERROR - cannot create file %s, make sure the output folder %s exists\n",logfilename,out_dir);
+        fprintf(stderr,"%s:: ERROR - cannot create file %s, make sure the output folder %s exists\n",argv[0],logfilename,out_dir);
         return E_OUTDIR;
     }
     fprintf(logfile,"# NODE CODENAMES\n");
