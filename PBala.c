@@ -119,7 +119,7 @@ int main (int argc, char *argv[]) {
     logfile = fopen(logfilename,"w");
     if (logfile==NULL) {
         fprintf(stderr,"%s:: ERROR - cannot create file %s, make sure the output folder %s exists\n",logfilename,out_dir);
-        return E_OUTFILE;
+        return E_OUTDIR;
     }
     fprintf(logfile,"# NODE CODENAMES\n");
 
