@@ -2,7 +2,7 @@
 
 # Releases and changelog
 
--v1.2.1:
+- v1.2.1:
  - Solved a long standing segfault problem that triggered when the output_dir did not exist.
  - Added one more error code
 
