@@ -45,3 +45,7 @@
 #ifndef E_DATAFILE_FIRSTCOL
 #define E_DATAFILE_FIRSTCOL 20
 #endif
+
+#ifndef E_OUTDIR
+#define E_OUTDIR 21
+#endif

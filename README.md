@@ -92,3 +92,4 @@ Existing codes:
 - 18: error when creating output file
 - 19: error when spawning pvm tasks
 - 20: error when reading first column of datafile (must be task id)
+- 21: error when creating out_dir/node_info.txt (maybe out_dir does not exist?)
