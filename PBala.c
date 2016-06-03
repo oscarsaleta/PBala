@@ -33,6 +33,7 @@
 #include <unistd.h>
 #include <pvm3.h>
 #include "antz_lib.h"
+#include "errcodes.h"
 
 
 /**
@@ -103,7 +104,7 @@ int main (int argc, char *argv[]) {
         || argc > 8
         ) {
         fprintf(stderr,"%s:: exec_flag program_file data_file node_file out_dir [max_mem_size (KB)] [maple_single_cpu]\n",argv[0]);
-        return 1;
+        return E_ARGS;
     }
     // sanitize maple library if single cpu is required
     if (maple_single_cpu) {
@@ -122,21 +123,21 @@ int main (int argc, char *argv[]) {
     // Get file length (number of nodes)
     if ((nNodes = getLineCount(inp_nodes))==-1) {
         fprintf(stderr,"%s:: ERROR - cannot open file %s\n",argv[0],inp_nodes);
-        return -1;
+        return E_NODE_LINES;
     }
     // Read node file
     if ((err=parseNodefile(inp_nodes,nNodes,&nodes,&nodeCores)) == 1) {
         fprintf(stderr,"%s:: ERROR - cannot open file %s\n",argv[0],inp_nodes);
-        return -1;
+        return E_NODE_OPEN;
     } else if (err==2) {
         fprintf(stderr,"%s:: ERROR - while reading node file %s\n",argv[0],inp_nodes);
-        return -1;
+        return E_NODE_READ;
     }
 
     /* INITIALIZE PVMD */
     if (getcwd(cwd,FNAME_SIZE)==NULL) {
         fprintf(stderr,"%s:: ERROR - cannot resolve current directory\n",argv[0]);
-        return -1;
+        return E_CWD;
     }
     sprintf(aux_char,"echo '* ep=%s wd=%s' > hostfile",cwd,cwd);
     system(aux_char);
@@ -152,14 +153,14 @@ int main (int argc, char *argv[]) {
     mytid = pvm_mytid();
     if (mytid<0) {
         pvm_perror(argv[0]);
-        return -1;
+        return E_PVM_MYTID;
     }
     // Error parent id
     myparent = pvm_parent();
     if (myparent<0 && myparent != PvmNoParent) {
         pvm_perror(argv[0]);
         pvm_exit();
-        return -1;
+        return E_PVM_PARENT;
     }
     /***/
 
@@ -170,9 +171,9 @@ int main (int argc, char *argv[]) {
     }
     
     // Read how many tasks we have to perform
-    if((nTasks = getLineCount(inp_dataFile))==1) {
+    if((nTasks = getLineCount(inp_dataFile))==-1) {
         fprintf(stderr,"%s:: cannot open data file %s\n",argv[0],inp_dataFile);
-        return -1;
+        return E_DATAFILE_LINES;
     }
 
     fprintf(stderr,"%s:: INFO - will use nodes ",argv[0]);
@@ -185,7 +186,7 @@ int main (int argc, char *argv[]) {
     sprintf(out_file,"%s/outfile.txt",out_dir);
     if ((f_out = fopen(out_file,"w")) == NULL) {
         fprintf(stderr,"%s:: ERROR - cannot open output file %s\n",argv[0],out_file);
-        return 1;
+        return E_OUTFILE_OPEN;
     }
     pvm_catchout(f_out);
 
@@ -203,7 +204,7 @@ int main (int argc, char *argv[]) {
                     argv[0],numt,taskId[itid],nodes[i]);
                 fflush(stderr);
                 pvm_perror(argv[0]);
-                return 1;
+                return E_PVM_SPAWN;
             }
             // Send info to task
             pvm_initsend(PVM_ENCODING);
@@ -227,7 +228,7 @@ int main (int argc, char *argv[]) {
         if (fgets(buffer,BUFFER_SIZE,f_data)!=NULL) {
             if (sscanf(buffer,"%d",&taskNumber)!=1) {
                 fprintf(stderr,"%s:: ERROR - first column of data file must be task id\n",argv[0]);
-                return 1;
+                return E_DATAFILE_FIRSTCOL;
             }
             pvm_initsend(PVM_ENCODING);
             pvm_pkint(&work_code,1,1);
@@ -275,7 +276,7 @@ int main (int argc, char *argv[]) {
                 logfile = fopen(logfilename,"a");
                 if (sscanf(buffer,"%d",&taskNumber)!=1) {
                     fprintf(stderr,"%s:: ERROR - first column of data file must be task id\n",argv[0]);
-                    return 1;
+                    return E_DATAFILE_FIRSTCOL;
                 }
                 pvm_initsend(PVM_ENCODING);
                 pvm_pkint(&work_code,1,1);

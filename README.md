@@ -74,3 +74,21 @@ Run `doxigen` and take a look at html/index.html for documentation
  - *Maple*: Maple uses multithreading to parallelize the executions by default. This is good for performance but bad for resource management, because the PVM task loses control of the processes spawned. Therefore, the output file mem\*.log doesn't show accurate values for resource usage of the program, because it can only track the parent Maple process, which doesn't do any work besides spawning and controlling its child processes. 
   - *Workaround*: we execute maple with the -t flag, so in \*\_err.txt (output error file) we can see the kernelopts line that reports memory usage and computation time directly from maple.
  - *C*, *Python* and *Pari*: as long as the program to be executed is sequential, the PVM task will be able to get resource usage from the execution (using C system call *getrusage()*) and print it to the mem\*.log file.
+
+## Error codes
+
+*(New in version 1.2.0)* Error codes were added to the main executable *PBala*. Now if the program aborts you can simply check the error code in terminal (you also still can check the output file) to see what happened.
+
+Existing codes:
+
+- 10: error with command line arguments passed to the program
+- 11: error when counting number of lines of nodefile
+- 12: error when trying to open nodefile
+- 13: error when trying to read nodefile
+- 14: error when getting the current working directory
+- 15: error when asking pvmd for my TID (task identifier)
+- 16: error when asking pvmd for the task parent
+- 17: error when counting number of lines of datafile
+- 18: error when creating output file
+- 19: error when spawning pvm tasks
+- 20: error when reading first column of datafile (must be task id)
