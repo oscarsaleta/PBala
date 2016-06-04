@@ -2,6 +2,10 @@
 
 # Releases and changelog
 
+- v1.3.0:
+ - Added more info at the beginning of stderr (system call, executable, datafile, nodefile, output directory)
+ - Added a version variable in antz_lib.h
+
 - v1.2.1:
  - Solved a long standing segfault problem that triggered when the output_dir did not exist.
  - Added one more error code

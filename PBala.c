@@ -180,6 +180,19 @@ int main (int argc, char *argv[]) {
         return E_DATAFILE_LINES;
     }
 
+    // Print execution info
+    fprintf(stderr,"PRINCESS BALA v%s\n",VERSION);
+    fprintf(stderr,"System call: ");
+    for (i=0;i<argc;i++)
+        fprintf(stderr,"%s ",argv[i]);
+    fprintf(stderr,"\n\n");
+
+    fprintf(stderr,"%s:: INFO - will use executable %s\n",argv[0],inp_programFile);
+    fprintf(stderr,"%s:: INFO - will use datafile %s\n",argv[0],inp_dataFile);
+    fprintf(stderr,"%s:: INFO - will use nodefile %s\n",argv[0],inp_nodes);
+    fprintf(stderr,"%s:: INFO - results will be stored in %s\n\n",argv[0],out_dir);
+
+
     fprintf(stderr,"%s:: INFO - will use nodes ",argv[0]);
     for (i=0; i<nNodes-1; i++)
         fprintf(stderr,"%s (%d), ",nodes[i],nodeCores[i]);
