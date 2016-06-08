@@ -33,7 +33,7 @@
 #include <unistd.h>
 #include <pvm3.h>
 #include "antz_lib.h"
-#include "errcodes.h"
+#include "antz_errcodes.h"
 
 
 /**
@@ -74,7 +74,7 @@ int main (int argc, char *argv[]) {
     // Aux variables
     char buffer[BUFFER_SIZE];
     int i,j,err;
-    char aux_char[BUFFER_SIZE];
+    char aux_str[BUFFER_SIZE];
     size_t aux_size;
     // Task variables
     int task_type;
@@ -108,9 +108,9 @@ int main (int argc, char *argv[]) {
     }
     // sanitize maple library if single cpu is required
     if (maple_single_cpu) {
-        sprintf(aux_char,"grep -q -F 'kernelopts(numcpus=1)' %s || (sed '1ikernelopts(numcpus=1);' %s > %s_tmp && mv %s %s.bak && mv %s_tmp %s)",
+        sprintf(aux_str,"grep -q -F 'kernelopts(numcpus=1)' %s || (sed '1ikernelopts(numcpus=1);' %s > %s_tmp && mv %s %s.bak && mv %s_tmp %s)",
                 inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile);
-        system(aux_char);
+        system(aux_str);
     }
 
     // prepare node_info.log file
@@ -143,11 +143,11 @@ int main (int argc, char *argv[]) {
         fprintf(stderr,"%s:: ERROR - cannot resolve current directory\n",argv[0]);
         return E_CWD;
     }
-    sprintf(aux_char,"echo '* ep=%s wd=%s' > hostfile",cwd,cwd);
-    system(aux_char);
+    sprintf(aux_str,"echo '* ep=%s wd=%s' > hostfile",cwd,cwd);
+    system(aux_str);
     for (i=0; i<nNodes; i++) {
-        sprintf(aux_char,"echo '%s' >> hostfile",nodes[i]);
-        system(aux_char);
+        sprintf(aux_str,"echo '%s' >> hostfile",nodes[i]);
+        system(aux_str);
     }
     char *pvmd_argv[1] = {"hostfile"};
     int pvmd_argc = 1;
@@ -240,15 +240,15 @@ int main (int argc, char *argv[]) {
             pvm_pkstr(inp_programFile);
             pvm_pkstr(out_dir);
             /* parse arguments (skip tasknumber) */
-            sprintf(aux_char,"%d",taskNumber);
-            aux_size = strlen(aux_char);
+            sprintf(aux_str,"%d",taskNumber);
+            aux_size = strlen(aux_str);
             buffer[strlen(buffer)-1]=0;
-            // copy to aux_char the data line from after the first ","
-            sprintf(aux_char,"%s",&buffer[aux_size+1]); 
-            pvm_pkstr(aux_char);
+            // copy to aux_str the data line from after the first ","
+            sprintf(aux_str,"%s",&buffer[aux_size+1]); 
+            pvm_pkstr(aux_str);
             // create file for pari execution if needed
             if (task_type == 3) {
-                parifile(taskNumber,aux_char,inp_programFile,out_dir);
+                parifile(taskNumber,aux_str,inp_programFile,out_dir);
                 fprintf(stderr,"%s:: INFO - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
             }
             // send the job
@@ -261,6 +261,11 @@ int main (int argc, char *argv[]) {
     fclose(logfile);
     // Keep assigning work to nodes if needed
     int status;
+    FILE *unfinishedTasks;
+    char unfinishedTasks_name[FNAME_SIZE];
+    sprintf(unfinishedTasks_name,"%s/unfinished_tasks.txt",out_dir);
+    unfinishedTasks=fopen(unfinishedTasks_name,"w");
+    fclose(unfinishedTasks);
     if (nTasks > maxConcurrentTasks) {
         for (j=maxConcurrentTasks; j<nTasks; j++) {
             // Receive answer from slaves
@@ -268,12 +273,25 @@ int main (int argc, char *argv[]) {
             pvm_upkint(&itid,1,1);
             pvm_upkint(&taskNumber,1,1);
             pvm_upkint(&status,1,1);
-            pvm_upkdouble(&exec_time,1,1);
-            if (status != 0)
-                fprintf(stderr,"%s:: ERROR - task %4d was stopped or killed\n",argv[0],taskNumber);
-            else
-                fprintf(stderr,"%s:: INFO - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
-            
+            pvm_upkstr(aux_str);
+            // Check if response is error at forking
+            if (status == ST_FORK_ERR) {
+                fprintf(stderr,"%s:: ERROR - could not fork process for task %d at slave %d\n",
+                        argv[0],taskNumber,itid);
+                unfinishedTasks = fopen(unfinishedTasks_name,"a");
+                fprintf(unfinishedTasks,"%d,%s\n",taskNumber,aux_str);
+                fclose(unfinishedTasks);
+            } else {
+                pvm_upkdouble(&exec_time,1,1);
+                // Check if task was killed or completed
+                if (status == ST_TASK_KILLED) {
+                    fprintf(stderr,"%s:: ERROR - task %4d was stopped or killed\n",argv[0],taskNumber);
+                    unfinishedTasks = fopen(unfinishedTasks_name,"a");
+                    fprintf(unfinishedTasks,"%d,%s\n",taskNumber,aux_str);
+                    fclose(unfinishedTasks);
+                } else
+                    fprintf(stderr,"%s:: INFO - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
+            }
             // Assign more work until we're done
             if (fgets(buffer,BUFFER_SIZE,f_data)!=NULL) {
                 // Open logfile for appending work
@@ -287,14 +305,14 @@ int main (int argc, char *argv[]) {
                 pvm_pkint(&taskNumber,1,1);
                 pvm_pkstr(inp_programFile);
                 pvm_pkstr(out_dir);
-                sprintf(aux_char,"%d",taskNumber);
-                aux_size = strlen(aux_char);
+                sprintf(aux_str,"%d",taskNumber);
+                aux_size = strlen(aux_str);
                 buffer[strlen(buffer)-1]=0;
-                sprintf(aux_char,"%s",&buffer[aux_size+1]);
-                pvm_pkstr(aux_char);
+                sprintf(aux_str,"%s",&buffer[aux_size+1]);
+                pvm_pkstr(aux_str);
                 // create file for pari execution if needed
                 if (task_type == 3) {
-                    parifile(taskNumber,aux_char,inp_programFile,out_dir);
+                    parifile(taskNumber,aux_str,inp_programFile,out_dir);
                     fprintf(stderr,"%s:: INFO - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
                 }
                 // send the job
@@ -308,16 +326,30 @@ int main (int argc, char *argv[]) {
     // Listen to answers from slaves that keep working
     work_code = MSG_STOP;
     for (i=0; i<maxConcurrentTasks; i++) {
-        // Receive response
+        // Receive answer from slaves
         pvm_recv(-1,MSG_RESULT);
         pvm_upkint(&itid,1,1);
         pvm_upkint(&taskNumber,1,1);
         pvm_upkint(&status,1,1);
-        pvm_upkdouble(&exec_time,1,1);
-        if (status != 0)
-            fprintf(stderr,"%s:: ERROR - task %4d was stopped or killed\n",argv[0],taskNumber);
-        else
-            fprintf(stderr,"%s:: INFO - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
+        pvm_upkstr(aux_str);
+        // Check if response is error at forking
+        if (status == ST_FORK_ERR) {
+            fprintf(stderr,"%s:: ERROR - could not fork process for task %d at slave %d\n",
+                    argv[0],taskNumber,itid);
+            unfinishedTasks = fopen(unfinishedTasks_name,"a");
+            fprintf(unfinishedTasks,"%d,%s\n",taskNumber,aux_str);
+            fclose(unfinishedTasks);
+        } else {
+            pvm_upkdouble(&exec_time,1,1);
+            // Check if task was killed or completed
+            if (status == ST_TASK_KILLED) {
+                fprintf(stderr,"%s:: ERROR - task %4d was stopped or killed\n",argv[0],taskNumber);
+                unfinishedTasks = fopen(unfinishedTasks_name,"a");
+                fprintf(unfinishedTasks,"%d,%s\n",taskNumber,aux_str);
+                fclose(unfinishedTasks);
+            } else
+                fprintf(stderr,"%s:: INFO - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
+        }
         pvm_upkdouble(&total_time,1,1);
         // Shut down slave
         pvm_initsend(PVM_ENCODING);
@@ -340,13 +372,13 @@ int main (int argc, char *argv[]) {
     
     // remove tmp program (if modified)
     if (maple_single_cpu) {
-        sprintf(aux_char,"[ ! -f %s.bak ] || mv %s.bak %s",inp_programFile,inp_programFile,inp_programFile);
-        system(aux_char);
+        sprintf(aux_str,"[ ! -f %s.bak ] || mv %s.bak %s",inp_programFile,inp_programFile,inp_programFile);
+        system(aux_str);
     }
     // remove tmp pari programs (if created)
     if (task_type == 3) {
-        sprintf(aux_char,"rm %s/auxprog-*",out_dir);
-        system(aux_char);
+        sprintf(aux_str,"rm %s/auxprog-*",out_dir);
+        system(aux_str);
     }
 
     pvm_catchout(0);

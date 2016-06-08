@@ -34,6 +34,7 @@
 
 #include <pvm3.h>
 #include "antz_lib.h"
+#include "antz_errcodes.h"
 
 /**
  * Main task function.
@@ -100,11 +101,13 @@ int main(int argc, char *argv[]) {
         // If fork fails, notify master and exit
         if (pid<0) {
             fprintf(stderr,"ERROR - task %d could not spawn execution process\n",taskNumber);
-            int state=1;
+            int state=ST_FORK_ERR;
             pvm_initsend(PVM_ENCODING);
             pvm_pkint(&me,1,1);
             pvm_pkint(&taskNumber,1,1);
             pvm_pkint(&state,1,1);
+            pvm_pkstr(arguments);
+            pvm_pkdouble(&totalt,1,1);
             pvm_send(myparent,MSG_RESULT);
             pvm_exit();
             exit(1);
@@ -271,7 +274,7 @@ int main(int argc, char *argv[]) {
                 || infop.si_code == CLD_DUMPED
                 /*|| infop.si_code == CLD_STOPPED*/) {
             prterror(pid,taskNumber,out_dir,difft);
-            state=1;
+            state=ST_TASK_KILLED;
         } else {
             struct rusage usage; // Stores information about the child's resource usage
             getrusage(RUSAGE_CHILDREN,&usage); // Get child resource usage
@@ -284,6 +287,7 @@ int main(int argc, char *argv[]) {
         pvm_pkint(&me,1,1);
         pvm_pkint(&taskNumber,1,1);
         pvm_pkint(&state,1,1);
+        pvm_pkstr(arguments);
         pvm_pkdouble(&difft,1,1);
         pvm_pkdouble(&totalt,1,1);
         pvm_send(myparent,MSG_RESULT);
