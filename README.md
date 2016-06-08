@@ -2,23 +2,27 @@
 
 # Releases and changelog
 
-- v1.3.0:
+- **v2.0.0**:
+ - **Automatic generation of unfinished tasks datafile** (i.e. a clone of datafile containing only the lines that correspond to tasks that were killed before they could finish execution). This means that the program can later be run again using this new data file as input instead of having to manually search for the necessary data.
+ - Added more error checks and error cases when forking tasks.
+
+- **v1.3.0**:
  - Added more info at the beginning of stderr (system call, executable, datafile, nodefile, output directory)
  - Added a version variable in antz_lib.h
 
-- v1.2.1:
+- **v1.2.1**:
  - Solved a long standing segfault problem that triggered when the output_dir did not exist.
  - Added one more error code
 
-- v1.2.0:
+- **v1.2.0**:
  - Added error codes (see bottom of this file) to better inform of what made your execution crash.
 
-- v1.1.0:
+- **v1.1.0**:
  - Added ability to detect if a task was killed or stopped.
  - Changed format files, now there are 4 different files: task\*_stdout, task\*_stderr, task\*_mem and task\*_killed (this last one just for tasks that *have been killed*). This way all the files for the same task can be easily located.
  - Fixed a bug that caused nodefiles of a single node to stop the execution.
  
-- v1.0.0: First release
+- **v1.0.0**: First release
  - New name: *Princess Bala* (because this software makes Antz work much harder).
  - Paths no longer need to be absolute.
  - PVM path is the current dir, so the executables work out of the box.
