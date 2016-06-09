@@ -3,7 +3,7 @@
  * \author Oscar Saleta Reig
  */
 
-#define VERSION "2.0.0"
+#define VERSION "2.0.1"
 #define PVM_ENCODING PvmDataRaw ///< Little Endian encoding
 #define MAX_NODE_LENGTH 6 ///< Max length of node names (a0X)
 #define FNAME_SIZE 150 ///< Max length of filename (including path)
