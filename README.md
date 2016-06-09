@@ -2,6 +2,9 @@
 
 # Releases and changelog
 
+- **v2.0.1**:
+ - Solved bug with executions that had less tasks than nodes (execution would not finish unless killed)
+
 - **v2.0.0**:
  - **Automatic generation of unfinished tasks datafile** (i.e. a clone of datafile containing only the lines that correspond to tasks that were killed before they could finish execution). This means that the program can later be run again using this new data file as input instead of having to manually search for the necessary data.
  - Added more error checks and error cases when forking tasks.
