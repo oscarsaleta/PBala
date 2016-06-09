@@ -67,7 +67,7 @@ int main (int argc, char *argv[]) {
     FILE *f_out;
     char cwd[FNAME_SIZE];
     // Nodes variables
-    int hostinfos;
+    //int hostinfos;
     char **nodes;
     int *nodeCores;
     int nNodes,maxConcurrentTasks;
@@ -152,7 +152,13 @@ int main (int argc, char *argv[]) {
     char *pvmd_argv[1] = {"hostfile"};
     int pvmd_argc = 1;
     pvm_start_pvmd(pvmd_argc,pvmd_argv,1);
-    pvm_addhosts(nodes,nNodes,&hostinfos);
+    sprintf(out_file,"%s/outfile.txt",out_dir);
+    if ((f_out = fopen(out_file,"w")) == NULL) {
+        fprintf(stderr,"%s:: ERROR - cannot open output file %s\n",argv[0],out_file);
+        return E_OUTFILE_OPEN;
+    }
+    pvm_catchout(f_out);
+    //pvm_addhosts(nodes,nNodes,&hostinfos);
     // Error task id
     mytid = pvm_mytid();
     if (mytid<0) {
@@ -200,13 +206,7 @@ int main (int argc, char *argv[]) {
     fprintf(stderr,"%s:: INFO - will create %d tasks for %d slaves\n\n",argv[0],nTasks,nNodes);
 
     
-    sprintf(out_file,"%s/outfile.txt",out_dir);
-    if ((f_out = fopen(out_file,"w")) == NULL) {
-        fprintf(stderr,"%s:: ERROR - cannot open output file %s\n",argv[0],out_file);
-        return E_OUTFILE_OPEN;
-    }
-    pvm_catchout(f_out);
-
+    
 
     // Spawn all the tasks
     int taskId[maxConcurrentTasks];
@@ -228,14 +228,18 @@ int main (int argc, char *argv[]) {
             pvm_pkint(&itid,1,1);
             pvm_pkint(&task_type,1,1);
             pvm_pklong(&maxMemSize,1,1);
-            /* msgtag=1 used for greeting slave */
             pvm_send(taskId[itid],MSG_GREETING);
             fprintf(stderr,"%s:: INFO - created slave %d\n",argv[0],itid);
             fprintf(logfile,"# Node %2d -> %s\n",numnode,nodes[i]);
             numnode++;
+            // Do not create more tasks than necessary
+            if (numnode >= nTasks)
+                break;
             itid++;
         }
     }
+    fprintf(stderr,"%s:: INFO - all slaves created successfullyi\n\n",argv[0]);
+
     // First batch of work sent at once (we will listen to answers later)
     f_data = fopen(inp_dataFile,"r");
     fprintf(logfile,"\nNODE,TASK\n");
@@ -270,6 +274,9 @@ int main (int argc, char *argv[]) {
             fprintf(logfile,"%2d,%4d\n",i,taskNumber);
         }
     }
+    fprintf(stderr,"%s:: INFO - first batch of work sent\n\n",argv[0]);
+
+
     // Close logfile so it updates in file system
     fclose(logfile);
     // Keep assigning work to nodes if needed
@@ -336,9 +343,10 @@ int main (int argc, char *argv[]) {
             }
         }
     }
+
     // Listen to answers from slaves that keep working
     work_code = MSG_STOP;
-    for (i=0; i<maxConcurrentTasks; i++) {
+    for (i=0; i<firstBatchSize; i++) {
         // Receive answer from slaves
         pvm_recv(-1,MSG_RESULT);
         pvm_upkint(&itid,1,1);
