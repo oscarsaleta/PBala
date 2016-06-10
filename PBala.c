@@ -238,7 +238,7 @@ int main (int argc, char *argv[]) {
             itid++;
         }
     }
-    fprintf(stderr,"%s:: INFO - all slaves created successfullyi\n\n",argv[0]);
+    fprintf(stderr,"%s:: INFO - all slaves created successfully\n\n",argv[0]);
 
     // First batch of work sent at once (we will listen to answers later)
     f_data = fopen(inp_dataFile,"r");
