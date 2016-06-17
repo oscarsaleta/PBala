@@ -40,7 +40,7 @@
  * Main PVM function. Handles task creation and result gathering.
  * Call: ./PBala programFlag programFile dataFile nodeFile outDir [maxMemSize (KB)] [maple_single_core]
  *
- * \param[in] argv[1] flag for program type (0=maple,1=C,2=python,3=pari)
+ * \param[in] argv[1] flag for program type (0=maple,1=C,2=python,3=pari,4=sage)
  * \param[in] argv[2] program file (maple library, c executable, etc)
  * \param[in] argv[3] data input file
  * \param[in] argv[4] nodes file (2 cols: node cpus)
@@ -112,6 +112,16 @@ int main (int argc, char *argv[]) {
                 inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile);
         system(aux_str);
     }
+
+    // check if task type is correct
+    if(task_type!=1
+            && task_type!=2
+            && task_type!=3
+            && task_type!=4) {
+        fprintf(stderr,"%s:: ERROR - wrong task_type value (must be one of: 1,2,3,4)\n",argv[0]);
+        return E_WRONG_TASK;
+    }
+
 
     // prepare node_info.log file
     strcpy(logfilename,out_dir);
@@ -267,7 +277,11 @@ int main (int argc, char *argv[]) {
             if (task_type == 3) {
                 parifile(taskNumber,aux_str,inp_programFile,out_dir);
                 fprintf(stderr,"%s:: INFO - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
+            } else if (task_type == 4) {
+                sagefile(taskNumber,aux_str,inp_programFile,out_dir);
+                fprintf(stderr,"%s:: INFO - creating auxiliary Sage script for task %d\n",argv[0],taskNumber);
             }
+
             // send the job
             pvm_send(taskId[i],MSG_WORK);
             fprintf(stderr,"%s:: INFO - sent task %4d for execution\n",argv[0],taskNumber);
@@ -334,6 +348,9 @@ int main (int argc, char *argv[]) {
                 if (task_type == 3) {
                     parifile(taskNumber,aux_str,inp_programFile,out_dir);
                     fprintf(stderr,"%s:: INFO - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
+                } else if (task_type == 4) {
+                    sagefile(taskNumber,aux_str,inp_programFile,out_dir);
+                    fprintf(stderr,"%s:: INFO - creating auxiliary Sage script for task %d\n",argv[0],taskNumber);
                 }
                 // send the job
                 pvm_send(taskId[itid],MSG_WORK);
@@ -397,7 +414,7 @@ int main (int argc, char *argv[]) {
         system(aux_str);
     }
     // remove tmp pari programs (if created)
-    if (task_type == 3) {
+    if (task_type == 3 || task_type == 4) {
         sprintf(aux_str,"rm %s/auxprog-*",out_dir);
         system(aux_str);
     }

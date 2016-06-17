@@ -52,6 +52,10 @@
 #define E_OUTDIR 21
 #endif
 
+#ifndef E_WRONG_TASK
+#define E_WRONG_TASK 22
+#endif
+
 
 /* ERROR CODES FOR task.c SLAVE RETURN STATUS */
 #ifndef ST_FORK_ERR

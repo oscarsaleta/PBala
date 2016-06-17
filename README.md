@@ -2,6 +2,9 @@
 
 # Releases and changelog
 
+- **v3.0.0**:
+ - Added Sage support using `task_type=4`. Sage scripts must have extension *.sage*, *.py* or *.spyx* in order for Sage to execute them.
+
 - **v2.0.1**:
  - Solved bug with executions that had less tasks than nodes (execution would not finish unless killed)
 
@@ -40,7 +43,8 @@ This C program uses PVM libraries in order to create a parallellization interfac
  - **Maple** scripts
  - **C** programs
  - **Python** scripts
- - **Pari** scripts (although Pari should be also supported through the Pari C/C++ library or through gp2c by manually editing the output C code and compiling as a C program using the command provided by gp2c. The executable can then be run using the C module of this software.)
+ - **Pari/GP** scripts (although Pari should be also supported through the Pari C/C++ library or through gp2c by manually editing the output C code and compiling as a C program using the command provided by gp2c. The executable can then be run using the C module of this software.)
+ - **Sage** scripts
 
 This interface lets the user execute a same script/program over multiple input data in several CPUs located at the antz computing server. It sports memory management so nodes do not run out of RAM due to too many processes being started in the same node. It also reports resource usage data after execution.
 
@@ -59,7 +63,8 @@ Run `doxigen` and take a look at html/index.html for documentation
   - 0 = Maple
   - 1 = C
   - 2 = Python
-  - 3 = Pari
+  - 3 = Pari (as of v.1.0.0)
+  - 4 = Sage (as of v3.0.0)
  - *program*: path to program file
  - *datafile*: path to data file
   - Line format is "tasknumber,arg1,arg2,...,argN"

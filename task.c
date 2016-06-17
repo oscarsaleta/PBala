@@ -65,6 +65,7 @@ int main(int argc, char *argv[]) {
     pvm_upkint(&task_type,1,1);
     pvm_upklong(&max_task_size,1,1);
 
+
     /* Perform generic check or use specific size info?
      *  memcheck_flag = 0 means generic check
      *  memcheck_flag = 1 means specific info
@@ -238,7 +239,7 @@ int main(int argc, char *argv[]) {
 
             /* PARI/GP */
             } else if (task_type == 3) {
-                // NULL-terminated array of strings for calling the Maple script
+                // NULL-terminated array of strings
                 char **args;
                 char filename[FNAME_SIZE];
                 sprintf(filename,"%s/auxprog-%d.gp",out_dir,taskNumber);
@@ -259,7 +260,31 @@ int main(int argc, char *argv[]) {
                 err = execvp(args[0],args);
                 perror("ERROR:: child PARI process");
                 exit(err);
+
+            /* SAGE */
+            } else if (task_type == 4) {
+                // NULL-terminated array of strings 
+                char **args;
+                char filename[FNAME_SIZE];
+                sprintf(filename,"%s/auxprog-%d.sage",out_dir,taskNumber);
+                // 0: sage, 1: file, 3: NULL
+                int nargs=2;
+                args = (char**)malloc((nargs+1)*sizeof(char*));
+                // Do not malloc for NULL
+                for (i=0;i<nargs;i++)
+                    args[i] = malloc(BUFFER_SIZE);
+                // Fill up the array with strings
+                sprintf(args[0],"sage");
+                sprintf(args[1],"%s",filename);
+                //sprintf(args[1],"-c \"taskId=%d;taskArgs:=[%s];load('%s')\"",taskNumber,arguments,inp_programFile);
+                args[2] = NULL;
+
+                // Call the execution and check for errors
+                err = execvp(args[0],args);
+                perror("ERROR:: child Sage process");
+                exit(err);
             }
+
         }
 
 

@@ -3,7 +3,7 @@
  * \author Oscar Saleta Reig
  */
 
-#define VERSION "2.0.1"
+#define VERSION "3.0.0"
 #define PVM_ENCODING PvmDataRaw ///< Little Endian encoding
 #define MAX_NODE_LENGTH 6 ///< Max length of node names (a0X)
 #define FNAME_SIZE 150 ///< Max length of filename (including path)
@@ -18,4 +18,5 @@ int parseNodefile(char *nodefile, int nNodes, char ***nodes, int **nodeCores);
 int memcheck(int flag, long int max_task_size);
 int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage);
 int parifile(int taskId, char *args, char *programfile, char *directory);
+int sagefile(int taskId, char *args, char *programfile, char *directory);
 int prterror (int pid, int taskNumber, char *out_dir, double time);
