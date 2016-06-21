@@ -28,6 +28,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
@@ -413,10 +414,16 @@ int main (int argc, char *argv[]) {
         sprintf(aux_str,"[ ! -f %s.bak ] || mv %s.bak %s",inp_programFile,inp_programFile,inp_programFile);
         system(aux_str);
     }
-    // remove tmp pari programs (if created)
+    // remove tmp pari/sage programs (if created)
     if (task_type == 3 || task_type == 4) {
-        sprintf(aux_str,"rm %s/auxprog-*",out_dir);
-        system(aux_str);
+        DIR *dir;
+        struct dirent *ent;
+        dir = opendir(out_dir);
+        while((ent = readdir(dir))) {
+            if(strstr(ent->d_name,"auxprog")!=NULL)
+                remove(ent->d_name);
+        }
+        closedir(dir);
     }
 
     pvm_catchout(0);

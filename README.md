@@ -2,6 +2,9 @@
 
 # Releases and changelog
 
+- **v3.0.1**:
+ - Changed procedure for cleaning auxiliary Pari/Sage scripts generated during execution.
+
 - **v3.0.0**:
  - Added Sage support using `task_type=4`. Sage scripts must have extension *.sage*, *.py* or *.spyx* in order for Sage to execute them.
 
