@@ -239,7 +239,7 @@ int main (int argc, char *argv[]) {
             pvm_pkint(&task_type,1,1);
             pvm_pklong(&maxMemSize,1,1);
             pvm_send(taskId[itid],MSG_GREETING);
-            fprintf(stderr,"%s:: INFO - created slave %d\n",argv[0],itid);
+            fprintf(stderr,"%s:: CREATED_SLAVE - created slave %d\n",argv[0],itid);
             fprintf(logfile,"# Node %2d -> %s\n",numnode,nodes[i]);
             numnode++;
             // Do not create more tasks than necessary
@@ -276,15 +276,15 @@ int main (int argc, char *argv[]) {
             // create file for pari execution if needed
             if (task_type == 3) {
                 parifile(taskNumber,aux_str,inp_programFile,out_dir);
-                fprintf(stderr,"%s:: INFO - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
+                fprintf(stderr,"%s:: CREATED_SCRIPT - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
             } else if (task_type == 4) {
                 sagefile(taskNumber,aux_str,inp_programFile,out_dir);
-                fprintf(stderr,"%s:: INFO - creating auxiliary Sage script for task %d\n",argv[0],taskNumber);
+                fprintf(stderr,"%s:: CREATED_SCRIPT - creating auxiliary Sage script for task %d\n",argv[0],taskNumber);
             }
 
             // send the job
             pvm_send(taskId[i],MSG_WORK);
-            fprintf(stderr,"%s:: INFO - sent task %4d for execution\n",argv[0],taskNumber);
+            fprintf(stderr,"%s:: SENT - sent task %4d for execution\n",argv[0],taskNumber);
             fprintf(logfile,"%2d,%4d\n",i,taskNumber);
         }
     }
@@ -324,7 +324,7 @@ int main (int argc, char *argv[]) {
                     fprintf(unfinishedTasks,"%d,%s\n",taskNumber,aux_str);
                     fclose(unfinishedTasks);
                 } else
-                    fprintf(stderr,"%s:: INFO - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
+                    fprintf(stderr,"%s:: COMPLETED - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
             }
             // Assign more work until we're done
             if (fgets(buffer,BUFFER_SIZE,f_data)!=NULL) {
@@ -347,14 +347,14 @@ int main (int argc, char *argv[]) {
                 // create file for pari execution if needed
                 if (task_type == 3) {
                     parifile(taskNumber,aux_str,inp_programFile,out_dir);
-                    fprintf(stderr,"%s:: INFO - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
+                    fprintf(stderr,"%s:: CREATED_SCRIPT - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
                 } else if (task_type == 4) {
                     sagefile(taskNumber,aux_str,inp_programFile,out_dir);
-                    fprintf(stderr,"%s:: INFO - creating auxiliary Sage script for task %d\n",argv[0],taskNumber);
+                    fprintf(stderr,"%s:: CREATED_SCRIPT - creating auxiliary Sage script for task %d\n",argv[0],taskNumber);
                 }
                 // send the job
                 pvm_send(taskId[itid],MSG_WORK);
-                fprintf(stderr,"%s:: INFO - sent task %3d for execution\n",argv[0],taskNumber);
+                fprintf(stderr,"%s:: SENT - sent task %3d for execution\n",argv[0],taskNumber);
                 fprintf(logfile,"%2d,%4d\n",itid,taskNumber);
                 fclose(logfile);
             }
@@ -386,7 +386,7 @@ int main (int argc, char *argv[]) {
                 fprintf(unfinishedTasks,"%d,%s\n",taskNumber,aux_str);
                 fclose(unfinishedTasks);
             } else
-                fprintf(stderr,"%s:: INFO - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
+                fprintf(stderr,"%s:: COMPLETED - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
         }
         pvm_upkdouble(&total_time,1,1);
         // Shut down slave
@@ -400,7 +400,7 @@ int main (int argc, char *argv[]) {
     // Final message
     time(&endt);
     difft = difftime(endt,initt);
-    fprintf(stderr,"\n%s:: INFO - END OF EXECUTION.\nCombined computing time: %14.5G seconds.\nTotal execution time:    %14.5G seconds.\n",argv[0],total_total_time,difft);
+    fprintf(stderr,"\n%s:: END OF EXECUTION.\nCombined computing time: %14.5G seconds.\nTotal execution time:    %14.5G seconds.\n",argv[0],total_total_time,difft);
 
     free(nodes);
     free(nodeCores);
