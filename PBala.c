@@ -284,7 +284,7 @@ int main (int argc, char *argv[]) {
 
             // send the job
             pvm_send(taskId[i],MSG_WORK);
-            fprintf(stderr,"%s:: SENT - sent task %4d for execution\n",argv[0],taskNumber);
+            fprintf(stderr,"%s:: TASK_SENT - sent task %4d for execution\n",argv[0],taskNumber);
             fprintf(logfile,"%2d,%4d\n",i,taskNumber);
         }
     }
@@ -324,7 +324,7 @@ int main (int argc, char *argv[]) {
                     fprintf(unfinishedTasks,"%d,%s\n",taskNumber,aux_str);
                     fclose(unfinishedTasks);
                 } else
-                    fprintf(stderr,"%s:: COMPLETED - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
+                    fprintf(stderr,"%s:: TASK_COMPLETED - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
             }
             // Assign more work until we're done
             if (fgets(buffer,BUFFER_SIZE,f_data)!=NULL) {
@@ -354,7 +354,7 @@ int main (int argc, char *argv[]) {
                 }
                 // send the job
                 pvm_send(taskId[itid],MSG_WORK);
-                fprintf(stderr,"%s:: SENT - sent task %3d for execution\n",argv[0],taskNumber);
+                fprintf(stderr,"%s:: TASK_SENT - sent task %3d for execution\n",argv[0],taskNumber);
                 fprintf(logfile,"%2d,%4d\n",itid,taskNumber);
                 fclose(logfile);
             }
@@ -386,7 +386,7 @@ int main (int argc, char *argv[]) {
                 fprintf(unfinishedTasks,"%d,%s\n",taskNumber,aux_str);
                 fclose(unfinishedTasks);
             } else
-                fprintf(stderr,"%s:: COMPLETED - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
+                fprintf(stderr,"%s:: TASK_COMPLETED - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
         }
         pvm_upkdouble(&total_time,1,1);
         // Shut down slave
