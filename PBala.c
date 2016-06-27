@@ -214,7 +214,7 @@ int main (int argc, char *argv[]) {
     for (i=0; i<nNodes-1; i++)
         fprintf(stderr,"%s (%d), ",nodes[i],nodeCores[i]);
     fprintf(stderr,"%s (%d)\n",nodes[nNodes-1],nodeCores[nNodes-1]);
-    fprintf(stderr,"%s:: INFO - will create %d tasks for %d slaves\n\n",argv[0],nTasks,nNodes);
+    fprintf(stderr,"%s:: INFO - will create %d tasks for %d slaves\n\n",argv[0],nTasks,maxConcurrentTasks);
 
     
     
@@ -419,9 +419,11 @@ int main (int argc, char *argv[]) {
         DIR *dir;
         struct dirent *ent;
         dir = opendir(out_dir);
-        while((ent = readdir(dir))) {
-            if(strstr(ent->d_name,"auxprog")!=NULL)
-                remove(ent->d_name);
+        while ((ent = readdir(dir))) {
+            if (strstr(ent->d_name,"auxprog")!=NULL) {
+                sprintf(aux_str,"%s/%s",out_dir,ent->d_name);
+                remove(aux_str);
+            }
         }
         closedir(dir);
     }
