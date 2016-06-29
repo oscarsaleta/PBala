@@ -196,7 +196,7 @@ int main (int argc, char *argv[]) {
     // Read how many tasks we have to perform
     if((nTasks = getLineCount(inp_dataFile))==-1) {
         fprintf(stderr,"%s:: cannot open data file %s\n",argv[0],inp_dataFile);
-        pvm_exit();
+        pvm_halt();
         return E_DATAFILE_LINES;
     }
 
@@ -235,7 +235,7 @@ int main (int argc, char *argv[]) {
                     argv[0],numt,taskId[itid],nodes[i]);
                 fflush(stderr);
                 pvm_perror(argv[0]);
-                pvm_exit();
+                pvm_halt();
                 return E_PVM_SPAWN;
             }
             // Send info to task
@@ -264,7 +264,7 @@ int main (int argc, char *argv[]) {
         if (fgets(buffer,BUFFER_SIZE,f_data)!=NULL) {
             if (sscanf(buffer,"%d",&taskNumber)!=1) {
                 fprintf(stderr,"%s:: ERROR - first column of data file must be task id\n",argv[0]);
-                pvm_exit();
+                pvm_halt();
                 return E_DATAFILE_FIRSTCOL;
             }
             pvm_initsend(PVM_ENCODING);
@@ -338,7 +338,7 @@ int main (int argc, char *argv[]) {
                 logfile = fopen(logfilename,"a");
                 if (sscanf(buffer,"%d",&taskNumber)!=1) {
                     fprintf(stderr,"%s:: ERROR - first column of data file must be task id\n",argv[0]);
-                    pvm_exit();
+                    pvm_halt();
                     return E_DATAFILE_FIRSTCOL;
                 }
                 pvm_initsend(PVM_ENCODING);
