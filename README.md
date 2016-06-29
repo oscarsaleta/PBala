@@ -2,6 +2,9 @@
 
 # Releases and changelog
 
+- **v3.0.2**:
+ - Bugfix: if the program exited with error status after PVM was initialized, it did not halt the virtual machine. Now it does automatically, so no manual halt is needed.
+
 - **v3.0.1**:
  - Changed procedure for cleaning auxiliary Pari/Sage scripts generated during execution.
 
