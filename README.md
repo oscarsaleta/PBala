@@ -88,13 +88,35 @@ for any corresponding short options.
 
 Report bugs to <osr@mat.uab.cat>.
 ```
+Output from `./PBala --usage`:
+```
+Usage: PBala [-eghs?V] [-m MAX_MEM] [--create-errfiles] [--create-memfiles]
+            [--create-slavefile] [--max-mem-size=MAX_MEM] [--maple-single-core]
+            [--help] [--usage] [--version]
+            programflag programfile datafile nodefile outdir
+```
 
+Mandatory arguments explained:
+- *programflag*:
+ - 0 = Maple
+ - 1 = C
+ - 2 = Python
+ - 3 = Pari (as of v1.0.0)
+ - 4 = Sage (as of v3.0.0)
+- *programfile*: path to program file
+- *datafile*: path to data file
+ - Line format is "tasknumber,arg1,arg2,...,argN"
+- *nodefile*: path to PVM node file
+ - Line format is "nodename number_of_processes"
+
+
+**For versions pre-4.0.0**:
 `./PBala exec_type program datafile nodefile outputdir [memory] [maple_flag]`
  - *exec_type*:
   - 0 = Maple
   - 1 = C
   - 2 = Python
-  - 3 = Pari (as of v.1.0.0)
+  - 3 = Pari (as of v1.0.0)
   - 4 = Sage (as of v3.0.0)
  - *program*: path to program file
  - *datafile*: path to data file
