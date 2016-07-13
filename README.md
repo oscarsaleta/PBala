@@ -154,7 +154,12 @@ Options explained:
 
 ### Procedure of execution
 
-  *As of v1.0.0, there is no need of starting PVM using a hostfile (it is actually advised not to do so). Instead, execute the program and we will start PVM for you, using the information extracted from the nodefile.*
+**As of v1.0.0**
+
+There is no need of starting PVM using a hostfile (it is actually advised not to do so). Instead, execute the program and we will start PVM for you, using the information extracted from the nodefile.
+
+
+**For versions before v1.0.0** (these are buggy, update ASAP...):
 
   - First, you will need to execute PVM and add all the nodes that you want to use. This is done easily with `pvm hostfile`, where *hostfile* is simply a file with all the names of the nodes we will use in it (exactly the same names that appear in *nodefile*, but without the 2nd column). From inside the PVM cmd, type `quit` to leave the application and have the PVM daemon running in the background.
   - Now compile the software (if you have not done so yet) with `make`, and your own program if needed. Also, `mkdir resultdir` if it does not exist.
@@ -163,9 +168,9 @@ Options explained:
 
 ## Memory reporting
   
- - *Maple*: Maple uses multithreading to parallelize the executions by default. This is good for performance but bad for resource management, because the PVM task loses control of the processes spawned. Therefore, the output file mem\*.log doesn't show accurate values for resource usage of the program, because it can only track the parent Maple process, which doesn't do any work besides spawning and controlling its child processes. 
+ - *Maple*: Maple uses multithreading to parallelize the executions by default. This is good for performance but bad for resource management, because the PVM task loses control of the processes spawned. Therefore, the output files task_mem\*.txt don't show accurate values for resource usage of the program, because we can only track the parent Maple process, which doesn't do any work besides spawning and controlling its child processes. 
   - *Workaround*: we execute maple with the -t flag, so in \*\_err.txt (output error file) we can see the kernelopts line that reports memory usage and computation time directly from maple.
- - *C*, *Python* and *Pari*: as long as the program to be executed is sequential, the PVM task will be able to get resource usage from the execution (using C system call *getrusage()*) and print it to the mem\*.log file.
+ - *C*, *Python*, *Pari* and *Sage*: as long as the program to be executed is sequential, the PVM task will be able to get resource usage from the execution (using C system call *getrusage()*) and print it to the task_mem\*.txt file.
 
 ## Error codes
 
