@@ -67,7 +67,9 @@ Run `doxigen` and take a look at html/index.html for documentation
 
 ## Usage
 
-**As of v4.0.0**: the program admits standard `--help` (`-?`), `--usage` and `--version` (`-V`) arguments.
+**As of v4.0.0**:
+
+The program admits standard `--help` (`-?`), `--usage` and `--version` (`-V`) arguments.
 
 Output from `./PBala --help`:
 ```
@@ -120,6 +122,7 @@ Options explained:
 
 
 **For versions previous to v4.0.0**:
+
 `./PBala exec_type program datafile nodefile outputdir [memory] [maple_flag]`
  - *exec_type*:
   - 0 = Maple
