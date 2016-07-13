@@ -71,7 +71,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 
     switch(key) {
         case 'm':
-            arguments->max_mem_size = arg;
+            sscanf(arg,"%ld",&(arguments->max_mem_size));
             break;
         case 's':
             arguments->maple_single_cpu = 1;
@@ -154,8 +154,8 @@ int main (int argc, char *argv[]) {
     size_t aux_size;
     // Task variables
     int task_type;
-    int maple_single_cpu=0;
-    long int max_mem_size=0;
+    int maple_single_cpu;
+    long int max_mem_size;
     // Execution time variables
     double exec_time,total_time;
     double total_total_time=0;
@@ -320,7 +320,8 @@ int main (int argc, char *argv[]) {
             pvm_pkint(&itid,1,1);
             pvm_pkint(&task_type,1,1);
             pvm_pklong(&max_mem_size,1,1);
-            pvm_pkint(
+            pvm_pkint(&(arguments.create_err),1,1);
+            pvm_pkint(&(arguments.create_mem),1,1);
             pvm_send(taskId[itid],MSG_GREETING);
             fprintf(stderr,"%s:: CREATED_SLAVE - created slave %d\n",argv[0],itid);
             if (arguments.create_slave)

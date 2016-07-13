@@ -20,21 +20,21 @@
  * \brief PVM task. Adapts to different programs, forks execution to track mem usage
  * \author Oscar Saleta Reig
  */
+#include <fcntl.h>
+#include <pvm3.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <time.h>
-#include <fcntl.h>
+#include <unistd.h>
 
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/resource.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
-#include <pvm3.h>
-#include "antz_lib.h"
 #include "antz_errcodes.h"
+#include "antz_lib.h"
 
 /**
  * Main task function.
@@ -51,6 +51,8 @@ int main(int argc, char *argv[]) {
     char arguments[BUFFER_SIZE]; // string of arguments as read from data file
     int task_type; // 0:maple, 1:C, 2:python
     long int max_task_size; // if given, max size in KB of a spawned process
+    int flag_err; // 0=no err files, 1=yes err files
+    int flag_mem; // 0=no mem files, 1=yes mem files
     int i; // for loops
     clock_t initt,endt;
     double difft, totalt=0;
@@ -64,6 +66,8 @@ int main(int argc, char *argv[]) {
     pvm_upkint(&me,1,1);
     pvm_upkint(&task_type,1,1);
     pvm_upklong(&max_task_size,1,1);
+    pvm_upkint(&flag_err,1,1);
+    pvm_upkint(&flag_mem,1,1);
 
 
     /* Perform generic check or use specific size info?
@@ -123,11 +127,14 @@ int main(int argc, char *argv[]) {
             int fd = open(output_file,O_WRONLY|O_CREAT|O_TRUNC,0666);
             dup2(fd,1);
             close(fd);
+
             // Move stderr to taskNumber_err.txt
-            sprintf(output_file,"%s/task%d_stderr.txt",out_dir,taskNumber);
-            fd = open(output_file,O_WRONLY|O_CREAT|O_TRUNC,0666);
-            dup2(fd,2);
-            close(fd);
+            if (flag_err) {
+                sprintf(output_file,"%s/task%d_stderr.txt",out_dir,taskNumber);
+                fd = open(output_file,O_WRONLY|O_CREAT|O_TRUNC,0666);
+                dup2(fd,2);
+                close(fd);
+            }
 
             /*
              * GENERATE EXECUTION OF PROGRAM
@@ -290,17 +297,16 @@ int main(int argc, char *argv[]) {
 
         /* Attempt at measuring memory usage for the child process */
         siginfo_t infop; // Stores information about the child execution
-        waitid(P_PID,pid,&infop,WEXITED/*|WSTOPPED*/); // Wait for the execution to end
+        waitid(P_PID,pid,&infop,WEXITED); // Wait for the execution to end
         // Computation time
         time(&endt);
         difft = difftime(endt,initt);
         totalt += difft;
         if (infop.si_code == CLD_KILLED
-                || infop.si_code == CLD_DUMPED
-                /*|| infop.si_code == CLD_STOPPED*/) {
+                || infop.si_code == CLD_DUMPED) {
             prterror(pid,taskNumber,out_dir,difft);
             state=ST_TASK_KILLED;
-        } else {
+        } else if (flag_mem) {
             struct rusage usage; // Stores information about the child's resource usage
             getrusage(RUSAGE_CHILDREN,&usage); // Get child resource usage
             prtusage(pid,taskNumber,out_dir,usage); // Print resource usage to file
