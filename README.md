@@ -3,7 +3,9 @@
 # Releases and changelog
 
 - **v4.0.0**:
- - Revamped argument parsing
+ - Revamped argument parsing (see the whole new *Usage* section).
+ - Changed default safety memory threshold from 25% of total RAM to 15% of total RAM (user caution advised).
+ - Added flags for creating \*_stderr.txt files, \*_mem.txt files, and node_info.txt file. Default behaviour now is *not* to create them unless specified with the optional flags.
 
 - **v3.0.2**:
  - Bugfix: if the program exited with error status after PVM was initialized, it did not halt the virtual machine. Now it does automatically, so no manual halt is needed.
@@ -147,6 +149,8 @@ Options explained:
   For Maple, we define 2 variables: **taskId** and **taskArgs**. taskId is an identifier for the task number that we are sending to the Maple script. taskArgs are the actual arguments that Maple has to use to do the computations. It is important to use these names because they are passed to Maple this way.
 
   For C and Python we use the argv arrays so make sure the program can read and use those variables (and perform the error checking because this software has no way of knowing if the data file is suitable for your program).
+
+  Pari and Sage are executed by creating auxiliary scripts where **taskId** and **taskArgs** are defined, so they could be directly used in the scripts just like in Maple.
 
 ### Procedure of execution
 
