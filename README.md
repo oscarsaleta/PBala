@@ -97,20 +97,29 @@ Usage: PBala [-eghs?V] [-m MAX_MEM] [--create-errfiles] [--create-memfiles]
 ```
 
 Mandatory arguments explained:
-- *programflag*:
+- `programflag`:
  - 0 = Maple
  - 1 = C
  - 2 = Python
  - 3 = Pari (as of v1.0.0)
  - 4 = Sage (as of v3.0.0)
-- *programfile*: path to program file
-- *datafile*: path to data file
+- `programfile`: path to program file
+- `datafile`: path to data file
  - Line format is "tasknumber,arg1,arg2,...,argN"
-- *nodefile*: path to PVM node file
+- `nodefile`: path to PVM node file
  - Line format is "nodename number_of_processes"
+- `outdir`: path to output directory
+
+Options explained:
+- `-e, --create-errfiles`: Save stderr output for each execution in a task_stderr.txt file
+- `-g, --create-memfiles`: Save memory info for each execution in a task_mem.txt file
+- `-h, --create-slavefile`: Save a log of which task is given to which slave in node_info.txt
+- `-m, --max-mem-size=MAX_MEM`: max amount of RAM (in KB) that a single execution can require
+ - Remark: the default behaviour is not giving work to a slave unless more than 15% of the max memory is available
+- `-s, --maple-single-core`: Force Maple to use a single core for its executions
 
 
-**For versions pre-4.0.0**:
+**For versions previous to v4.0.0**:
 `./PBala exec_type program datafile nodefile outputdir [memory] [maple_flag]`
  - *exec_type*:
   - 0 = Maple

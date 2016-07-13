@@ -94,7 +94,7 @@ int memcheck(int flag, long int max_task_size) {
     sscanf(token,"%d",&freemem);
     fclose(f);
     if (flag==0) {
-        if (freemem < 0.25*maxmem)
+        if (freemem < 0.15*maxmem)
             return 1;
     } else {
         if (freemem < max_task_size)
@@ -118,7 +118,7 @@ int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage) {
     FILE *memlog;
     char memlogfilename[FNAME_SIZE];
     
-    sprintf(memlogfilename,"%s/task%d_mem.log",out_dir,taskNumber);
+    sprintf(memlogfilename,"%s/task%d_mem.txt",out_dir,taskNumber);
     memlog = fopen(memlogfilename,"w");
     fprintf(memlog,"TASK %d RESOURCE USAGE (PID %d)\n",taskNumber,pid);
     fprintf(memlog,"----------------------\n");
