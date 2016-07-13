@@ -26,20 +26,88 @@
  * \author Oscar Saleta Reig
  */
 
+#include <argp.h>
+#include <dirent.h>
+#include <pvm3.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <dirent.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <pvm3.h>
-#include "antz_lib.h"
+
 #include "antz_errcodes.h"
+#include "antz_lib.h"
+
+
+/* Program version and bug email */
+const char *argp_program_version = VERSION;
+const char *argp_program_bug_address = "<osr@mat.uab.cat>";
+
+/* Program documentation */
+static char doc[]= "PBala -- PVM SPMD execution parallellizer";
+/* Arguments we accept */
+static char args_doc[] = "programflag programfile datafile nodefile outdir";
+
+/* Options we understand */
+static struct argp_option options[] = {
+    {"max-mem-size",      'm', "MAX_MEM", 0, "Max memory size of a task (KB)"},
+    {"maple-single-core", 's', 0,         0, "Force single core Maple"},
+    {"create-errfiles",   'e', 0,         0, "Create stderr files"},
+    {"create-memfiles",   103, 0,         0, "Create memory files"},
+    {"create-slavefile",  104, 0,         0, "Create node file"},
+    {0}
+};
+
+/* Struct for communicating arguments to main */
+struct arguments {
+    char *args[5];
+    long int max_mem_size;
+    int maple_single_cpu, create_err, create_mem, create_slave;
+};
+
+/* Parse a single option */
+static error_t parse_opt (int key, char *arg, struct argp_state *state) {
+    struct arguments *arguments = state->input;
+
+    switch(key) {
+        case 'm':
+            arguments->max_mem_size = arg;
+            break;
+        case 's':
+            arguments->maple_single_cpu = 1;
+            break;
+        case 'e':
+            arguments->create_err = 1;
+            break;
+        case 103:
+            arguments->create_mem = 1;
+            break;
+        case 104:
+            arguments->create_slave = 1;
+            break;
+
+        case ARGP_KEY_ARG:
+            if (state->arg_num >= 5)
+                argp_usage(state);
+            arguments->args[state->arg_num] = arg;
+            break;
+
+        default:
+            return ARGP_ERR_UNKNOWN;
+    }
+    return 0;
+}
+
+/* argp parser */
+static struct argp argp = {options, parse_opt, args_doc, doc};
+
+
+
 
 
 /**
  * Main PVM function. Handles task creation and result gathering.
- * Call: ./PBala programFlag programFile dataFile nodeFile outDir [maxMemSize (KB)] [maple_single_core]
+ * Call: ./PBala programFlag programFile dataFile nodeFile outDir [max_mem_size (KB)] [maple_single_core]
  *
  * \param[in] argv[1] flag for program type (0=maple,1=C,2=python,3=pari,4=sage)
  * \param[in] argv[2] program file (maple library, c executable, etc)
@@ -52,23 +120,30 @@
  * \return 0 if successful
  */
 int main (int argc, char *argv[]) {
+    // Program options and arguments
+    struct arguments arguments;
+    arguments.max_mem_size = 0;
+    arguments.maple_single_cpu = 0;
+    arguments.create_err = 0;
+    arguments.create_mem = 0;
+    arguments.create_slave = 0;
     // PVM args
     int myparent, mytid, nTasks, taskNumber;
     int itid;
     int work_code;
-    // Files
+    // File names
     char inp_programFile[FNAME_SIZE];
     char inp_dataFile[FNAME_SIZE];
-    FILE *f_data;
     char inp_nodes[FNAME_SIZE];
     char out_dir[FNAME_SIZE];
     char logfilename[FNAME_SIZE];
-    FILE *logfile;
     char out_file[FNAME_SIZE];
-    FILE *f_out;
     char cwd[FNAME_SIZE];
+    // Files
+    FILE *f_data;
+    FILE *logfile;
+    FILE *f_out;
     // Nodes variables
-    //int hostinfos;
     char **nodes;
     int *nodeCores;
     int nNodes,maxConcurrentTasks;
@@ -80,7 +155,7 @@ int main (int argc, char *argv[]) {
     // Task variables
     int task_type;
     int maple_single_cpu=0;
-    long int maxMemSize=0;
+    long int max_mem_size=0;
     // Execution time variables
     double exec_time,total_time;
     double total_total_time=0;
@@ -94,19 +169,20 @@ int main (int argc, char *argv[]) {
     setvbuf(stderr,NULL,_IOLBF,BUFFER_SIZE);
 
     /* Read command line arguments */
-    if (argc < 6
-        || sscanf(argv[1],"%d",&task_type)!=1
-        || sscanf(argv[2],"%s",inp_programFile)!=1
-        || sscanf(argv[3],"%s",inp_dataFile)!=1
-        || sscanf(argv[4],"%s",inp_nodes)!=1
-        || sscanf(argv[5],"%s",out_dir)!=1
-        || ( argc > 6 && sscanf(argv[6],"%ld",&maxMemSize)!=1 )
-        || ( argc > 7 && sscanf(argv[7],"%d",&maple_single_cpu)!=1 )
-        || argc > 8
-        ) {
-        fprintf(stderr,"%s:: exec_flag program_file data_file node_file out_dir [max_mem_size (KB)] [maple_single_cpu]\n",argv[0]);
+    argp_parse(&argp, argc, argv, 0, 0, &arguments);
+    if (sscanf(arguments.args[0],"%d",&task_type)!=1
+            || sscanf(arguments.args[1],"%s",inp_programFile)!=1
+            || sscanf(arguments.args[2],"%s",inp_dataFile)!=1
+            || sscanf(arguments.args[3],"%s",inp_nodes)!=1
+            || sscanf(arguments.args[4],"%s",out_dir)!=1
+       ) {
+        fprintf(stderr,"%s:: ERROR - reading arguments\n",argv[0]);
         return E_ARGS;
     }
+    max_mem_size = arguments.max_mem_size;
+    maple_single_cpu = arguments.maple_single_cpu;
+    
+
     // sanitize maple library if single cpu is required
     if (maple_single_cpu) {
         sprintf(aux_str,"grep -q -F 'kernelopts(numcpus=1)' %s || (sed '1ikernelopts(numcpus=1);' %s > %s_tmp && mv %s %s.bak && mv %s_tmp %s)",
@@ -124,15 +200,17 @@ int main (int argc, char *argv[]) {
     }
 
 
-    // prepare node_info.log file
-    strcpy(logfilename,out_dir);
-    strcat(logfilename,"/node_info.log");
-    logfile = fopen(logfilename,"w");
-    if (logfile==NULL) {
-        fprintf(stderr,"%s:: ERROR - cannot create file %s, make sure the output folder %s exists\n",argv[0],logfilename,out_dir);
-        return E_OUTDIR;
+    // prepare node_info.log file if desired
+    if (arguments.create_slave) {
+        strcpy(logfilename,out_dir);
+        strcat(logfilename,"/node_info.log");
+        logfile = fopen(logfilename,"w");
+        if (logfile==NULL) {
+            fprintf(stderr,"%s:: ERROR - cannot create file %s, make sure the output folder %s exists\n",argv[0],logfilename,out_dir);
+            return E_OUTDIR;
+        }
+        fprintf(logfile,"# NODE CODENAMES\n");
     }
-    fprintf(logfile,"# NODE CODENAMES\n");
 
     /* Read node configuration file */
     // Get file length (number of nodes)
@@ -170,7 +248,6 @@ int main (int argc, char *argv[]) {
         return E_OUTFILE_OPEN;
     }
     pvm_catchout(f_out);
-    //pvm_addhosts(nodes,nNodes,&hostinfos);
     // Error task id
     mytid = pvm_mytid();
     if (mytid<0) {
@@ -242,10 +319,12 @@ int main (int argc, char *argv[]) {
             pvm_initsend(PVM_ENCODING);
             pvm_pkint(&itid,1,1);
             pvm_pkint(&task_type,1,1);
-            pvm_pklong(&maxMemSize,1,1);
+            pvm_pklong(&max_mem_size,1,1);
+            pvm_pkint(
             pvm_send(taskId[itid],MSG_GREETING);
             fprintf(stderr,"%s:: CREATED_SLAVE - created slave %d\n",argv[0],itid);
-            fprintf(logfile,"# Node %2d -> %s\n",numnode,nodes[i]);
+            if (arguments.create_slave)
+                fprintf(logfile,"# Node %2d -> %s\n",numnode,nodes[i]);
             numnode++;
             // Do not create more tasks than necessary
             if (numnode >= nTasks)
@@ -257,7 +336,8 @@ int main (int argc, char *argv[]) {
 
     // First batch of work sent at once (we will listen to answers later)
     f_data = fopen(inp_dataFile,"r");
-    fprintf(logfile,"\nNODE,TASK\n");
+    if (arguments.create_slave)
+        fprintf(logfile,"\nNODE,TASK\n");
     int firstBatchSize = nTasks < maxConcurrentTasks ? nTasks : maxConcurrentTasks;
     work_code = MSG_GREETING;
     for (i=0; i<firstBatchSize; i++) {
@@ -291,14 +371,16 @@ int main (int argc, char *argv[]) {
             // send the job
             pvm_send(taskId[i],MSG_WORK);
             fprintf(stderr,"%s:: TASK_SENT - sent task %4d for execution\n",argv[0],taskNumber);
-            fprintf(logfile,"%2d,%4d\n",i,taskNumber);
+            if (arguments.create_slave)
+                fprintf(logfile,"%2d,%4d\n",i,taskNumber);
         }
     }
     fprintf(stderr,"%s:: INFO - first batch of work sent\n\n",argv[0]);
 
 
     // Close logfile so it updates in file system
-    fclose(logfile);
+    if (arguments.create_slave)
+        fclose(logfile);
     // Keep assigning work to nodes if needed
     int status;
     FILE *unfinishedTasks;
@@ -335,7 +417,8 @@ int main (int argc, char *argv[]) {
             // Assign more work until we're done
             if (fgets(buffer,BUFFER_SIZE,f_data)!=NULL) {
                 // Open logfile for appending work
-                logfile = fopen(logfilename,"a");
+                if (arguments.create_slave) 
+                    logfile = fopen(logfilename,"a");
                 if (sscanf(buffer,"%d",&taskNumber)!=1) {
                     fprintf(stderr,"%s:: ERROR - first column of data file must be task id\n",argv[0]);
                     pvm_halt();
@@ -362,8 +445,10 @@ int main (int argc, char *argv[]) {
                 // send the job
                 pvm_send(taskId[itid],MSG_WORK);
                 fprintf(stderr,"%s:: TASK_SENT - sent task %3d for execution\n",argv[0],taskNumber);
-                fprintf(logfile,"%2d,%4d\n",itid,taskNumber);
-                fclose(logfile);
+                if (arguments.create_slave) {
+                    fprintf(logfile,"%2d,%4d\n",itid,taskNumber);
+                    fclose(logfile);
+                }
             }
         }
     }
