@@ -2,6 +2,9 @@
 
 # Releases and changelog
 
+- **v4.0.0**:
+ - Revamped argument parsing
+
 - **v3.0.2**:
  - Bugfix: if the program exited with error status after PVM was initialized, it did not halt the virtual machine. Now it does automatically, so no manual halt is needed.
 
@@ -63,6 +66,28 @@ The command `make` takes care.
 Run `doxigen` and take a look at html/index.html for documentation
 
 ## Usage
+
+**As of v4.0.0**: the program admits standard `--help` (`-?`), `--usage` and `--version` (`-V`) arguments.
+
+Output from `./PBala --help`:
+```
+Usage: PBala [OPTION...] programflag programfile datafile nodefile outdir
+PBala -- PVM SPMD execution parallellizer
+
+  -e, --create-errfiles      Create stderr files
+  -g, --create-memfiles      Create memory files
+  -h, --create-slavefile     Create node file
+  -m, --max-mem-size=MAX_MEM Max memory size of a task (KB)
+  -s, --maple-single-core    Force single core Maple
+  -?, --help                 Give this help list
+      --usage                Give a short usage message
+  -V, --version              Print program version
+
+Mandatory or optional arguments to long options are also mandatory or optional
+for any corresponding short options.
+
+Report bugs to <osr@mat.uab.cat>.
+```
 
 `./PBala exec_type program datafile nodefile outputdir [memory] [maple_flag]`
  - *exec_type*:

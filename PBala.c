@@ -92,6 +92,11 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             arguments->args[state->arg_num] = arg;
             break;
 
+        case ARGP_KEY_END:
+            if (state->arg_num < 5)
+                argp_usage(state);
+            break;
+
         default:
             return ARGP_ERR_UNKNOWN;
     }
@@ -170,6 +175,7 @@ int main (int argc, char *argv[]) {
 
     /* Read command line arguments */
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
+        
     if (sscanf(arguments.args[0],"%d",&task_type)!=1
             || sscanf(arguments.args[1],"%s",inp_programFile)!=1
             || sscanf(arguments.args[2],"%s",inp_dataFile)!=1
