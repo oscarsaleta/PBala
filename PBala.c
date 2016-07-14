@@ -389,7 +389,7 @@ int main (int argc, char *argv[]) {
     if (arguments.create_slave)
         fclose(logfile);
     // Keep assigning work to nodes if needed
-    int status;
+    int status, unfinished_tasks_present = 0;
     FILE *unfinishedTasks;
     char unfinishedTasks_name[FNAME_SIZE];
     sprintf(unfinishedTasks_name,"%s/unfinished_tasks.txt",out_dir);
@@ -410,6 +410,7 @@ int main (int argc, char *argv[]) {
                 unfinishedTasks = fopen(unfinishedTasks_name,"a");
                 fprintf(unfinishedTasks,"%d,%s\n",taskNumber,aux_str);
                 fclose(unfinishedTasks);
+                unfinished_tasks_present = 1;
             } else {
                 pvm_upkdouble(&exec_time,1,1);
                 // Check if task was killed or completed
@@ -418,6 +419,7 @@ int main (int argc, char *argv[]) {
                     unfinishedTasks = fopen(unfinishedTasks_name,"a");
                     fprintf(unfinishedTasks,"%d,%s\n",taskNumber,aux_str);
                     fclose(unfinishedTasks);
+                    unfinished_tasks_present = 1;
                 } else
                     fprintf(stderr,"%s:: TASK_COMPLETED - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
             }
@@ -476,6 +478,7 @@ int main (int argc, char *argv[]) {
             unfinishedTasks = fopen(unfinishedTasks_name,"a");
             fprintf(unfinishedTasks,"%d,%s\n",taskNumber,aux_str);
             fclose(unfinishedTasks);
+            unfinished_tasks_present = 1;
         } else {
             pvm_upkdouble(&exec_time,1,1);
             // Check if task was killed or completed
@@ -484,6 +487,7 @@ int main (int argc, char *argv[]) {
                 unfinishedTasks = fopen(unfinishedTasks_name,"a");
                 fprintf(unfinishedTasks,"%d,%s\n",taskNumber,aux_str);
                 fclose(unfinishedTasks);
+                unfinished_tasks_present = 1;
             } else
                 fprintf(stderr,"%s:: TASK_COMPLETED - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
         }
@@ -524,6 +528,11 @@ int main (int argc, char *argv[]) {
             }
         }
         closedir(dir);
+    }
+    // remove unfinished_tasks.txt file if empty
+    if (!unfinished_tasks_present) {
+        sprintf(aux_str,"rm %s",unfinishedTasks_name);
+        system(aux_str);
     }
 
     pvm_catchout(0);
