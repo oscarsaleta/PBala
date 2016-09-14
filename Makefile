@@ -2,10 +2,12 @@
 # Opcions de compilacio
 # =====================
 COMPILER=gcc
-OPT=-g -Wall
+OPT=-O3 -Wall
+OPTg=-g -Wall
 LIBS=-lpvm3 -lm
 
 all : PBala task
+debug : PBalag taskg
 
 # ======
 # Master
@@ -13,11 +15,17 @@ all : PBala task
 PBala : PBala.c antz_lib.o
 	$(COMPILER) -o PBala $(OPT) PBala.c antz_lib.o $(LIBS)
 
+PBalaG: PBala.c antz_lib.o
+	$(COMPILER) -o PBala $(OPTg) PBala.c antz_lib.o $(LIBS)
+
 # =======
 # Esclaus
 # =======
 task: task.c antz_lib.o
 	$(COMPILER) -o task $(OPT) task.c antz_lib.o $(LIBS)
+
+taskg: task.c antz_lib.o
+	$(COMPILER) -o task $(OPTg) task.c antz_lib.o $(LIBS)
 
 # ============
 # Biblioteques
