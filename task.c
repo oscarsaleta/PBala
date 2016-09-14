@@ -1,7 +1,7 @@
 /* Job parallelizer in PVM for SPMD executions in antz computing server
  * URL: https://github.com/oscarsaleta/PVMantz
  *
- * Copyright (C) 2016  Dept. Matematiques UAB
+ * Copyright (C) 2016  Oscar Saleta Reig
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
