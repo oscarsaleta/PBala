@@ -2,9 +2,9 @@
 # Opcions de compilacio
 # =====================
 COMPILER=gcc
-OPT=-O3 -Wall
-OPTg=-g -Wall
-LIBS=-lpvm3 -lm
+CFLAGS=-O3 -Wall
+CFLAGSg=-g -Wall
+LFLAGS=-lpvm3 -lm
 
 all : PBala task
 debug : PBalag taskg
@@ -13,25 +13,25 @@ debug : PBalag taskg
 # Master
 # ======
 PBala : PBala.c antz_lib.o
-	$(COMPILER) -o PBala $(OPT) PBala.c antz_lib.o $(LIBS)
+	$(COMPILER) -o PBala $(CFLAGS) PBala.c antz_lib.o $(LFLAGS)
 
 PBalaG: PBala.c antz_lib.o
-	$(COMPILER) -o PBala $(OPTg) PBala.c antz_lib.o $(LIBS)
+	$(COMPILER) -o PBala $(CFLAGSg) PBala.c antz_lib.o $(LFLAGS)
 
 # =======
 # Esclaus
 # =======
 task: task.c antz_lib.o
-	$(COMPILER) -o task $(OPT) task.c antz_lib.o $(LIBS)
+	$(COMPILER) -o task $(CFLAGS) task.c antz_lib.o $(LFLAGS)
 
 taskg: task.c antz_lib.o
-	$(COMPILER) -o task $(OPTg) task.c antz_lib.o $(LIBS)
+	$(COMPILER) -o task $(CFLAGSg) task.c antz_lib.o $(LFLAGS)
 
 # ============
 # Biblioteques
 # ============
 antz_lib.o : antz_lib.c
-	$(COMPILER) -c $(OPT) antz_lib.c $(TAIL)
+	$(COMPILER) -c $(CFLAGS) antz_lib.c $(LFLAGS)
 
 # ======
 # Neteja

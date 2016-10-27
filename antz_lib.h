@@ -1,3 +1,5 @@
+#ifndef ANTZ_LIB_H
+#define ANTZ_LIB_H
 /*! \file antz_lib.h 
  * \brief Header for antz_lib.c
  * \author Oscar Saleta Reig
@@ -20,3 +22,5 @@ int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage);
 int parifile(int taskId, char *args, char *programfile, char *directory);
 int sagefile(int taskId, char *args, char *programfile, char *directory);
 int prterror (int pid, int taskNumber, char *out_dir, double time);
+
+#endif /* ANTZ_LIB_H */
