@@ -2,7 +2,7 @@
 
 # Current version
 
-Current version is 4.1.0 (see <a href="CHANGELOG.md">changelog</a>).
+Current version is 4.1.0 (<a href="mat.uab.cat/~osr/downloads/pbala/source.tar.gz">download source</a>, <a href="mat.uab.cat/~osr/downloads/pbala/binaries.tar.gz">download binaries</a> (these are not guaranteed to work for your system!), see <a href="CHANGELOG.md">changelog</a>).
 
 # Explanation of the software
 
@@ -21,19 +21,19 @@ This interface lets the user execute a same script/program over multiple input d
 
 ### v4.1.0 and above
 
- - Download the latest source <a href="https://github.com/oscarsaleta/PBala/archive/master.zip">here</a> (or `$wget https://github.com/oscarsaleta/PBala/archive/master.zip`), 
- - Extract it: `$unzip master.zip && cd PBala-master`,
+ - Download the latest source <a href="mat.uab.cat/~osr/downloads/pbala/source.tar.gz">here</a> (or `$wget mat.uab.cat/~osr/downloads/pbala/source.tar.gz`), 
+ - Extract it: `$unzip source.zip && cd pbala-{version}`, where `{version}` stands for the latest version,
  - Compile the code: `$./configure && make`,
  - Optionally, perform a system-wide install: `sudo make install`.
 
-**Notice**: if you cloned the repository instead of downloading the zipped source files, you may have problems with `make`, since GitHub does not respect the timestamps of the files when cloning. This can be solved by running `autoreconf -fi` before `./configure && make` (requires the package *autotools*).
+**Notice**: if you cloned the repository instead of downloading the source files, you may have problems with `make`, since GitHub does not respect the timestamps of the files when cloning. This can be solved by running `autoreconf -fi` before `./configure && make` (requires the package *autotools*).
 
 ### Versions older than v4.1.0
 The command `make` takes care of compilation (if all dependencies are satisfied, no checks performed). No system-wide installation supported for these older versions.
 
 ### Binary files
 
-Alternatively, you can download the tar.gz compressed binaries from the <a href="https://github.com/oscarsaleta/PBala/releases/latest">releases page</a> and check if they work on your system.
+Alternatively, you can download the tar.gz compressed binaries here <a href="mat.uab.cat/~osr/downloads/pbala/binaries.tar.gz"> and check if they work on your system.
 
 ## Documentation
 
