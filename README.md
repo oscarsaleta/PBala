@@ -22,7 +22,7 @@ This interface lets the user execute a same script/program over multiple input d
 ### v4.1.0 and above
 
  - Download the latest source <a href="https://github.com/oscarsaleta/PBala/archive/master.zip">here</a> (or `$wget https://github.com/oscarsaleta/PBala/archive/master.zip`), 
- - Extract it: `$unzip master.zip && cd master`,
+ - Extract it: `$unzip master.zip && cd PBala-master`,
  - Compile the code: `$./configure && make`,
  - Optionally, perform a system-wide install: `sudo make install`.
 
