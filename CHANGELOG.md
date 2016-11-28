@@ -2,7 +2,7 @@
 
 - **v4.1.0**:
  - Added *autotools* support (`configure && make && make install`).
- - Solved issue <a href="https://github.com/oscarsaleta/PBala/issues/8">#8</a>.
+ - Solved issue <a href="https://github.com/oscarsaleta/PBala/issues/1">#1</a>.
 - **v4.0.0**:
  - Revamped argument parsing (see the whole new *Usage* section).
  - Changed default safety memory threshold from 25% of total RAM to 15% of total RAM (user caution advised).
