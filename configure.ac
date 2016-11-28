@@ -1,5 +1,5 @@
 # Prelude
-AC_INIT([PBala], [4.0.1], [osr@mat.uab.cat], [], [https://github.com/oscarsaleta/PBala])
+AC_INIT([PBala], [4.0.2], [osr@mat.uab.cat], [], [https://github.com/oscarsaleta/PBala])
 AC_REVISION([$Revision: 1.0$])
 AC_CONFIG_SRCDIR([src/PBala.c])
 AC_CONFIG_AUX_DIR([build-aux])
