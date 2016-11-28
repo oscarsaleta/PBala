@@ -2,7 +2,14 @@
 
 # Current version
 
-Current version is 4.1.0 (<a href="mat.uab.cat/~osr/downloads/pbala/source.tar.gz">download source</a>, <a href="mat.uab.cat/~osr/downloads/pbala/binaries.tar.gz">download binaries</a> (these are not guaranteed to work for your system!), see <a href="CHANGELOG.md">changelog</a>).
+Current version is 4.1.0. 
+
+# Downloads
+* <a href="mat.uab.cat/~osr/downloads/pbala/source.tar.gz">Source</a>,
+* <a href="mat.uab.cat/~osr/downloads/pbala/binaries.tar.gz">binaries</a> (these are not guaranteed to work for your system!).
+
+# Changelog
+See <a href="CHANGELOG.md">CHANGELOG.md</a>.
 
 # Explanation of the software
 
@@ -21,7 +28,7 @@ This interface lets the user execute a same script/program over multiple input d
 
 ### v4.1.0 and above
 
- - Download the latest source <a href="mat.uab.cat/~osr/downloads/pbala/source.tar.gz">here</a> (or `$wget mat.uab.cat/~osr/downloads/pbala/source.tar.gz`), 
+ - Download the latest source (<a href="#downloads">above</a>), 
  - Extract it: `$unzip source.zip && cd pbala-{version}`, where `{version}` stands for the latest version,
  - Compile the code: `$./configure && make`,
  - Optionally, perform a system-wide install: `sudo make install`.
@@ -31,9 +38,6 @@ This interface lets the user execute a same script/program over multiple input d
 ### Versions older than v4.1.0
 The command `make` takes care of compilation (if all dependencies are satisfied, no checks performed). No system-wide installation supported for these older versions.
 
-### Binary files
-
-Alternatively, you can download the tar.gz compressed binaries here <a href="mat.uab.cat/~osr/downloads/pbala/binaries.tar.gz"> and check if they work on your system.
 
 ## Documentation
 
