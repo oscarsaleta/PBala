@@ -3832,7 +3832,7 @@ _ACEOF
   LIBS="-lpvm3 $LIBS"
 
 else
-  as_fn_error 1 "PVM library (-lpvm3) not found, which is needed to compile this program" "$LINENO" 5
+  as_fn_error 1 "PVM library (-lpvm3) not found" "$LINENO" 5
 fi
 
 
