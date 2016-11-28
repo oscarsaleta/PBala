@@ -1,3 +1,3 @@
 SUBDIRS = src
 dist_doc_DATA = README.md
-EXTRA_DIST = CHANGELOG.md LICENSE Doxyfile
+EXTRA_DIST = CHANGELOG.md LICENSE.txt Doxyfile
