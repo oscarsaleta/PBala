@@ -10,7 +10,7 @@ AC_PROG_CC
 
 # Check for libraries
 AC_CHECK_LIB([m],[sin],[], [AC_MSG_ERROR([Math library [(-lm)] not found], [1])])
-AC_CHECK_LIB([pvm3],[pvm_start_pvmd], [], [AC_MSG_ERROR([PVM library [(-lpvm3)] not found, which is needed to compile this program], [1])])
+AC_CHECK_LIB([pvm3],[pvm_start_pvmd], [], [AC_MSG_ERROR([PVM library [(-lpvm3)] not found], [1])])
 
 # Check for header files
 AC_CHECK_HEADER([argp.h], [], [AC_MSG_ERROR([argp.h not found], [1])])
