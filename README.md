@@ -61,7 +61,12 @@ This interface lets the user execute a same script/program over multiple input d
 
 ## Compilation
 
-The command `make` takes care.
+**v4.1.0 and above**
+
+`./configure`
+
+### Versions older than v4.1.0
+The command `make` takes care of compilation (if all dependencies are satisfied, no checks performed).
 
 ## Documentation
 
@@ -69,7 +74,7 @@ Run `doxigen` and take a look at html/index.html for documentation
 
 ## Usage
 
-**As of v4.0.0**:
+### As of v4.0.0
 
 The program admits standard `--help` (`-?`), `--usage` and `--version` (`-V`) arguments.
 
@@ -92,6 +97,7 @@ for any corresponding short options.
 
 Report bugs to <osr@mat.uab.cat>.
 ```
+
 Output from `./PBala --usage`:
 ```
 Usage: PBala [-eghs?V] [-m MAX_MEM] [--create-errfiles] [--create-memfiles]
@@ -123,7 +129,7 @@ Options explained:
 - `-s, --maple-single-core`: Force Maple to use a single core for its executions
 
 
-**For versions previous to v4.0.0**:
+### For versions previous to v4.0.0
 
 `./PBala exec_type program datafile nodefile outputdir [memory] [maple_flag]`
  - *exec_type*:

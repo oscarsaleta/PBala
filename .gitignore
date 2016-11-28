@@ -1,4 +1,5 @@
 Makefile
 src/.deps
 stamp*
+config.log
 
