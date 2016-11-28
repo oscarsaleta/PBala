@@ -21,9 +21,12 @@ This interface lets the user execute a same script/program over multiple input d
 
 ### v4.1.0 and above
 
-Download the latest source <a href="https://github.com/oscarsaleta/PBala/releases/latest">here</a>, extract it, and run `./configure && make` for compiling the software, and `sudo make install` to install it.
+ - Download the latest source <a href="https://github.com/oscarsaleta/PBala/archive/master.zip">here</a>, 
+ - Extract it: `$unzip PBala-master.zip && cd PBala-master`,
+ - Compile the code: `$./configure && make`,
+ - Optionally, perform a system-wide install: `sudo make install`.
 
-**Notice**: if you cloned the repository, you may have problems with `make`, since GitHub does not respect the timestamps of the files when cloning. This can be solved by running `autoreconf -fi` before `./configure && make` (this requires the package *autotools*).
+**Notice**: if you cloned the repository instead of downloading the zipped source files, you may have problems with `make`, since GitHub does not respect the timestamps of the files when cloning. This can be solved by running `autoreconf -fi` before `./configure && make` (requires the package *autotools*).
 
 ### Versions older than v4.1.0
 The command `make` takes care of compilation (if all dependencies are satisfied, no checks performed).
