@@ -26,6 +26,10 @@
  * \author Oscar Saleta Reig
  */
 
+#include "antz_errcodes.h"
+#include "antz_lib.h"
+
+#include <config.h>
 #include <argp.h>
 #include <dirent.h>
 #include <pvm3.h>
@@ -34,9 +38,6 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-
-#include "antz_errcodes.h"
-#include "antz_lib.h"
 
 
 /* Program version and bug email */

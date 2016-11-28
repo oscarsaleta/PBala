@@ -20,6 +20,11 @@
  * \brief PVM task. Adapts to different programs, forks execution to track mem usage
  * \author Oscar Saleta Reig
  */
+#include "antz_errcodes.h"
+#include "antz_lib.h"
+
+#include <config.h>
+
 #include <fcntl.h>
 #include <pvm3.h>
 #include <stdio.h>
@@ -33,8 +38,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include "antz_errcodes.h"
-#include "antz_lib.h"
 
 /**
  * Main task function.
