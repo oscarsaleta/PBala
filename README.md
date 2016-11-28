@@ -30,7 +30,7 @@ The command `make` takes care of compilation (if all dependencies are satisfied,
 
 ### Binary files
 
-Alternatively, you can download the tar.gz compressed binaries from the <a href="https://github.com/oscarsaleta/releases/latest">releases page</a> and check if they work on your system.
+Alternatively, you can download the tar.gz compressed binaries from the <a href="https://github.com/oscarsaleta/PBala/releases/latest">releases page</a> and check if they work on your system.
 
 ## Documentation
 
