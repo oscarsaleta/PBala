@@ -2,4 +2,6 @@ Makefile
 src/.deps
 stamp*
 config.log
-
+*.in
+*.m4
+configure

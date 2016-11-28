@@ -33,7 +33,7 @@ This interface lets the user execute a same script/program over multiple input d
  - Compile the code: `$./configure && make`,
  - Optionally, perform a system-wide install: `sudo make install`.
 
-**Notice**: if you cloned the repository instead of downloading the source files, you may have problems with `make`, since GitHub does not respect the timestamps of the files when cloning. This can be solved by running `autoreconf -fi` before `./configure && make` (requires the package *autotools*).
+**Notice**: if you cloned the repository instead of downloading the source files, you will have to run `autoreconf -fi` before `./configure && make` (requires the package <a href="https://www.gnu.org/software/automake/manual/html_node/index.html">*Automake*</a>).
 
 ### Versions older than v4.1.0
 The command `make` takes care of compilation (if all dependencies are satisfied, no checks performed). No system-wide installation supported for these older versions.
