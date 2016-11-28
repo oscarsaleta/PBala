@@ -17,7 +17,7 @@ This C program uses PVM libraries in order to create a parallellization interfac
 
 This interface lets the user execute a same script/program over multiple input data in several CPUs located at the antz computing server. It sports memory management so nodes do not run out of RAM due to too many processes being started in the same node. It also reports resource usage data after execution.
 
-## Compilation
+## Compilation and installation
 
 ### v4.1.0 and above
 
@@ -29,7 +29,7 @@ This interface lets the user execute a same script/program over multiple input d
 **Notice**: if you cloned the repository instead of downloading the zipped source files, you may have problems with `make`, since GitHub does not respect the timestamps of the files when cloning. This can be solved by running `autoreconf -fi` before `./configure && make` (requires the package *autotools*).
 
 ### Versions older than v4.1.0
-The command `make` takes care of compilation (if all dependencies are satisfied, no checks performed).
+The command `make` takes care of compilation (if all dependencies are satisfied, no checks performed). No system-wide installation supported for these older versions.
 
 ### Binary files
 
