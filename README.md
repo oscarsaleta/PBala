@@ -5,8 +5,8 @@
 Current version is 4.1.0. 
 
 # Downloads
-* <a href="mat.uab.cat/~osr/downloads/pbala/source.tar.gz">Source</a>,
-* <a href="mat.uab.cat/~osr/downloads/pbala/binaries.tar.gz">binaries</a> (these are not guaranteed to work for your system!).
+* <a href="http://mat.uab.cat/~osr/downloads/pbala/source.tar.gz">Source</a>,
+* <a href="http://mat.uab.cat/~osr/downloads/pbala/binaries.tar.gz">binaries</a> (these are not guaranteed to work for your system!).
 
 # Changelog
 See <a href="CHANGELOG.md">CHANGELOG.md</a>.
