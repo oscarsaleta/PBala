@@ -1,10 +1,4 @@
-configure
-*.in
 Makefile
-*.cache
-build-aux
-config.*
-*.m4
 src/.deps
 stamp*
 
