@@ -29,7 +29,7 @@ This interface lets the user execute a same script/program over multiple input d
 ### v4.1.0 and above
 
  - Download the latest source (<a href="#downloads">above</a>), 
- - Extract it: `$unzip source.zip && cd pbala-{version}`, where `{version}` stands for the latest version,
+ - Extract it: `$tar -xzf source.tar.gz && cd pbala-{version}`, where `{version}` stands for the latest version,
  - Compile the code: `$./configure && make`,
  - Optionally, perform a system-wide install: `sudo make install`.
 
