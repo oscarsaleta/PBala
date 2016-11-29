@@ -1,4 +1,4 @@
-/* Job parallelizer in PVM for SPMD executions in antz computing server
+/* Job parallelizer in PVM for SPMD executions in computing cluster
  * URL: https://github.com/oscarsaleta/PVMantz
  *
  * Copyright (C) 2016  Oscar Saleta Reig
@@ -16,12 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file task.c 
+/*! \file PBala_task.c 
  * \brief PVM task. Adapts to different programs, forks execution to track mem usage
  * \author Oscar Saleta Reig
  */
-#include "antz_errcodes.h"
-#include "antz_lib.h"
+#include "PBala_errcodes.h"
+#include "PBala_lib.h"
 
 #include <config.h>
 
@@ -86,9 +86,11 @@ int main(int argc, char *argv[]) {
          *  both conclude that there is enough because they see the same
          *  output, but maybe there is not enough memory for 2 tasks.
          */
-        if (memcheck(memcheck_flag,max_task_size) == 1) {
+        if (int mcheck = memcheck(memcheck_flag,max_task_size) == 1) {
             sleep(60); // arbitrary number that could be much lower
             continue;
+        } else if (mcheck == -1) {
+            return E_IO; // i/o error
         }
         // Receive inputs
         pvm_recv(myparent,MSG_WORK);
@@ -307,7 +309,7 @@ int main(int argc, char *argv[]) {
         totalt += difft;
         if (infop.si_code == CLD_KILLED
                 || infop.si_code == CLD_DUMPED) {
-            prterror(pid,taskNumber,out_dir,difft);
+            prterror(pid,taskNumber,out_dir,difft); // this could fail silently
             state=ST_TASK_KILLED;
         } else if (flag_mem) {
             struct rusage usage; // Stores information about the child's resource usage

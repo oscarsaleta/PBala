@@ -1,32 +1,52 @@
-/*! \file antz_lib.c 
+/* Job parallelizer in PVM for SPMD executions in computing cluster
+ * URL: https://github.com/oscarsaleta/PVMantz
+ *
+ * Copyright (C) 2016  Oscar Saleta Reig
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*! \file PBala_lib.c 
  * \brief File with generic functions and constant definitions
  * \author Oscar Saleta Reig
  */
+#include "PBala_lib.h"
 
+#include <pvm3.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/resource.h>
-#include <pvm3.h>
-#include "antz_lib.h"
+
 
 /**
  * Count how many lines a textfile has
  *
  * \param[in] *fileName name of file to be counted
  *
- * \return int lineCount
+ * \return int lineCount, -1 if an error occurred
  */
 int getLineCount(char *fileName) {
     FILE *f_aux;
     char str_tmp[BUFFER_SIZE];
+    char *str_aux;
     int lineCount;
 
     sprintf(str_tmp,"wc -l %s",fileName);
     f_aux = popen(str_tmp,"r");
     if (f_aux == NULL) 
         return -1;
-    fgets(str_tmp,1024,f_aux);
+    if (fgets(str_tmp,1024,f_aux)==NULL)
+        return -1;
     sscanf(str_tmp,"%d",&lineCount);
     fclose(f_aux);
 
@@ -75,23 +95,31 @@ int parseNodefile(char *nodefile, int nNodes, char ***nodes, int **nodeCores) {
  * \param[in] flag Tells the function if there is a guess by the user
  * \param[in] max_task_size If flag!=0 use this as constraint to memory
  *
- * \returns 0 if there is enough memory, 1 if there is not enough memory
+ * \returns 0 if there is enough memory, 1 if there is not enough memory,
+ * -1 if an error occurred
  */
 int memcheck(int flag, long int max_task_size) {
     FILE *f;
     char buffer[1024];
     char *token;
+
     int maxmem,freemem;
 
     f = fopen("/proc/meminfo","r");
-    fgets(buffer,1024,f); // reads total memory
+    if (f==NULL)
+        return -1;
+    if (fgets(buffer,1024,f)==NULL) // reads total memory
+        return -1;
     token = strtok(buffer," ");
     token = strtok(NULL," ");
-    sscanf(token,"%d",&maxmem);
-    fgets(buffer,1024,f); // reads free memory
+    if (sscanf(token,"%d",&maxmem)!=1)
+        return -1;
+    if (fgets(buffer,1024,f)==NULL) // reads free memory
+        return -1;
     token = strtok(buffer," ");
     token = strtok(NULL," ");
-    sscanf(token,"%d",&freemem);
+    if (sscanf(token,"%d",&freemem)!=1)
+        return -1;
     fclose(f);
     if (flag==0) {
         if (freemem < 0.15*maxmem)
@@ -168,7 +196,7 @@ int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage) {
  * \param[in] programfile path to PARI script
  * \param[in] directory path to results directory
  *
- * \returns 0 if successful
+ * \returns 0 if successful, -1 if error occurred
  */
 int parifile(int taskId, char *args, char *programfile, char *directory) {
     FILE *f;
@@ -176,6 +204,8 @@ int parifile(int taskId, char *args, char *programfile, char *directory) {
 
     sprintf(aux,"%s/auxprog-%d.gp",directory,taskId);
     f = fopen(aux,"w");
+    if (f == NULL)
+        return -1;
     fprintf(f,"taskId=%d;\n",taskId);
     fprintf(f,"taskArgs=[%s];\n",args);
     fprintf(f,"\\r %s\n",programfile);
@@ -202,6 +232,8 @@ int sagefile(int taskId, char *args, char *programfile, char *directory) {
 
     sprintf(aux,"%s/auxprog-%d.sage",directory,taskId);
     f = fopen(aux,"w");
+    if (f==NULL)
+        return -1;
     fprintf(f,"taskId=%d;\n",taskId);
     fprintf(f,"taskArgs=[%s];\n",args);
     fprintf(f,"load('%s')\n",programfile);
@@ -219,7 +251,7 @@ int sagefile(int taskId, char *args, char *programfile, char *directory) {
  * \param[in] taskNumber Task identifier (within our program)
  * \param[in] out_dir Output file name
  *
- * \returns 0 if successful
+ * \returns 0 if successful, -1 if file error
  */
 int prterror (int pid, int taskNumber, char *out_dir, double time) {
     FILE *memlog;
@@ -227,6 +259,8 @@ int prterror (int pid, int taskNumber, char *out_dir, double time) {
 
     sprintf(memlogfname,"%s/task%d_killed.log",out_dir,taskNumber);
     memlog = fopen(memlogfname,"w");
+    if (memlog == NULL)
+        return -1;
     fprintf(memlog,"TASK %d (PID %d) ERROR REPORT\n",taskNumber,pid);
     fprintf(memlog,"----------------------\n");
     fprintf(memlog,"Task was killed or stopped after %10.5G seconds.\n",time);

@@ -1,4 +1,4 @@
-/* Job parallelizer in PVM for SPMD executions in antz computing server
+/* Job parallelizer in PVM for SPMD executions in computing cluster
  * URL: https://github.com/oscarsaleta/PVMantz
  *
  * Copyright (C) 2016  Oscar Saleta Reig
@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /*! \mainpage PVM general parallelizer for antz
  * \author Oscar Saleta Reig
  */
@@ -26,8 +25,8 @@
  * \author Oscar Saleta Reig
  */
 
-#include "antz_errcodes.h"
-#include "antz_lib.h"
+#include "PBala_errcodes.h"
+#include "PBala_lib.h"
 
 #include <config.h>
 #include <argp.h>
@@ -157,6 +156,7 @@ int main (int argc, char *argv[]) {
     char buffer[BUFFER_SIZE];
     int i,j,err;
     char aux_str[BUFFER_SIZE];
+    int ignored;
     size_t aux_size;
     // Task variables
     int task_type;
@@ -194,7 +194,7 @@ int main (int argc, char *argv[]) {
     if (maple_single_cpu) {
         sprintf(aux_str,"grep -q -F 'kernelopts(numcpus=1)' %s || (sed '1ikernelopts(numcpus=1);' %s > %s_tmp && mv %s %s.bak && mv %s_tmp %s)",
                 inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile);
-        system(aux_str);
+        ignored = system(aux_str);
     }
 
     // check if task type is correct
@@ -240,10 +240,10 @@ int main (int argc, char *argv[]) {
         return E_CWD;
     }
     sprintf(aux_str,"echo '* ep=%s wd=%s' > hostfile",cwd,cwd);
-    system(aux_str);
+    ignored = system(aux_str);
     for (i=0; i<nNodes; i++) {
         sprintf(aux_str,"echo '%s' >> hostfile",nodes[i]);
-        system(aux_str);
+        ignored = system(aux_str);
     }
     char *pvmd_argv[1] = {"hostfile"};
     int pvmd_argc = 1;
@@ -313,7 +313,7 @@ int main (int argc, char *argv[]) {
     int numnode=0;
     for (i=0; i<nNodes; i++) {
         for (j=0; j<nodeCores[i]; j++) {
-            numt = pvm_spawn("task",NULL,PvmTaskHost,nodes[i],1,&taskId[itid]);
+            numt = pvm_spawn("PBala_task",NULL,PvmTaskHost,nodes[i],1,&taskId[itid]);
             if (numt != 1) {
                 fprintf(stderr,"%s:: ERROR - %d creating task %4d in node %s\n",
                     argv[0],numt,taskId[itid],nodes[i]);
@@ -369,10 +369,12 @@ int main (int argc, char *argv[]) {
             pvm_pkstr(aux_str);
             // create file for pari execution if needed
             if (task_type == 3) {
-                parifile(taskNumber,aux_str,inp_programFile,out_dir);
+                if (parifile(taskNumber,aux_str,inp_programFile,out_dir) == -1)
+                    return E_IO; // i/o error
                 fprintf(stderr,"%s:: CREATED_SCRIPT - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
             } else if (task_type == 4) {
-                sagefile(taskNumber,aux_str,inp_programFile,out_dir);
+                if (sagefile(taskNumber,aux_str,inp_programFile,out_dir) == -1)
+                    return E_IO; // i/o error
                 fprintf(stderr,"%s:: CREATED_SCRIPT - creating auxiliary Sage script for task %d\n",argv[0],taskNumber);
             }
 
@@ -446,10 +448,12 @@ int main (int argc, char *argv[]) {
                 pvm_pkstr(aux_str);
                 // create file for pari execution if needed
                 if (task_type == 3) {
-                    parifile(taskNumber,aux_str,inp_programFile,out_dir);
+                    if (parifile(taskNumber,aux_str,inp_programFile,out_dir) == -1)
+                        return E_IO; // i/o error
                     fprintf(stderr,"%s:: CREATED_SCRIPT - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
                 } else if (task_type == 4) {
-                    sagefile(taskNumber,aux_str,inp_programFile,out_dir);
+                    if (sagefile(taskNumber,aux_str,inp_programFile,out_dir) == -1)
+                    return E_IO; // i/o error
                     fprintf(stderr,"%s:: CREATED_SCRIPT - creating auxiliary Sage script for task %d\n",argv[0],taskNumber);
                 }
                 // send the job
@@ -515,7 +519,7 @@ int main (int argc, char *argv[]) {
     // remove tmp program (if modified)
     if (maple_single_cpu) {
         sprintf(aux_str,"[ ! -f %s.bak ] || mv %s.bak %s",inp_programFile,inp_programFile,inp_programFile);
-        system(aux_str);
+        ignored = system(aux_str);
     }
     // remove tmp pari/sage programs (if created)
     if (task_type == 3 || task_type == 4) {
@@ -533,7 +537,7 @@ int main (int argc, char *argv[]) {
     // remove unfinished_tasks.txt file if empty
     if (!unfinished_tasks_present) {
         sprintf(aux_str,"rm %s",unfinishedTasks_name);
-        system(aux_str);
+        ignored = system(aux_str);
     }
 
     pvm_catchout(0);

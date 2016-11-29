@@ -1,7 +1,11 @@
 Makefile
 src/.deps
+src/*.o
+src/PBala
+src/task
 stamp*
 config.log
 *.in
 *.m4
 configure
+*.tar.gz
