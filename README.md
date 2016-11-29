@@ -2,7 +2,7 @@
 
 # Current version
 
-Current version is 4.1.0. 
+Current version is 4.1.1. 
 
 # Downloads
 * <a href="http://mat.uab.cat/~osr/downloads/pbala/source.tar.gz">Source</a>,

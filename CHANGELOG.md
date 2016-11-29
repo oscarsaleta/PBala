@@ -1,8 +1,13 @@
 # Releases and changelog
 
+- **v4.1.1**:
+ - Added error checks in some unchecked `fgets`, `sscanf` and `fopen` calls.
+ - Some source files renamed from `antz_*` to `PBala_*`.
+
 - **v4.1.0**:
  - Added *autotools* support (`configure && make && make install`).
  - Solved issue <a href="https://github.com/oscarsaleta/PBala/issues/1">#1</a>.
+
 - **v4.0.0**:
  - Revamped argument parsing (see the whole new *Usage* section).
  - Changed default safety memory threshold from 25% of total RAM to 15% of total RAM (user caution advised).

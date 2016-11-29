@@ -60,6 +60,7 @@ int main(int argc, char *argv[]) {
     clock_t initt,endt;
     double difft, totalt=0;
     int state;
+    int mcheck; // error status of memory file check
 
     myparent = pvm_parent();
 
@@ -79,14 +80,14 @@ int main(int argc, char *argv[]) {
      */
     int memcheck_flag = max_task_size > 0 ? 1 : 0;
 
-    // Work work work
+    // Work work work work work
     while (1) {
         /* Race condition. Mitigated by executing few CPUs on each node
          * Explanation: 2 tasks could check memory simultaneously and
          *  both conclude that there is enough because they see the same
          *  output, but maybe there is not enough memory for 2 tasks.
          */
-        if (int mcheck = memcheck(memcheck_flag,max_task_size) == 1) {
+        if (mcheck = memcheck(memcheck_flag,max_task_size) == 1) {
             sleep(60); // arbitrary number that could be much lower
             continue;
         } else if (mcheck == -1) {
