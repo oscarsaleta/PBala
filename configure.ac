@@ -14,6 +14,7 @@ AC_CHECK_LIB([pvm3],[pvm_start_pvmd], [], [AC_MSG_ERROR([PVM library [(-lpvm3)] 
 
 # Check for header files
 AC_HEADER_STDC
+AC_HEADER_SYS_WAIT
 AC_CHECK_HEADER([argp.h], [], [AC_MSG_ERROR([argp.h not found], [1])])
 AC_CHECK_HEADER([dirent.h], [], [AC_MSG_ERROR([dirent.h not found], [1])])
 AC_CHECK_HEADER([fcntl.h], [], [AC_MSG_ERROR([fcntl.h not found], [1])])
@@ -24,7 +25,6 @@ AC_CHECK_HEADER([unistd.h], [], [AC_MSG_ERROR([argp.h not found], [1])])
 AC_CHECK_HEADER([sys/resource.h], [], [AC_MSG_ERROR([sys/resource.h not found], [1])])
 AC_CHECK_HEADER([sys/stat.h], [], [AC_MSG_ERROR([sys/stat.h not found], [1])])
 AC_CHECK_HEADER([sys/types.h], [], [AC_MSG_ERROR([sys/types.h not found], [1])])
-AC_CHECK_HEADER([sys/wait.h], [], [AC_MSG_ERROR([sys/wait.h not found], [1])])
 
 # Check for typedefs, structures, and compiler characteristics
 

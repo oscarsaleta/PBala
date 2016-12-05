@@ -2,7 +2,7 @@
 
 # Current version
 
-Current version is 4.1.1. 
+Current version is 4.1.1, see <a href="https://github.com/oscarsaleta/PBala/releases/latest">release page</a>. 
 
 # Downloads
 * <a href="http://mat.uab.cat/~osr/downloads/pbala/source.tar.gz">Source</a>,
