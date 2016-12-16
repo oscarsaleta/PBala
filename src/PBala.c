@@ -27,8 +27,8 @@
 
 #include "PBala_errcodes.h"
 #include "PBala_lib.h"
+#include "PBala_config.h"
 
-#include <config.h>
 #include <argp.h>
 #include <dirent.h>
 #include <pvm3.h>

@@ -22,8 +22,7 @@
  */
 #include "PBala_errcodes.h"
 #include "PBala_lib.h"
-
-#include <config.h>
+#include "PBala_config.h"
 
 #include <fcntl.h>
 #include <pvm3.h>
