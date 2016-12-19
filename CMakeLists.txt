@@ -4,7 +4,7 @@ project (PBala)
 
 set (PBala_VERSION_MAJOR 4)
 set (PBala_VERSION_MINOR 1)
-set (PBala_VERSION_PATCH 1)
+set (PBala_VERSION_PATCH 2)
 
 set(CMAKE_C_FLAGS "-O3 -Wall")
 
