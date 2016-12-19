@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
          *  both conclude that there is enough because they see the same
          *  output, but maybe there is not enough memory for 2 tasks.
          */
-        if (mcheck = memcheck(memcheck_flag,max_task_size) == 1) {
+        if ( (mcheck = memcheck(memcheck_flag,max_task_size)) == 1) {
             sleep(60); // arbitrary number that could be much lower
             continue;
         } else if (mcheck == -1) {

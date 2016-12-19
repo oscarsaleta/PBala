@@ -2,11 +2,10 @@
 
 # Current version
 
-Current version is 4.1.1, see <a href="https://github.com/oscarsaleta/PBala/releases/latest">release page</a>. 
+Current version is 4.1.2. 
 
-# Downloads
-* <a href="http://mat.uab.cat/~osr/downloads/pbala/source.tar.gz">Source</a>,
-* <a href="http://mat.uab.cat/~osr/downloads/pbala/binaries.tar.gz">binaries</a> (these are not guaranteed to work for your system!).
+# Download and install
+Go to the <a href="https://www.github.com/oscarsaleta/PBala/releases/latest">latest release</a> for download links and installation instructions.
 
 # Changelog
 See <a href="CHANGELOG.md">CHANGELOG.md</a>.
@@ -16,32 +15,34 @@ See <a href="CHANGELOG.md">CHANGELOG.md</a>.
 ## Introduction
 
 This C program uses PVM libraries in order to create a parallellization interface for
- - **Maple** scripts
- - **C** programs
- - **Python** scripts
- - **Pari/GP** scripts (although Pari should be also supported through the Pari C/C++ library or through gp2c by manually editing the output C code and compiling as a C program using the command provided by gp2c. The executable can then be run using the C module of this software.)
- - **Sage** scripts
+
+* **Maple** scripts
+* **C** programs
+* **Python** scripts
+* **Pari/GP** scripts (although Pari should be also supported through the Pari C/C++ library or through gp2c by manually editing the output C code and compiling as a C program using the command provided by gp2c. The executable can then be run using the C module of this software.)
+* **Sage** scripts
 
 This interface lets the user execute a same script/program over multiple input data in several CPUs located at the antz computing server. It sports memory management so nodes do not run out of RAM due to too many processes being started in the same node. It also reports resource usage data after execution.
 
-## Compilation and installation
+## Manual compilation and installation
 
-### v4.1.0 and above
+### v4.1.2 and above (requires CMake 3.0 or higher)
 
- - Download the latest source (<a href="#downloads">above</a>), 
- - Extract it: `$tar -xzf source.tar.gz && cd pbala-{version}`, where `{version}` stands for the latest version,
- - Compile the code: `$./configure && make`,
- - Optionally, perform a system-wide install: `sudo make install`.
+* Clone this git repository: `git clone https://github.com/oscarsaleta/PBala.git` in a directory of your system,
+* Change dir into *PBala*: `cd PBala`,
+* Create a build directory: `mkdir build && cd build`,
+* Run the CMake command: `cmake ..`,
+* Compile the code with make: `make`, the executables *PBala* and *PBala_task* will be found in *build/src*.
+* Optionally, perform a system wide install: `sudo make install`, which will install *PBala* and *PBala_task* into */usr/local/bin* and *PBala_config.h* into */usr/local/include*.
 
-**Notice**: if you cloned the repository instead of downloading the source files, you will have to run `autoreconf -fi` before `./configure && make` (requires the package <a href="https://www.gnu.org/software/automake/">Automake</a>).
 
 ### Versions older than v4.1.0
-The command `make` takes care of compilation (if all dependencies are satisfied, no checks performed). No system-wide installation supported for these older versions.
+If the older version of the source tree provides a Makefile, running `make` in a Terminal from that directory should take care of compilation. No automatic system installation is provided in the Makefile.
 
 
 ## Documentation
 
-Run `doxigen` and take a look at html/index.html for documentation.
+Run `doxigen` and take a look at *html/index.html* for documentation.
 
 ## Usage
 
@@ -50,6 +51,7 @@ Run `doxigen` and take a look at html/index.html for documentation.
 The program admits standard `--help` (`-?`), `--usage` and `--version` (`-V`) arguments.
 
 Output from `./PBala --help`:
+
 ```
 Usage: PBala [OPTION...] programflag programfile datafile nodefile outdir
 PBala -- PVM SPMD execution parallellizer
@@ -70,6 +72,7 @@ Report bugs to <osr@mat.uab.cat>.
 ```
 
 Output from `./PBala --usage`:
+
 ```
 Usage: PBala [-eghs?V] [-m MAX_MEM] [--create-errfiles] [--create-memfiles]
             [--create-slavefile] [--max-mem-size=MAX_MEM] [--maple-single-core]
@@ -78,20 +81,22 @@ Usage: PBala [-eghs?V] [-m MAX_MEM] [--create-errfiles] [--create-memfiles]
 ```
 
 Mandatory arguments explained:
-- `programflag`:
+
+* `programflag`:
  - 0 = Maple
  - 1 = C
  - 2 = Python
  - 3 = Pari (as of v1.0.0)
  - 4 = Sage (as of v3.0.0)
-- `programfile`: path to program file
-- `datafile`: path to data file
+* `programfile`: path to program file
+* `datafile`: path to data file
  - Line format is "tasknumber,arg1,arg2,...,argN"
-- `nodefile`: path to PVM node file
+* `nodefile`: path to PVM node file
  - Line format is "nodename number_of_processes"
-- `outdir`: path to output directory
+* `outdir`: path to output directory
 
 Options explained:
+
 - `-e, --create-errfiles`: Save stderr output for each execution in a task_stderr.txt file
 - `-g, --create-memfiles`: Save memory info for each execution in a task_mem.txt file
 - `-h, --create-slavefile`: Save a log of which task is given to which slave in node_info.txt
@@ -103,6 +108,7 @@ Options explained:
 ### For versions previous to v4.0.0
 
 `./PBala exec_type program datafile nodefile outputdir [memory] [maple_flag]`
+
  - *exec_type*:
   - 0 = Maple
   - 1 = C
@@ -155,15 +161,22 @@ There is no need of starting PVM using a hostfile (it is actually advised not to
 
 Existing codes:
 
-- 10: error with command line arguments passed to the program
-- 11: error when counting number of lines of nodefile
-- 12: error when trying to open nodefile
-- 13: error when trying to read nodefile
-- 14: error when getting the current working directory
-- 15: error when asking pvmd for my TID (task identifier)
-- 16: error when asking pvmd for the task parent
-- 17: error when counting number of lines of datafile
-- 18: error when creating output file
-- 19: error when spawning pvm tasks
-- 20: error when reading first column of datafile (must be task id)
-- 21: error when creating out_dir/node_info.txt (maybe out_dir does not exist?)
+* **PBala.c**
+    - 10: error with command line arguments passed to the program
+    - 11: error when counting number of lines of nodefile
+    - 12: error when trying to open nodefile
+    - 13: error when trying to read nodefile
+    - 14: error when getting the current working directory
+    - 15: error when asking pvmd for my TID (task identifier)
+    - 16: error when asking pvmd for the task parent
+    - 17: error when counting number of lines of datafile
+    - 18: error when creating output file
+    - 19: error when spawning pvm tasks
+    - 20: error when reading first column of datafile (must be task id)
+    - 21: error when creating out_dir/node_info.txt (maybe out_dir does not exist?)
+    - 22: invalid task number
+    - 23: error when writing to a file (PARI/GP or Sage aux script)
+    - 24: error when sanitizing Maple script for single CPU execution
+* **PBala_task.c**
+    - 10: error when forking process
+    - 11: task killed by system

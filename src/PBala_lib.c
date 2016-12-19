@@ -38,7 +38,7 @@
 int getLineCount(char *fileName) {
     FILE *f_aux;
     char str_tmp[BUFFER_SIZE];
-    char *str_aux;
+    //char *str_aux;
     int lineCount;
 
     sprintf(str_tmp,"wc -l %s",fileName);

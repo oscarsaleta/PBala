@@ -38,6 +38,7 @@
 #define E_OUTDIR 21
 #define E_WRONG_TASK 22
 #define E_IO 23
+#define E_MPL 24
 
 /* ERROR CODES FOR PBala_task.c SLAVE RETURN STATUS */
 #define ST_FORK_ERR 10

@@ -194,7 +194,8 @@ int main (int argc, char *argv[]) {
     if (maple_single_cpu) {
         sprintf(aux_str,"grep -q -F 'kernelopts(numcpus=1)' %s || (sed '1ikernelopts(numcpus=1);' %s > %s_tmp && mv %s %s.bak && mv %s_tmp %s)",
                 inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile,inp_programFile);
-        ignored = system(aux_str);
+        if ( (ignored = system(aux_str)) == -1)
+            return E_MPL;
     }
 
     // check if task type is correct
