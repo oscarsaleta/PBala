@@ -8,7 +8,6 @@ src/PBala
 src/PBala_task
 stamp*
 config.log
-*.in
 *.m4
 configure
 *.tar.gz
