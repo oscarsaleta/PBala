@@ -46,7 +46,7 @@ const char *argp_program_bug_address = "<osr@mat.uab.cat>";
 /* Program documentation */
 static char doc[]= "PBala -- PVM SPMD execution parallellizer";
 /* Arguments we accept */
-static char args_doc[] = "programflag programfile datafile nodefile outdir";
+static char args_doc[] = "programflag[0,1,2,3,4] programfile datafile nodefile outdir";
 
 /* Options we understand */
 static struct argp_option options[] = {
@@ -199,11 +199,12 @@ int main (int argc, char *argv[]) {
     }
 
     // check if task type is correct
-    if(task_type!=1
+    if(task_type !=0
+            && task_type!=1
             && task_type!=2
             && task_type!=3
             && task_type!=4) {
-        fprintf(stderr,"%s:: ERROR - wrong task_type value (must be one of: 1,2,3,4)\n",argv[0]);
+        fprintf(stderr,"%s:: ERROR - wrong task_type value (must be one of: 0,1,2,3,4)\n",argv[0]);
         return E_WRONG_TASK;
     }
 
