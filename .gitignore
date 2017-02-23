@@ -1,13 +1,3 @@
-autom4te.cache
 Makefile
-build-aux
-config.*
-src/.deps
-src/*.o
-src/PBala
-src/PBala_task
-stamp*
-config.log
-*.m4
-configure
+build/
 *.tar.gz
