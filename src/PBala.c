@@ -44,9 +44,9 @@ const char *argp_program_version = VERSION;
 const char *argp_program_bug_address = "<osr@mat.uab.cat>";
 
 /* Program documentation */
-static char doc[]= "PBala -- PVM SPMD execution parallellizer";
+static char doc[]= "PBala -- PVM SPMD execution parallellizer.\n\tprogramflag argument can be:\n\t\t0 (Maple), 1 (C), 2 (Python), 3 (Pari) or 4 (Sage).";
 /* Arguments we accept */
-static char args_doc[] = "programflag[0,1,2,3,4] programfile datafile nodefile outdir";
+static char args_doc[] = "programflag programfile datafile nodefile outdir";
 
 /* Options we understand */
 static struct argp_option options[] = {

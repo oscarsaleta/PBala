@@ -1,4 +1,6 @@
 # Releases and changelog
+* **v4.1.3**:
+    - Solved an issue that prevented the user from select Maple executions.
 * **v4.1.2**:
     - Changed build system to *CMake* (build instructions in <a href="README.md">readme</a>).
     - Added error check for Maple single CPU file preparation.

@@ -2,7 +2,7 @@
 
 # Current version
 
-Current version is 4.1.2. 
+Current version is 4.1.3. 
 
 # Download and install
 Go to the <a href="https://www.github.com/oscarsaleta/PBala/releases/latest">latest release</a> for download links and installation instructions.
