@@ -44,23 +44,25 @@ const char *argp_program_version = VERSION;
 const char *argp_program_bug_address = "<osr@mat.uab.cat>";
 
 /* Program documentation */
-static char doc[]= "PBala -- PVM SPMD execution parallellizer.\n\tprogramflag argument can be:\n\t\t0 (Maple), 1 (C), 2 (Python), 3 (Pari) or 4 (Sage).";
+static char doc[]= "PBala -- PVM SPMD execution parallellizer.\n\tprogramflag argument can be: 0 (Maple), 1 (C), 2 (Python), 3 (Pari) or 4 (Sage).";
 /* Arguments we accept */
 static char args_doc[] = "programflag programfile datafile nodefile outdir";
 
 /* Options we understand */
 static struct argp_option options[] = {
-    {"max-mem-size",      'm', "MAX_MEM", 0, "Max memory size of a task (KB)"},
-    {"maple-single-core", 's', 0,         0, "Force single core Maple"},
-    {"create-errfiles",   'e', 0,         0, "Create stderr files"},
-    {"create-memfiles",   103, 0,         0, "Create memory files"},
-    {"create-slavefile",  104, 0,         0, "Create node file"},
+    {"kill",                'k', 0,         0, "Kill remainig PBala/PVM processes (WARNING: use at own risk! Use only if something goes wrong during an execution and PVM stops working and you have no other important processes running)"},
+    {"max-mem-size",        'm', "MAX_MEM", 0, "Max memory size of a task (KB)"},
+    {"maple-single-core",   's', 0,         0, "Force single core Maple"},
+    {"create-errfiles",     'e', 0,         0, "Create stderr files"},
+    {"create-memfiles",     103, 0,         0, "Create memory files"},
+    {"create-slavefile",    104, 0,         0, "Create node file"},
     {0}
 };
 
 /* Struct for communicating arguments to main */
 struct arguments {
     char *args[5];
+    int kill;
     long int max_mem_size;
     int maple_single_cpu, create_err, create_mem, create_slave;
 };
@@ -70,6 +72,9 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
     struct arguments *arguments = state->input;
 
     switch(key) {
+        case 'k':
+            arguments->kill = 1;
+            break;
         case 'm':
             sscanf(arg,"%ld",&(arguments->max_mem_size));
             break;
@@ -93,7 +98,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             break;
 
         case ARGP_KEY_END:
-            if (state->arg_num < 5)
+            if (state->arg_num < 5 && arguments->kill != 1)
                 argp_usage(state);
             break;
 
@@ -127,6 +132,7 @@ static struct argp argp = {options, parse_opt, args_doc, doc};
 int main (int argc, char *argv[]) {
     // Program options and arguments
     struct arguments arguments;
+    arguments.kill = 0;
     arguments.max_mem_size = 0;
     arguments.maple_single_cpu = 0;
     arguments.create_err = 0;
@@ -176,6 +182,12 @@ int main (int argc, char *argv[]) {
 
     /* Read command line arguments */
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
+
+    /* if kill option is found, we do that and exit */
+    if (arguments.kill) {
+        fprintf(stdout,"Killing PBala and PVM...\n");
+        return killPBala();
+    }
         
     if (sscanf(arguments.args[0],"%d",&task_type)!=1
             || sscanf(arguments.args[1],"%s",inp_programFile)!=1
@@ -249,7 +261,13 @@ int main (int argc, char *argv[]) {
     }
     char *pvmd_argv[1] = {"hostfile"};
     int pvmd_argc = 1;
-    pvm_start_pvmd(pvmd_argc,pvmd_argv,1);
+    int start_status;
+    int start_tries = 0;
+    while ((start_status = pvm_start_pvmd(pvmd_argc,pvmd_argv,1)) == PvmDupHost
+        && ++start_tries < 3) {
+        pvm_halt();
+        system("rm -f /tmp/pvm*");
+    }
     sprintf(out_file,"%s/outfile.txt",out_dir);
     if ((f_out = fopen(out_file,"w")) == NULL) {
         fprintf(stderr,"%s:: ERROR - cannot open output file %s\n",argv[0],out_file);
@@ -287,23 +305,23 @@ int main (int argc, char *argv[]) {
     }
 
     // Print execution info
-    fprintf(stderr,"PRINCESS BALA v%s\n",VERSION);
-    fprintf(stderr,"System call: ");
+    fprintf(stdout,"PRINCESS BALA v%s\n",VERSION);
+    fprintf(stdout,"System call: ");
     for (i=0;i<argc;i++)
-        fprintf(stderr,"%s ",argv[i]);
-    fprintf(stderr,"\n\n");
+        fprintf(stdout,"%s ",argv[i]);
+    fprintf(stdout,"\n\n");
 
-    fprintf(stderr,"%s:: INFO - will use executable %s\n",argv[0],inp_programFile);
-    fprintf(stderr,"%s:: INFO - will use datafile %s\n",argv[0],inp_dataFile);
-    fprintf(stderr,"%s:: INFO - will use nodefile %s\n",argv[0],inp_nodes);
-    fprintf(stderr,"%s:: INFO - results will be stored in %s\n\n",argv[0],out_dir);
+    fprintf(stdout,"%s:: INFO - will use executable %s\n",argv[0],inp_programFile);
+    fprintf(stdout,"%s:: INFO - will use datafile %s\n",argv[0],inp_dataFile);
+    fprintf(stdout,"%s:: INFO - will use nodefile %s\n",argv[0],inp_nodes);
+    fprintf(stdout,"%s:: INFO - results will be stored in %s\n\n",argv[0],out_dir);
 
 
-    fprintf(stderr,"%s:: INFO - will use nodes ",argv[0]);
+    fprintf(stdout,"%s:: INFO - will use nodes ",argv[0]);
     for (i=0; i<nNodes-1; i++)
-        fprintf(stderr,"%s (%d), ",nodes[i],nodeCores[i]);
-    fprintf(stderr,"%s (%d)\n",nodes[nNodes-1],nodeCores[nNodes-1]);
-    fprintf(stderr,"%s:: INFO - will create %d tasks for %d slaves\n\n",argv[0],nTasks,maxConcurrentTasks);
+        fprintf(stdout,"%s (%d), ",nodes[i],nodeCores[i]);
+    fprintf(stdout,"%s (%d)\n",nodes[nNodes-1],nodeCores[nNodes-1]);
+    fprintf(stdout,"%s:: INFO - will create %d tasks for %d slaves\n\n",argv[0],nTasks,maxConcurrentTasks);
 
     
     
@@ -332,7 +350,7 @@ int main (int argc, char *argv[]) {
             pvm_pkint(&(arguments.create_err),1,1);
             pvm_pkint(&(arguments.create_mem),1,1);
             pvm_send(taskId[itid],MSG_GREETING);
-            fprintf(stderr,"%s:: CREATED_SLAVE - created slave %d\n",argv[0],itid);
+            fprintf(stdout,"%s:: CREATED_SLAVE - created slave %d\n",argv[0],itid);
             if (arguments.create_slave)
                 fprintf(logfile,"# Node %2d -> %s\n",numnode,nodes[i]);
             numnode++;
@@ -342,7 +360,7 @@ int main (int argc, char *argv[]) {
             itid++;
         }
     }
-    fprintf(stderr,"%s:: INFO - all slaves created successfully\n\n",argv[0]);
+    fprintf(stdout,"%s:: INFO - all slaves created successfully\n\n",argv[0]);
 
     // First batch of work sent at once (we will listen to answers later)
     f_data = fopen(inp_dataFile,"r");
@@ -373,21 +391,21 @@ int main (int argc, char *argv[]) {
             if (task_type == 3) {
                 if (parifile(taskNumber,aux_str,inp_programFile,out_dir) == -1)
                     return E_IO; // i/o error
-                fprintf(stderr,"%s:: CREATED_SCRIPT - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
+                fprintf(stdout,"%s:: CREATED_SCRIPT - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
             } else if (task_type == 4) {
                 if (sagefile(taskNumber,aux_str,inp_programFile,out_dir) == -1)
                     return E_IO; // i/o error
-                fprintf(stderr,"%s:: CREATED_SCRIPT - creating auxiliary Sage script for task %d\n",argv[0],taskNumber);
+                fprintf(stdout,"%s:: CREATED_SCRIPT - creating auxiliary Sage script for task %d\n",argv[0],taskNumber);
             }
 
             // send the job
             pvm_send(taskId[i],MSG_WORK);
-            fprintf(stderr,"%s:: TASK_SENT - sent task %4d for execution\n",argv[0],taskNumber);
+            fprintf(stdout,"%s:: TASK_SENT - sent task %4d for execution\n",argv[0],taskNumber);
             if (arguments.create_slave)
                 fprintf(logfile,"%2d,%4d\n",i,taskNumber);
         }
     }
-    fprintf(stderr,"%s:: INFO - first batch of work sent\n\n",argv[0]);
+    fprintf(stdout,"%s:: INFO - first batch of work sent\n\n",argv[0]);
 
 
     // Close logfile so it updates in file system
@@ -426,7 +444,7 @@ int main (int argc, char *argv[]) {
                     fclose(unfinishedTasks);
                     unfinished_tasks_present = 1;
                 } else
-                    fprintf(stderr,"%s:: TASK_COMPLETED - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
+                    fprintf(stdout,"%s:: TASK_COMPLETED - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
             }
             // Assign more work until we're done
             if (fgets(buffer,BUFFER_SIZE,f_data)!=NULL) {
@@ -452,15 +470,15 @@ int main (int argc, char *argv[]) {
                 if (task_type == 3) {
                     if (parifile(taskNumber,aux_str,inp_programFile,out_dir) == -1)
                         return E_IO; // i/o error
-                    fprintf(stderr,"%s:: CREATED_SCRIPT - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
+                    fprintf(stdout,"%s:: CREATED_SCRIPT - creating auxiliary Pari script for task %d\n",argv[0],taskNumber);
                 } else if (task_type == 4) {
                     if (sagefile(taskNumber,aux_str,inp_programFile,out_dir) == -1)
                     return E_IO; // i/o error
-                    fprintf(stderr,"%s:: CREATED_SCRIPT - creating auxiliary Sage script for task %d\n",argv[0],taskNumber);
+                    fprintf(stdout,"%s:: CREATED_SCRIPT - creating auxiliary Sage script for task %d\n",argv[0],taskNumber);
                 }
                 // send the job
                 pvm_send(taskId[itid],MSG_WORK);
-                fprintf(stderr,"%s:: TASK_SENT - sent task %3d for execution\n",argv[0],taskNumber);
+                fprintf(stdout,"%s:: TASK_SENT - sent task %3d for execution\n",argv[0],taskNumber);
                 if (arguments.create_slave) {
                     fprintf(logfile,"%2d,%4d\n",itid,taskNumber);
                     fclose(logfile);
@@ -496,21 +514,21 @@ int main (int argc, char *argv[]) {
                 fclose(unfinishedTasks);
                 unfinished_tasks_present = 1;
             } else
-                fprintf(stderr,"%s:: TASK_COMPLETED - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
+                fprintf(stdout,"%s:: TASK_COMPLETED - task %4d completed in %10.5G seconds\n",argv[0],taskNumber,exec_time);
         }
         pvm_upkdouble(&total_time,1,1);
         // Shut down slave
         pvm_initsend(PVM_ENCODING);
         pvm_pkint(&work_code,1,1);
         pvm_send(taskId[itid],MSG_STOP);
-        fprintf(stderr,"%s:: INFO - shutting down slave %2d (total execution time: %13.5G seconds)\n",argv[0],itid,total_time);
+        fprintf(stdout,"%s:: INFO - shutting down slave %2d (total execution time: %13.5G seconds)\n",argv[0],itid,total_time);
         total_total_time += total_time;
     }
 
     // Final message
     time(&endt);
     difft = difftime(endt,initt);
-    fprintf(stderr,"\n%s:: END OF EXECUTION.\nCombined computing time: %14.5G seconds.\nTotal execution time:    %14.5G seconds.\n",argv[0],total_total_time,difft);
+    fprintf(stdout,"\n%s:: END OF EXECUTION.\nCombined computing time: %14.5G seconds.\nTotal execution time:    %14.5G seconds.\n",argv[0],total_total_time,difft);
 
     free(nodes);
     free(nodeCores);

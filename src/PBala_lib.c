@@ -268,3 +268,55 @@ int prterror (int pid, int taskNumber, char *out_dir, double time) {
     fclose(memlog);
     return 0;
 }
+
+
+#define NNODES 8
+int killPBala (void) {
+    char nodes[NNODES][4] = {"a01","a02","a03","a04","a05","a06","a07","a08"};
+    int i;
+    char buffer[300];
+    /* kill PBala_task processes */
+    for (i=0; i<NNODES; i++) {
+        sprintf(buffer,"ssh %s killall %s",nodes[i],"PBala_task");
+        system(buffer);
+    }
+    /* kill pvm processes */
+    for (i=0; i<NNODES; i++) {
+        sprintf(buffer,"ssh %s killall %s",nodes[i],"pvmd");
+        system(buffer);
+    }
+    /* remove pvmd.uid files from /tmp */
+    for (i=0; i<NNODES; i++) {
+        sprintf(buffer,"ssh %s rm -f /tmp/pvm*",nodes[i]);
+        system(buffer);
+    }
+    /* kill maple processes */
+    for (i=0; i<NNODES; i++) {
+        sprintf(buffer,"ssh %s killall %s",nodes[i],"mserver");
+        system(buffer);
+    }
+    /* kill python processes */
+    for (i=0; i<NNODES; i++) {
+        sprintf(buffer,"ssh %s killall %s",nodes[i],"python");
+        system(buffer);
+    }
+    /* kill pari processes */
+    for (i=0; i<NNODES; i++) {
+        sprintf(buffer,"ssh %s killall %s",nodes[i],"gp");
+        system(buffer);
+    }
+    /* kill sage processes */
+    for (i=0; i<NNODES; i++) {
+        sprintf(buffer,"ssh %s killall %s",nodes[i],"sage");
+        system(buffer);
+    }
+    /* kill bash processes */
+    for (i=0; i<NNODES; i++) {
+        sprintf(buffer,"ssh %s killall %s",nodes[i],"bash");
+        system(buffer);
+    }
+    /* kill PBala process */
+    //system("killall PBala");
+    return 0;
+}
+#undef NNODES

@@ -3,10 +3,10 @@ cmake_minimum_required (VERSION 2.6)
 project (PBala)
 
 set (PBala_VERSION_MAJOR 4)
-set (PBala_VERSION_MINOR 1)
-set (PBala_VERSION_PATCH 3)
+set (PBala_VERSION_MINOR 2)
+set (PBala_VERSION_PATCH 0)
 
-set(CMAKE_C_FLAGS "-O3 -Wall")
+set(CMAKE_C_FLAGS "-O3 -Wall -Wno-unused-result")
 
 add_subdirectory (src)
 
