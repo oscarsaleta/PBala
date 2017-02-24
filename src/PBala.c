@@ -263,10 +263,12 @@ int main (int argc, char *argv[]) {
     int pvmd_argc = 1;
     int start_status;
     int start_tries = 0;
-    while ((start_status = pvm_start_pvmd(pvmd_argc,pvmd_argv,1)) == PvmDupHost
-        && ++start_tries < 3) {
+    while ((start_status = pvm_start_pvmd(pvmd_argc,pvmd_argv,1)) == PvmDupHost) {
+        ++start_tries;
         pvm_halt();
         system("rm -f /tmp/pvm*");
+        if (start_tries > 3)
+            return E_PVM_DUP;
     }
     sprintf(out_file,"%s/outfile.txt",out_dir);
     if ((f_out = fopen(out_file,"w")) == NULL) {

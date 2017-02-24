@@ -1,4 +1,7 @@
 # Releases and changelog
+* **v4.2.0**:
+    - Added `-k` option. If selected, PBala kills every process called `PBala`, `PBala_task`, `pvmd`, `python`, `mserver`, `sage` and `bash` from every node in antz. Also, it removes `/tmp/pvm*` from every node in antz. (This only affects the current user unless it is run as root, which should never be done).
+    - If PVM fails to start due to `PvmDupHost` (duplicate host, likely because of a previous failed execution), PBala tries to remove the host socket and start the daemon again. It will do so twice, and if it fails, it will return with an error (`E_PVM_DUP=25`).
 * **v4.1.3**:
     - Solved an issue that prevented the user from select Maple executions.
 * **v4.1.2**:

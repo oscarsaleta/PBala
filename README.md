@@ -2,7 +2,7 @@
 
 # Current version
 
-Current version is 4.1.3. 
+Current version is 4.2.0. 
 
 # Download and install
 Go to the <a href="https://www.github.com/oscarsaleta/PBala/releases/latest">latest release</a> for download links and installation instructions.
@@ -142,7 +142,7 @@ Options explained:
 There is no need of starting PVM using a hostfile (it is actually advised not to do so). Instead, execute the program and we will start PVM for you, using the information extracted from the nodefile.
 
 
-**For versions before v1.0.0** (these are buggy, update ASAP...):
+**For versions before v1.0.0 [DEPRECATED]**
 
   - First, you will need to execute PVM and add all the nodes that you want to use. This is done easily with `pvm hostfile`, where *hostfile* is simply a file with all the names of the nodes we will use in it (exactly the same names that appear in *nodefile*, but without the 2nd column). From inside the PVM cmd, type `quit` to leave the application and have the PVM daemon running in the background.
   - Now compile the software (if you have not done so yet) with `make`, and your own program if needed. Also, `mkdir resultdir` if it does not exist.
@@ -177,6 +177,7 @@ Existing codes:
     - 22: invalid task number
     - 23: error when writing to a file (PARI/GP or Sage aux script)
     - 24: error when sanitizing Maple script for single CPU execution
+    - 25: error when there is a duplicate PVM host and PBala fails to remove it
 * **PBala_task.c**
     - 10: error when forking process
     - 11: task killed by system

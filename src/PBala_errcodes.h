@@ -39,6 +39,7 @@
 #define E_WRONG_TASK 22
 #define E_IO 23
 #define E_MPL 24
+#define E_PVM_DUP 25
 
 /* ERROR CODES FOR PBala_task.c SLAVE RETURN STATUS */
 #define ST_FORK_ERR 10
