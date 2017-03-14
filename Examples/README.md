@@ -25,7 +25,7 @@ The data file that PBala receives for its execution is a CSV (comma-separated-va
 ...
 m,xm1,xm2,xm3,...,xmn
 ```
-where **each row is a single execution**.
+where **each row is a single execution** and _xij_ are **numbers** (and not symbolic expressions).
 
 The first column is the _id_ of the execution (in the example, _ids_ go from 0 to _m_, but you can use the numbers that you prefer. The _ids_ are used for labeling the output files, so you can know which output corresponds to which data).
 
@@ -46,3 +46,19 @@ Notice that, in order to be able to read arguments from command line, our `main`
 ```C
 int main(int argc, char *argv[])
 ```
+
+In the <a href="c_example.c">C example file</a> we show how to read some arguments from the command line while checking for some possible errors, and then print them to stdout. The same procedure can be generalised for any number and type of arguments and to perform the desired computations afterwards.
+
+# Python
+The Python executions work similarly to C executions, because arguments are passed to the script from the command line execution, so our program needs to be able to read and use them.
+
+In order to read arguments from command line, the simplest option is to import the `sys` library and then access them like this:
+
+```Python
+import sys
+
+print("taskId is ", sys.argv[1])
+print("taskArgs are ", sys.argv[2:])
+```
+
+The <a href="python_example.py">Python example</a> is a bit more elaborated, because it shows how to define a _main_ function in Python, so the behaviour of the program is even more similar to C.
