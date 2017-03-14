@@ -26,7 +26,7 @@ Current version is 4.2.0.
 Go to the <a href="https://www.github.com/oscarsaleta/PBala/releases/latest">latest release</a> for download links and installation instructions.
 
 # Examples
-See <a href="Examples/README.md">the examples directory</a>.
+See <a href="Examples/">the examples directory</a>.
 
 # Changelog
 See <a href="CHANGELOG.md">CHANGELOG.md</a>.
