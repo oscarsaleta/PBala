@@ -15,9 +15,10 @@
 [//]: # ( You should have received a copy of the GNU General Public License )
 [//]: # ( along with PBala.  If not, see <http://www.gnu.org/licenses/>. )
 
+# Examples
 In this folder you will find a simple example for each kind of execution that PBala presently supports.
 
-# Data file
+## Data file
 The data file that PBala receives for its execution is a CSV (comma-separated-values) file of the following form:
 ```
 0,x01,x02,x03,...,x0n
@@ -31,14 +32,14 @@ The first column is the _id_ of the execution (in the example, _ids_ go from 0 t
 
 The following columns are arguments to your program, and will be accessed from within your program in different ways depending on which kind of execution you are performing.
 
-# Maple
+## Maple
 For a Maple execution, the job is really simple. PBala automatically defines two variables upon execution: `taskId` and `taskArgs`. `taskId` is the first integer of the datafile, which identifies the execution, whereas `taskArgs` is a vector that contains the rest of arguments: `taskArgs:=[x1,x2,...,xn]`.
 
 In order to adapt a Maple script to be used by PBala, you just need to perform your desired computations using the `taskArgs` variable.
 
 In the <a href="maple_example.mpl">example file</a> we print the arguments received by Maple. In a similar fashion, any more complex set of operations could be applied to these variables.
 
-# C
+## C
 For a C execution, we need a C program that can read variables from the command line, because each execution will be considered as `./program taskId x1 x2 ... xn`. Therefore, our C program will receive the variables as if they were passed to it from command line, and we will need to use them as we please.
 
 Notice that, in order to be able to read arguments from command line, our `main` function must follow the standard prototype:
@@ -49,7 +50,7 @@ int main(int argc, char *argv[])
 
 In the <a href="c_example.c">C example file</a> we show how to read some arguments from the command line while checking for some possible errors, and then print them to stdout. The same procedure can be generalised for any number and type of arguments and to perform the desired computations afterwards.
 
-# Python
+## Python
 The Python executions work similarly to C executions, because arguments are passed to the script from the command line execution, so our program needs to be able to read and use them.
 
 In order to read arguments from command line, the simplest option is to import the `sys` library and then access them like this:
