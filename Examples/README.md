@@ -28,7 +28,9 @@ The data file that PBala receives for its execution is a CSV (comma-separated-va
 ...
 m,xm1,xm2,xm3,...,xmn
 ```
-where **each row is a single execution** and _xij_ are **numbers** (and not symbolic expressions).
+where **each row is a single execution**. This example would perform _m_ executions of the same program, and each execution would take one row as its arguments.
+
+**Notice:** the arguments _x<sub>i,j</sub>_ can be anything that your program understands. For example, in C they will most likely be numbers, but for Maple they can be symbolic expressions. However, the first element of each row **must be a number**.
 
 The first column is the _id_ of the execution (in the example, _ids_ go from 0 to _m_, but you can use the numbers that you prefer. The _ids_ are used for labeling the output files, so you can know which output corresponds to which data).
 
@@ -64,6 +66,14 @@ print("taskId is ", sys.argv[1])
 print("taskArgs are ", sys.argv[2:])
 ```
 
-The <a href="python_example.py">Python example</a> is a bit more elaborated, because it shows how to define a _main_ function in Python, so the behaviour of the program is even more similar to C.
+The <a href="python_example.py">Python example</a> is a bit more elaborated, because it also shows how to define a _main_ function in Python, so the behaviour of the program is even more similar to C.
 
-## 
+## PARI/GP
+Given that PARI is intended to work as a Computer Algebra System (CAS), PARI/GP executions are implemented to work the same as Maple executions. This is achieved by creating an intermediate PARI scripts that defines a number `taskId` and a vector `taskArgs` and then executes the desired program. Thus, we just need to use these variables as if they were already defined.
+
+In the <a href="pari_example.gp">PARI/GP example</a>, we simply print `taskId` and `taskArgs` to showcase that the program can use these variables as if they were defined by ourselves.
+
+## Sage
+Sage is a CAS (same as Maple and PARI), so we have implemented it to work exactly as in Maple and PARI. An auxiliary program created during execution of PBala will define the variables `taskId` and `taskArgs` from the arguments of the data file, and we can use these two variables as we please in our Sage script.
+
+See a piece of code that shows the simplest example in <a href="sage_example.sage">the Sage script</a>.
