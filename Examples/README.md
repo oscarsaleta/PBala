@@ -1,19 +1,19 @@
-[//]: # ( Job parallelizer in PVM for SPMD executions in computing cluster )
-[//]: # ( URL: https://github.com/oscarsaleta/PVMantz )
-[//]: # ( )
-[//]: # ( Copyright (C) 2016  Oscar Saleta Reig ) 
-[//]: # ( )
-[//]: # ( PBala is free software: you can redistribute it and/or modify )
-[//]: # ( it under the terms of the GNU General Public License as published by )
-[//]: # ( the Free Software Foundation, either version 3 of the License, or )
-[//]: # ( (at your option) any later version. )
-[//]: # ( PBala is distributed in the hope that it will be useful, )
-[//]: # ( but WITHOUT ANY WARRANTY; without even the implied warranty of )
-[//]: # ( MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the )
-[//]: # ( GNU General Public License for more details. )
-[//]: # ( )
-[//]: # ( You should have received a copy of the GNU General Public License )
-[//]: # ( along with PBala.  If not, see <http://www.gnu.org/licenses/>. )
+[comment]: # ( Job parallelizer in PVM for SPMD executions in computing cluster )
+[comment]: # ( URL: https://github.com/oscarsaleta/PVMantz )
+[comment]: # ( )
+[comment]: # ( Copyright (C) 2016  Oscar Saleta Reig ) 
+[comment]: # ( )
+[comment]: # ( PBala is free software: you can redistribute it and/or modify )
+[comment]: # ( it under the terms of the GNU General Public License as published by )
+[comment]: # ( the Free Software Foundation, either version 3 of the License, or )
+[comment]: # ( (at your option) any later version. )
+[comment]: # ( PBala is distributed in the hope that it will be useful, )
+[comment]: # ( but WITHOUT ANY WARRANTY; without even the implied warranty of )
+[comment]: # ( MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the )
+[comment]: # ( GNU General Public License for more details. )
+[comment]: # ( )
+[comment]: # ( You should have received a copy of the GNU General Public License )
+[comment]: # ( along with PBala.  If not, see <http://www.gnu.org/licenses/>. )
 
 # Examples
 In this folder you will find a simple example for each kind of execution that PBala presently supports.
@@ -63,3 +63,5 @@ print("taskArgs are ", sys.argv[2:])
 ```
 
 The <a href="python_example.py">Python example</a> is a bit more elaborated, because it shows how to define a _main_ function in Python, so the behaviour of the program is even more similar to C.
+
+## 
