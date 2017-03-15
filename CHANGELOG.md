@@ -1,3 +1,22 @@
+<!--
+    This file is part of PBala (http://github.com/oscarsaleta/PBala)
+
+    Copyright (C) 2016  O. Saleta
+
+    PBala is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
 # Releases and changelog
 * **v4.2.0**:
     - Added `-k` option. If selected, PBala kills every process called `PBala`, `PBala_task`, `pvmd`, `python`, `mserver`, `sage` and `bash` from every node in antz. Also, it removes `/tmp/pvm*` from every node in antz. (This only affects the current user unless it is run as root, which should never be done).
