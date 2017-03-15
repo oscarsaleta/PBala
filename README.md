@@ -49,14 +49,19 @@ This interface lets the user execute a same script/program over multiple input d
 
 ## Manual compilation and installation
 
-### v4.1.2 and above (requires CMake 3.0 or higher)
+### Dependencies
+* <a href="http://www.netlib.org/pvm3/">Parallel Virtual Machine (PVM)</a>.
+* C compiler
+* CMake (version 2.6 or higher)
+
+### Instructions
 
 * Clone this git repository: `git clone https://github.com/oscarsaleta/PBala.git` in a directory of your system,
 * Change dir into *PBala*: `cd PBala`,
 * Create a build directory: `mkdir build && cd build`,
 * Run the CMake command: `cmake ..`,
-* Compile the code with make: `make`, the executables *PBala* and *PBala_task* will be found in *build/src*.
-* Optionally, perform a system wide install: `sudo make install`, which will install *PBala* and *PBala_task* into */usr/local/bin* and *PBala_config.h* into */usr/local/include*.
+* Compile the code with `make`, the executables *PBala* and *PBala_task* will be found in *build/src*.
+* Optionally, perform a system wide install: `sudo make install`, which will install *PBala* and *PBala_task* into */usr/local/bin* and *PBala_config.h* into */usr/local/include* (this requires root permissions).
 
 
 ## Documentation
