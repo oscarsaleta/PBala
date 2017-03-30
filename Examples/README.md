@@ -42,7 +42,7 @@ For a Maple execution, the job is really simple. PBala automatically defines two
 
 In order to adapt a Maple script to be used by PBala, you just need to perform your desired computations using the `taskArgs` variable.
 
-In the <a href="maple_example.mpl">example file</a> we print the arguments received by Maple. In a similar fashion, any more complex set of operations could be applied to these variables.
+In the [example file](maple_example.mpl "Maple example") we print the arguments received by Maple. In a similar fashion, any more complex set of operations could be applied to these variables.
 
 ### C
 For a C execution, we need a C program that can read variables from the command line, because each execution will be considered as `./program taskId x1 x2 ... xn`. Therefore, our C program will receive the variables as if they were passed to it from command line, and we will need to use them as we please.
@@ -53,7 +53,7 @@ Notice that, in order to be able to read arguments from command line, our `main`
 int main(int argc, char *argv[])
 ```
 
-In the <a href="c_example.c">C example file</a> we show how to read some arguments from the command line while checking for some possible errors, and then print them to stdout. The same procedure can be generalised for any number and type of arguments and to perform the desired computations afterwards.
+In the [C example file](c_example.c "C example") we show how to read some arguments from the command line while checking for some possible errors, and then print them to stdout. The same procedure can be generalised for any number and type of arguments and to perform the desired computations afterwards.
 
 ### Python
 The Python executions work similarly to C executions, because arguments are passed to the script from the command line execution, so our program needs to be able to read and use them.
@@ -67,17 +67,17 @@ print("taskId is ", sys.argv[1])
 print("taskArgs are ", sys.argv[2:])
 ```
 
-The <a href="python_example.py">Python example</a> is a bit more elaborated, because it also shows how to define a _main_ function in Python, so the behaviour of the program is even more similar to C.
+The [Python example](python_example.py "Python example") is a bit more elaborated, because it also shows how to define a _main_ function in Python, so the behaviour of the program is even more similar to C.
 
 ### PARI/GP
 Given that PARI is intended to work as a Computer Algebra System (CAS), PARI/GP executions are implemented to work the same as Maple executions. This is achieved by creating an intermediate PARI scripts that defines a number `taskId` and a vector `taskArgs` and then executes the desired program. Thus, we just need to use these variables as if they were already defined.
 
-In the <a href="pari_example.gp">PARI/GP example</a>, we simply print `taskId` and `taskArgs` to showcase that the program can use these variables as if they were defined by ourselves.
+In the [PARI/GP example](pari_example.gp "PARI example"), we simply print `taskId` and `taskArgs` to showcase that the program can use these variables as if they were defined by ourselves.
 
 ### Sage
 Sage is a CAS (same as Maple and PARI), so we have implemented it to work exactly as in Maple and PARI. An auxiliary program created during execution of PBala will define the variables `taskId` and `taskArgs` from the arguments of the data file, and we can use these two variables as we please in our Sage script.
 
-See a piece of code that shows the simplest example in <a href="sage_example.sage">the Sage script</a>.
+See a piece of code that shows the simplest example in [the Sage script](sage_example.sage "Sage example").
 
 ## Example of a full execution in an _antz_ node
 Imagine our datafile is called `datafile.txt` and contains the following lines:

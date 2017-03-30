@@ -25,13 +25,13 @@
 Current version is 4.2.0. 
 
 # Download and install
-Go to the <a href="https://www.github.com/oscarsaleta/PBala/releases/latest">latest release</a> for download links and installation instructions.
+Go to the [latest release](https://www.github.com/oscarsaleta/PBala/releases/latest "Latest release") for download links and installation instructions.
 
 # Examples
-See <a href="Examples/">the examples directory</a>.
+See [the examples directory](Examples "Examples") the examples directory.
 
 # Changelog
-See <a href="CHANGELOG.md">CHANGELOG.md</a>.
+See [the changelog](CHANGELOG.md "CHANGELOG.md").
 
 # Explanation of the software
 
@@ -50,7 +50,7 @@ This interface lets the user execute a same script/program over multiple input d
 ## Manual compilation and installation
 
 ### Dependencies
-* <a href="http://www.netlib.org/pvm3/">Parallel Virtual Machine (PVM)</a>.
+* [Parallel Virtual Machine (PVM)](http://www.netlib.org/pvm3/ "PVM homepage").
 * C compiler
 * CMake (version 2.6 or higher)
 

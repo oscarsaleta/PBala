@@ -24,7 +24,7 @@
 * **v4.1.3**:
     - Solved an issue that prevented the user from select Maple executions.
 * **v4.1.2**:
-    - Changed build system to *CMake* (build instructions in <a href="README.md">readme</a>).
+    - Changed build system to *CMake* (build instructions in [readme](README.md "README")).
     - Added error check for Maple single CPU file preparation.
     - Added parentheses in two conditional expressions to avoid compilation warnings.
     - Removed unused variable.
@@ -33,7 +33,7 @@
     - Some source files renamed from `antz_*` to `PBala_*`.
 * **v4.1.0**:
     - Added *autotools* support (`configure && make && make install`).
-    - Solved issue <a href="https://github.com/oscarsaleta/PBala/issues/1">#1</a>.
+    - Solved issue [#1](https://github.com/oscarsaleta/PBala/issues/1 "Issue 1").
 * **v4.0.0**:
     - Revamped argument parsing (see the whole new *Usage* section).
     - Changed default safety memory threshold from 25% of total RAM to 15% of total RAM (user caution advised).
