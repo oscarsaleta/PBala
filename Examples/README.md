@@ -101,7 +101,7 @@ a03 1
 a05 3
 a07 1
 ```
-This will allow us to make 7 simultaneous executions of our program, so the three first executions that finish will perform the remaining three.
+This will allow us to make 7 simultaneous executions of our program, so the three first slaves that finish will perform the remaining three executions.
 
 Now we just need a directory for storing the results (so we don't clutter our main directory with files), which we will conveniently name `results`.
 
