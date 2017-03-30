@@ -108,8 +108,8 @@ Mandatory arguments explained:
     + 0 = Maple
     + 1 = C
     + 2 = Python
-    + 3 = Pari (as of v1.0.0)
-    + 4 = Sage (as of v3.0.0)
+    + 3 = Pari
+    + 4 = Sage
 * `programfile`: path to program file
 * `datafile`: path to data file
     + Line format is "tasknumber,arg1,arg2,...,argN"
