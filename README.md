@@ -22,7 +22,7 @@
 
 # Current version
 
-Current version is 4.2.0. 
+Current version is 5.0.0. 
 
 # Download and install
 Go to the [latest release](https://www.github.com/oscarsaleta/PBala/releases/latest "Latest release") for download links and installation instructions.
@@ -76,11 +76,17 @@ Output from `./PBala --help`:
 
 ```
 Usage: PBala [OPTION...] programflag programfile datafile nodefile outdir
-PBala -- PVM SPMD execution parallellizer
+PBala -- PVM SPMD execution parallellizer.
+	programflag argument can be: 0 (Maple), 1 (C), 2 (Python), 3 (Pari), 4 (Sage),
+or 5 (Octave)
 
   -e, --create-errfiles      Create stderr files
   -g, --create-memfiles      Create memory files
   -h, --create-slavefile     Create node file
+  -k, --kill                 Kill remainig PBala/PVM processes (WARNING: use at
+                             own risk! Use only if something goes wrong during
+                             an execution and PVM stops working and you have no
+                             other important processes running)
   -m, --max-mem-size=MAX_MEM Max memory size of a task (KB)
   -s, --maple-single-core    Force single core Maple
   -?, --help                 Give this help list
@@ -110,6 +116,7 @@ Mandatory arguments explained:
     + 2 = Python
     + 3 = Pari
     + 4 = Sage
+    + 5 = Octave
 * `programfile`: path to program file
 * `datafile`: path to data file
     + Line format is "tasknumber,arg1,arg2,...,argN"
@@ -135,6 +142,8 @@ Options explained:
     + PARI and Sage are executed by creating auxiliary scripts where `taskId` and `taskArgs` are defined, so they could be directly used in the scripts just like in Maple.
 - Programming languages: **C**, **Python**:
     + For C and Python we use the `argv` arrays so make sure the program can read and use those variables (and perform the error checking because this software has no way of knowing if the data file is suitable for your program).
+- Octave:
+    + We define the `taskArgs` list as a _cell array_, so you need to use the proper indexind and accessors to use the stored values (see [the Examples section](Examples/README.md#octave "Octave section in Examples") for more information).
 
 ### Procedure of execution
 
