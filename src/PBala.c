@@ -6,12 +6,12 @@
  * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -44,8 +44,8 @@ const char *argp_program_bug_address = "<osr@mat.uab.cat>";
 
 /* Program documentation */
 static char doc[] = "PBala -- PVM SPMD execution parallellizer.\n\tprogramflag "
-                    "argument can be: 0 (Maple), 1 (C), 2 (Python), 3 (Pari) "
-                    "or 4 (Sage).";
+                    "argument can be: 0 (Maple), 1 (C), 2 (Python), 3 (Pari), "
+                    "4 (Sage), or 5 (Octave)";
 /* Arguments we accept */
 static char args_doc[] = "programflag programfile datafile nodefile outdir";
 
@@ -217,10 +217,10 @@ int main(int argc, char *argv[])
 
     // check if task type is correct
     if (task_type != 0 && task_type != 1 && task_type != 2 && task_type != 3 &&
-        task_type != 4) {
+        task_type != 4 && task_type != 5) {
         fprintf(
             stderr,
-            "%s:: ERROR - wrong task_type value (must be one of: 0,1,2,3,4)\n",
+            "%s:: ERROR - wrong task_type value (must be one of: 0,1,2,3,4,5)\n",
             argv[0]);
         return E_WRONG_TASK;
     }
@@ -424,6 +424,13 @@ int main(int argc, char *argv[])
                 fprintf(stdout, "%s:: CREATED_SCRIPT - creating auxiliary Sage "
                                 "script for task %d\n",
                         argv[0], taskNumber);
+            } else if (task_type == 5) {
+                if (octavefile(taskNumber, aux_str, inp_programFile, out_dir) ==
+                    -1)
+                    return E_IO;
+                fprintf(stdout, "%s:: CREATED_SCRIPT - creating auxiliary "
+                                "Octave script for task %d\n",
+                        argv[0], taskNumber);
             }
 
             // send the job
@@ -515,6 +522,13 @@ int main(int argc, char *argv[])
                         return E_IO; // i/o error
                     fprintf(stdout, "%s:: CREATED_SCRIPT - creating auxiliary "
                                     "Sage script for task %d\n",
+                            argv[0], taskNumber);
+                } else if (task_type == 5) {
+                    if (octavefile(taskNumber, aux_str, inp_programFile,
+                                   out_dir) == -1)
+                        return E_IO;
+                    fprintf(stdout, "%s:: CREATED_SCRIPT - creating auxiliary "
+                                    "Octave script for task %d\n",
                             argv[0], taskNumber);
                 }
                 // send the job
