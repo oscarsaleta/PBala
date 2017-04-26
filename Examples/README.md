@@ -79,6 +79,16 @@ Sage is a CAS (same as Maple and PARI), so we have implemented it to work exactl
 
 See a piece of code that shows the simplest example in [the Sage script](sage_example.sage "Sage example").
 
+### Octave
+Octave has a similar syntax to C, but its data structures are very different. We create an auxiliary script (as with PARI and Sage), in order to define `taskId` and `taskArgs` and then source the original Octave program. We decided to define the `taskArgs` vector as a _cell array_, so it would look like
+```Octave
+taskArgs = {arg1,arg2,arg3};
+```
+This means that, if you want to access to the taskArgs from your main Octave script, you will have to take into account that it is a cell array: `taskArgs{1}` for accessing the first element, etc. (See [the Octave documentation about cell arrays](https://www.gnu.org/software/octave/doc/interpreter/Basic-Usage-of-Cell-Arrays.html#Basic-Usage-of-Cell-Arrays "Octave cell arrays") for more information).
+
+**Notice**: Octave implementation isn't really tested, so I can't be sure wheter using symbolic arguments would work (although my guess would be that it wouldn't).
+
+
 ## Example of a full execution in an _antz_ node
 Imagine our datafile is called `datafile.txt` and contains the following lines:
 ```
