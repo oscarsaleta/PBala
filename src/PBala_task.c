@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
                 char **args;
                 char filename[FNAME_SIZE];
                 sprintf(filename, "%s/auxprog-%d.sage", out_dir, taskNumber);
-                // 0: sage, 1: file, 3: NULL
+                // 0: sage, 1: file, 2: NULL
                 int nargs = 2;
                 args = (char **)malloc((nargs + 1) * sizeof(char *));
                 // Do not malloc for NULL
@@ -308,6 +308,29 @@ int main(int argc, char *argv[])
                 // Call the execution and check for errors
                 err = execvp(args[0], args);
                 perror("ERROR:: child Sage process");
+                exit(err);
+
+                /* OCTAVE */
+            } else if (task_type == 5) {
+                // NULL-terminated array of strings
+                char **args;
+                char filename[FNAME_SIZE];
+                sprintf(filename,"%s/auxprog-%d.m",out_dir,taskNumber);
+                // 0: octave, 1: -qf, 2: file, 3: NULL
+                int nargs = 3;
+                args = (char**)malloc((nargs+1)*sizeof(char*));
+                // Do not malloc for NULL
+                for (i=0;i<nargs;i++)
+                args[i]=malloc(BUFFER_SIZE);
+                // Fill up the array with strings
+                sprintf(args[0],"octave");
+                sprintf(args[1],"-qf");
+                sprintf(args[2],"%s",filename);
+                args[3]=NULL;
+
+                // Call the execution and check for errors
+                err=execvp(args[0],args);
+                perror("ERROR:: child Octave process");
                 exit(err);
             }
         }
