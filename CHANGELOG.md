@@ -18,6 +18,8 @@
 -->
 
 # Releases and changelog
+* **v5.0.0**:
+    - Added support for Octave executions (`task_id = 5`).
 * **v4.2.0**:
     - Added `-k` option. If selected, PBala kills every process called `PBala`, `PBala_task`, `pvmd`, `python`, `mserver`, `sage` and `bash` from every node in antz. Also, it removes `/tmp/pvm*` from every node in antz. (This only affects the current user unless it is run as root, which should never be done).
     - If PVM fails to start due to `PvmDupHost` (duplicate host, likely because of a previous failed execution), PBala tries to remove the host socket and start the daemon again. It will do so twice, and if it fails, it will return with an error (`E_PVM_DUP=25`).
