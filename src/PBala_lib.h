@@ -40,6 +40,7 @@ int memcheck(int flag, long int max_task_size);
 int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage);
 int parifile(int taskId, char *args, char *programfile, char *directory);
 int sagefile(int taskId, char *args, char *programfile, char *directory);
+int octavefile(int taskId, char *args, char *programfile, char *directory);
 int prterror(int pid, int taskNumber, char *out_dir, double time);
 int killPBala(void);
 

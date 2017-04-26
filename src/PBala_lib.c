@@ -6,12 +6,12 @@
  * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -30,7 +30,7 @@
 /**
  * Count how many lines a textfile has
  *
- * \param[in] *fileName name of file to be counted
+ * @param[in] *fileName name of file to be counted
  *
  * \return int lineCount, -1 if an error occurred
  */
@@ -57,12 +57,12 @@ int getLineCount(char *fileName)
  * Parse the node file and return an array of strings containing the names
  * of the nodes, and an array of ints containing their number of CPUs
  *
- * \param[in] *nodefile name of node file
- * \param[in] nNodes number of nodes
- * \param[in] ***nodes pointer to array of strings of node names
- * \param[in] **nodeCores pointer to array of ints of CPUs per node
+ * @param[in] *nodefile name of node file
+ * @param[in] nNodes number of nodes
+ * @param[in] ***nodes pointer to array of strings of node names
+ * @param[in] **nodeCores pointer to array of ints of CPUs per node
  *
- * \returns 0 if successful, 1 if error opening file, 2 if error reading
+ * @returns 0 if successful, 1 if error opening file, 2 if error reading
  */
 int parseNodefile(char *nodefile, int nNodes, char ***nodes, int **nodeCores)
 {
@@ -91,10 +91,10 @@ int parseNodefile(char *nodefile, int nNodes, char ***nodes, int **nodeCores)
 /**
  * Memory check for tasks. If no guess is given, limit to 25% of max RAM
  *
- * \param[in] flag Tells the function if there is a guess by the user
- * \param[in] max_task_size If flag!=0 use this as constraint to memory
+ * @param[in] flag Tells the function if there is a guess by the user
+ * @param[in] max_task_size If flag!=0 use this as constraint to memory
  *
- * \returns 0 if there is enough memory, 1 if there is not enough memory,
+ * @returns 0 if there is enough memory, 1 if there is not enough memory,
  * -1 if an error occurred
  */
 int memcheck(int flag, long int max_task_size)
@@ -134,12 +134,12 @@ int memcheck(int flag, long int max_task_size)
 /**
  * Print usage information to output file
  *
- * \param[in] pid Proccess identifier (within system)
- * \param[in] taskNumber Task identifier (within our program)
- * \param[in] usage Struct that contains all the resource usage information
- * \param[in] out_dir Output file name
+ * @param[in] pid Proccess identifier (within system)
+ * @param[in] taskNumber Task identifier (within our program)
+ * @param[in] usage Struct that contains all the resource usage information
+ * @param[in] out_dir Output file name
  *
- * \returns 0 if successful
+ * @returns 0 if successful
  */
 int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage)
 {
@@ -190,12 +190,12 @@ int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage)
 /**
  * Creates an auxiliary program for PARI execution
  *
- * \param[in] taskId Task number
- * \param[in] args Arguments string separated by commas
- * \param[in] programfile path to PARI script
- * \param[in] directory path to results directory
+ * @param[in] taskId Task number
+ * @param[in] args Arguments string separated by commas
+ * @param[in] programfile path to PARI script
+ * @param[in] directory path to results directory
  *
- * \returns 0 if successful, -1 if error occurred
+ * @returns 0 if successful, -1 if error occurred
  */
 int parifile(int taskId, char *args, char *programfile, char *directory)
 {
@@ -218,12 +218,12 @@ int parifile(int taskId, char *args, char *programfile, char *directory)
 /**
  * Creates an auxiliary program for SAGE execution
  *
- * \param[in] taskId Task number
- * \param[in] args Arguments string separated by commas
- * \param[in] programfile path to script
- * \param[in] directory path to results directory
+ * @param[in] taskId Task number
+ * @param[in] args Arguments string separated by commas
+ * @param[in] programfile path to script
+ * @param[in] directory path to results directory
  *
- * \returns 0 if successful
+ * @returns 0 if successful
  */
 int sagefile(int taskId, char *args, char *programfile, char *directory)
 {
@@ -243,14 +243,42 @@ int sagefile(int taskId, char *args, char *programfile, char *directory)
 }
 
 /**
+ * Creates an auxiliary program for Octave execution
+ *
+ * @param[in] taskId      Task number
+ * @param[in] args        Arguments string separated by commas
+ * @param[in] programfile Path to script
+ * @param[in] directory   Path to the results directory
+ *
+ * @returns 0 if successful
+ */
+int octavefile(int taskId, char *args, char *programfile, char *directory)
+{
+    FILE *f;
+    char aux[FNAME_SIZE];
+
+    sprintf(aux, "%s/auxprog-%d.m", directory, taskId);
+    f = fopen(aux, "w");
+    if (f == NULL)
+        return -1;
+    fprintf(f, "#! /usr/bin/octave -qf\n");
+    fprintf(f, "taskId = %d;\n", taskId);
+    fprintf(f, "taskArgs = {%s};\n", args);
+    fprintf(f, "source (\"%s\");\n", programfile);
+
+    fclose(f);
+    return 0;
+}
+
+/**
  * Informs that a process has been killed or stopped
  * this function runs instead of prtusage()
  *
- * \param[in] pid Proccess identifier (within system)
- * \param[in] taskNumber Task identifier (within our program)
- * \param[in] out_dir Output file name
+ * @param[in] pid Proccess identifier (within system)
+ * @param[in] taskNumber Task identifier (within our program)
+ * @param[in] out_dir Output file name
  *
- * \returns 0 if successful, -1 if file error
+ * @returns 0 if successful, -1 if file error
  */
 int prterror(int pid, int taskNumber, char *out_dir, double time)
 {
