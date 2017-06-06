@@ -60,7 +60,7 @@ static struct argp_option options[] = {
     {"create-errfiles", 'e', 0, 0, "Create stderr files"},
     {"create-memfiles", 103, 0, 0, "Create memory files"},
     {"create-slavefile", 104, 0, 0, "Create node file"},
-    {"custom-process", 'c', "path/to/exe", 0,
+    {"custom-process", 'c', "/path/to/exec", 0,
      "Specify a custom path for the executable program"},
     {0}};
 

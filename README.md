@@ -81,6 +81,8 @@ PBala -- PVM SPMD execution parallellizer.
 	programflag argument can be: 0 (Maple), 1 (C), 2 (Python), 3 (Pari), 4 (Sage),
 or 5 (Octave)
 
+  -c, --custom-process=/path/to/exec
+                             Specify a custom path for the executable program
   -e, --create-errfiles      Create stderr files
   -g, --create-memfiles      Create memory files
   -h, --create-slavefile     Create node file
@@ -103,7 +105,7 @@ Report bugs to <osr@mat.uab.cat>.
 Output from `./PBala --usage`:
 
 ```
-Usage: PBala [-eghs?V] [-m MAX_MEM] [--create-errfiles] [--create-memfiles]
+Usage: PBala [-ceghs?V] [-m MAX_MEM] [--create-errfiles] [--create-memfiles]
             [--create-slavefile] [--max-mem-size=MAX_MEM] [--maple-single-core]
             [--help] [--usage] [--version]
             programflag programfile datafile nodefile outdir
@@ -127,6 +129,7 @@ Mandatory arguments explained:
 
 Options explained:
 
+- `-c, --custom-process=/path/to/exec`: Specify a custom path for the Maple/Python/etc executable to use
 - `-e, --create-errfiles`: Save stderr output for each execution in a task_stderr.txt file
 - `-g, --create-memfiles`: Save memory info for each execution in a task_mem.txt file
 - `-h, --create-slavefile`: Save a log of which task is given to which slave in node_info.txt
@@ -144,7 +147,7 @@ Options explained:
 - Programming languages: **C**, **Python**:
     + For C and Python we use the `argv` arrays so make sure the program can read and use those variables (and perform the error checking because this software has no way of knowing if the data file is suitable for your program).
 - Octave:
-    + We define the `taskArgs` list as a _cell array_, so you need to use the proper indexind and accessors to use the stored values (see [the Examples section](Examples/README.md#octave "Octave section in Examples") for more information).
+    + We define the `taskArgs` list as a _cell array_, so you need to use the proper indexing and accessors to use the stored values (see [the Examples section](Examples/README.md#octave "Octave section in Examples") for more information).
 
 ### Procedure of execution
 

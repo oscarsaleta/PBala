@@ -18,6 +18,9 @@
 -->
 
 # Releases and changelog
+* **v5.1.0**:
+    - Add new option to PBala: `-c, --custom-process=/path/to/exec` for specifying a custom path to the Maple/Sage/Python/etc executable to use
+    - Changed timers to nanoseconds resolution
 * **v5.0.0**:
     - Added support for Octave executions (`task_id = 5`).
 * **v4.2.0**:
