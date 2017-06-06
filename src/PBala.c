@@ -60,6 +60,8 @@ static struct argp_option options[] = {
     {"create-errfiles", 'e', 0, 0, "Create stderr files"},
     {"create-memfiles", 103, 0, 0, "Create memory files"},
     {"create-slavefile", 104, 0, 0, "Create node file"},
+    {"custom-process", 'c', "path/to/exe", 0,
+     "Specify a custom path for the executable program"},
     {0}};
 
 /* Struct for communicating arguments to main */
@@ -68,6 +70,8 @@ struct arguments {
     int kill;
     long int max_mem_size;
     int maple_single_cpu, create_err, create_mem, create_slave;
+    int custom_path;
+    char program_path[BUFFER_SIZE];
 };
 
 /* Parse a single option */
@@ -93,6 +97,10 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         break;
     case 104:
         arguments->create_slave = 1;
+        break;
+    case 'c':
+        arguments->custom_path = 1;
+        sscanf(arg, "%s", arguments->program_path);
         break;
 
     case ARGP_KEY_ARG:
@@ -142,6 +150,7 @@ int main(int argc, char *argv[])
     arguments.create_err = 0;
     arguments.create_mem = 0;
     arguments.create_slave = 0;
+    arguments.custom_path = 0;
     // PVM args
     int myparent, mytid, nTasks, taskNumber;
     int itid;
@@ -218,10 +227,9 @@ int main(int argc, char *argv[])
     // check if task type is correct
     if (task_type != 0 && task_type != 1 && task_type != 2 && task_type != 3 &&
         task_type != 4 && task_type != 5) {
-        fprintf(
-            stderr,
-            "%s:: ERROR - wrong task_type value (must be one of: 0,1,2,3,4,5)\n",
-            argv[0]);
+        fprintf(stderr, "%s:: ERROR - wrong task_type value (must be one of: "
+                        "0,1,2,3,4,5)\n",
+                argv[0]);
         return E_WRONG_TASK;
     }
 
@@ -366,6 +374,9 @@ int main(int argc, char *argv[])
             pvm_pklong(&max_mem_size, 1, 1);
             pvm_pkint(&(arguments.create_err), 1, 1);
             pvm_pkint(&(arguments.create_mem), 1, 1);
+            pvm_pkint(&(arguments.custom_path), 1, 1);
+            if (arguments.custom_path)
+                pvm_pkstr(arguments.program_path);
             pvm_send(taskId[itid], MSG_GREETING);
             fprintf(stdout, "%s:: CREATED_SLAVE - created slave %d\n", argv[0],
                     itid);
