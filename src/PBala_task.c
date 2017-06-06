@@ -59,8 +59,10 @@ int main(int argc, char *argv[])
     int flag_custom_path;   // 0=no custom path, 1=custom path provided
     char custom_path[BUFFER_SIZE];
     char *custom_path_ptr = NULL;
-    clock_t initt, endt;
+    // clock_t initt, endt;
+    struct timespec tspec_before, tspec_after, tspec_result;
     double difft, totalt = 0;
+    long int sec, nsec;
     int state;
     int mcheck; // error status of memory file check
 
@@ -73,7 +75,7 @@ int main(int argc, char *argv[])
     pvm_upklong(&max_task_size, 1, 1);
     pvm_upkint(&flag_err, 1, 1);
     pvm_upkint(&flag_mem, 1, 1);
-    pvm_upkint(&flag_custom_path,1,1);
+    pvm_upkint(&flag_custom_path, 1, 1);
     if (flag_custom_path) {
         pvm_upkstr(custom_path);
         custom_path_ptr = &custom_path[0];
@@ -96,7 +98,17 @@ int main(int argc, char *argv[])
             sleep(60); // arbitrary number that could be much lower
             continue;
         } else if (mcheck == -1) {
-            return E_IO; // i/o error
+            /* if memcheck fails, return to master to try another node */
+            int state = ST_MEM_ERR;
+            pvm_initsend(PVM_ENCODING);
+            pvm_pkint(&me, 1, 1);
+            pvm_pkint(&taskNumber, 1, 1);
+            pvm_pkint(&state, 1, 1);
+            pvm_pkstr(arguments);
+            pvm_pkdouble(&totalt, 1, 1);
+            pvm_send(myparent, MSG_RESULT);
+            pvm_exit();
+            exit(1); // i/o error
         }
         // Receive inputs
         pvm_recv(myparent, MSG_WORK);
@@ -109,7 +121,9 @@ int main(int argc, char *argv[])
         pvm_upkstr(arguments); // string of comma-separated arguments read from
                                // datafile
 
-        time(&initt);
+        // time(&initt);
+        clock_gettime(CLOCK_REALTIME, &tspec_before);
+
         /* Fork one process that will do the execution
          * the "parent task" will only wait for this process to end
          * and then report resource usage via getrusage()
@@ -156,17 +170,20 @@ int main(int argc, char *argv[])
              */
             if (task_type == 0) {
                 /* MAPLE */
-                err = mapleProcess(taskNumber, inp_programFile, arguments, custom_path_ptr);
+                err = mapleProcess(taskNumber, inp_programFile, arguments,
+                                   custom_path_ptr);
                 perror("ERROR:: child Maple process");
                 exit(err);
             } else if (task_type == 1) {
                 /* C */
-                err = cProcess(taskNumber, inp_programFile, arguments, custom_path_ptr);
+                err = cProcess(taskNumber, inp_programFile, arguments,
+                               custom_path_ptr);
                 perror("ERROR:: child C process");
                 exit(err);
             } else if (task_type == 2) {
                 /* PYTHON */
-                err = pythonProcess(taskNumber, inp_programFile, arguments, custom_path_ptr);
+                err = pythonProcess(taskNumber, inp_programFile, arguments,
+                                    custom_path_ptr);
                 perror("ERROR:: child Python process");
                 exit(err);
             } else if (task_type == 3) {
@@ -188,11 +205,20 @@ int main(int argc, char *argv[])
         }
 
         /* Attempt at measuring memory usage for the child process */
-        siginfo_t infop; // Stores information about the child execution
-        waitid(P_PID, pid, &infop, WEXITED); // Wait for the execution to end
+        // Stores information about the child execution
+        siginfo_t infop;
+        // Wait for the execution to end
+        waitid(P_PID, pid, &infop, WEXITED);
+
         // Computation time
-        time(&endt);
-        difft = difftime(endt, initt);
+        clock_gettime(CLOCK_REALTIME, &tspec_after);
+        timespec_subtract(&tspec_result, &tspec_after, &tspec_before);
+        sec = (long int)tspec_result.tv_sec;
+        nsec = tspec_result.tv_nsec;
+
+        // time(&endt);
+        // difft = difftime(endt, initt);
+        difft = sec + nsec * 1e-9;
         totalt += difft;
         if (infop.si_code == CLD_KILLED || infop.si_code == CLD_DUMPED) {
             prterror(pid, taskNumber, out_dir,
