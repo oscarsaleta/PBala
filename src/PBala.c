@@ -180,11 +180,10 @@ int main(int argc, char *argv[])
     int task_type;
     // Execution time variables
     double exec_time, total_time;
+    struct timespec tspec_before, tspec_after, tspec_result;
     double total_total_time = 0;
-    time_t initt, endt;
-    double difft;
 
-    time(&initt);
+    clock_gettime(CLOCK_REALTIME, &tspec_before);
 
     /* MASTER CODE */
 
@@ -676,11 +675,13 @@ int main(int argc, char *argv[])
     }
 
     // Final message
-    time(&endt);
-    difft = difftime(endt, initt);
+    clock_gettime(CLOCK_REALTIME, &tspec_after);
+    timespec_subtract(&tspec_result, &tspec_after, &tspec_before);
+
     fprintf(stdout, "\n%s:: END OF EXECUTION.\nCombined computing time: %14.5G "
-                    "seconds.\nTotal execution time:    %14.5G seconds.\n",
-            argv[0], total_total_time, difft);
+                    "seconds.\nTotal execution time:    %6ld.%9ld seconds.\n",
+            argv[0], total_total_time, (long int)tspec_result.tv_sec,
+            tspec_result.tv_nsec);
 
     free(nodes);
     free(nodeCores);

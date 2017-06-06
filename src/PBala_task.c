@@ -59,7 +59,6 @@ int main(int argc, char *argv[])
     int flag_custom_path;   // 0=no custom path, 1=custom path provided
     char custom_path[BUFFER_SIZE];
     char *custom_path_ptr = NULL;
-    // clock_t initt, endt;
     struct timespec tspec_before, tspec_after, tspec_result;
     double difft, totalt = 0;
     long int sec, nsec;
@@ -121,7 +120,6 @@ int main(int argc, char *argv[])
         pvm_upkstr(arguments); // string of comma-separated arguments read from
                                // datafile
 
-        // time(&initt);
         clock_gettime(CLOCK_REALTIME, &tspec_before);
 
         /* Fork one process that will do the execution
@@ -216,8 +214,6 @@ int main(int argc, char *argv[])
         sec = (long int)tspec_result.tv_sec;
         nsec = tspec_result.tv_nsec;
 
-        // time(&endt);
-        // difft = difftime(endt, initt);
         difft = sec + nsec * 1e-9;
         totalt += difft;
         if (infop.si_code == CLD_KILLED || infop.si_code == CLD_DUMPED) {
