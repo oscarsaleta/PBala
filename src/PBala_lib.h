@@ -6,12 +6,12 @@
  * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -43,5 +43,12 @@ int sagefile(int taskId, char *args, char *programfile, char *directory);
 int octavefile(int taskId, char *args, char *programfile, char *directory);
 int prterror(int pid, int taskNumber, char *out_dir, double time);
 int killPBala(void);
+
+int mapleProcess(int taskNumber, char *inputFile, char *arguments, char *customPath);
+int cProcess(int taskNumber, char *inputFile, char *arguments, char *customPath);
+int pythonProcess(int taskNumber, char *inputFile, char *arguments, char *customPath);
+int pariProcess(int taskNumber, char *outdir, char *customPath);
+int sageProcess(int taskNumber, char *outdir, char *customPath);
+int octaveProcess(int taskNumber, char *outdir, char *customPath);
 
 #endif /* PBALA_LIB_H */

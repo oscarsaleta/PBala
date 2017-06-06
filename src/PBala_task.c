@@ -6,12 +6,12 @@
  * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -56,7 +56,9 @@ int main(int argc, char *argv[])
     long int max_task_size; // if given, max size in KB of a spawned process
     int flag_err;           // 0=no err files, 1=yes err files
     int flag_mem;           // 0=no mem files, 1=yes mem files
-    int i;                  // for loops
+    int flag_custom_path;   // 0=no custom path, 1=custom path provided
+    char custom_path[BUFFER_SIZE];
+    char *custom_path_ptr = NULL;
     clock_t initt, endt;
     double difft, totalt = 0;
     int state;
@@ -71,6 +73,11 @@ int main(int argc, char *argv[])
     pvm_upklong(&max_task_size, 1, 1);
     pvm_upkint(&flag_err, 1, 1);
     pvm_upkint(&flag_mem, 1, 1);
+    pvm_upkint(&flag_custom_path,1,1);
+    if (flag_custom_path) {
+        pvm_upkstr(custom_path);
+        custom_path_ptr = &custom_path[0];
+    }
 
     /* Perform generic check or use specific size info?
      *  memcheck_flag = 0 means generic check
@@ -147,189 +154,34 @@ int main(int argc, char *argv[])
             /*
              * GENERATE EXECUTION OF PROGRAM
              */
-            /* MAPLE */
             if (task_type == 0) {
-                // NULL-terminated array of strings for calling the Maple script
-                char **args;
-                // 0: maple, 1: taskid, 2: X, 3: input, 4: NULL
-                int nargs = 4;
-                args = (char **)malloc((nargs + 1) * sizeof(char *));
-                // Do not malloc for NULL
-                for (i = 0; i < nargs; i++)
-                    args[i] = malloc(BUFFER_SIZE);
-                // Fill up the array with strings
-                sprintf(args[0], "maple");
-                sprintf(args[1], "-tc \"taskId:=%d\"", taskNumber);
-                sprintf(args[2], "-c \"taskArgs:=[%s]\"", arguments);
-                sprintf(args[3], "%s", inp_programFile);
-                args[4] = NULL;
-
-                // Call the execution and check for errors
-                err = execvp(args[0], args);
+                /* MAPLE */
+                err = mapleProcess(taskNumber, inp_programFile, arguments, custom_path_ptr);
                 perror("ERROR:: child Maple process");
                 exit(err);
-
-                /* C */
             } else if (task_type == 1) {
-                // Preparations for C or Python execution
-                char *arguments_cpy;
-                arguments_cpy = malloc(strlen(arguments));
-                strcpy(arguments_cpy, arguments);
-                // This counts how many commas there are in arguments, giving
-                // the number
-                // of arguments passed to the program
-                for (i = 0; arguments_cpy[i];
-                     arguments_cpy[i] == ',' ? i++ : *arguments_cpy++)
-                    ;
-                int nargs = i + 1; // i = number of commas
-                int nargs_tot;     // will be the total number of arguments
-                                   // (nargs+program name+etc)
-                char *token;       // used for tokenizing arguments
-                char **args; // this is the NULL-terminated array of strings
-
-                /* In this case it's necessary to parse the arguments string
-                 * breaking it into tokens and then arranging the args of the
-                 * system call in a NULL-terminated array of strings which we
-                 * pass to execvp
-                 */
-                // Tokenizing breaks the original string so we make a copy
-                strcpy(arguments_cpy, arguments);
-                // Args in system call are (program tasknum arguments), so
-                // 2+nargs
-                nargs_tot = 2 + nargs;
-                args = (char **)malloc((nargs_tot + 1) * sizeof(char *));
-                args[nargs_tot] = NULL; // NULL-termination of args
-                for (i = 0; i < nargs_tot; i++)
-                    args[i] = malloc(BUFFER_SIZE);
-                // Two first command line arguments
-                // strcpy(args[0],inp_programFile);
-                sprintf(args[0], "./%s", inp_programFile);
-                sprintf(args[1], "%d", taskNumber);
-                // Tokenize arguments_cpy
-                token = strtok(arguments_cpy, ",");
-                // Copy the token to its place in args
-                for (i = 2; i < nargs_tot; i++) {
-                    strcpy(args[i], token);
-                    token = strtok(NULL, ",");
-                }
-                // Call the execution and check for errors
-                err = execvp(args[0], args);
+                /* C */
+                err = cProcess(taskNumber, inp_programFile, arguments, custom_path_ptr);
                 perror("ERROR:: child C process");
                 exit(err);
-
-                /* PYTHON */
             } else if (task_type == 2) {
-                // Preparations for C or Python execution
-                char *arguments_cpy;
-                arguments_cpy = malloc(strlen(arguments));
-                strcpy(arguments_cpy, arguments);
-                // This counts how many commas there are in arguments, giving
-                // the number
-                // of arguments passed to the program
-                for (i = 0; arguments_cpy[i];
-                     arguments_cpy[i] == ',' ? i++ : *arguments_cpy++)
-                    ;
-                int nargs = i + 1; // i = number of commas
-                int nargs_tot;     // will be the total number of arguments
-                                   // (nargs+program name+etc)
-                char *token;       // used for tokenizing arguments
-                char **args; // this is the NULL-terminated array of strings
-
-                // Same as in C, but adding "python" as first argument
-                // Tokenizing breaks the original string so we make a copy
-                strcpy(arguments_cpy, arguments);
-                // args: (0)-python (1)-program (2)-tasknumber
-                // (3..nargs+3)-arguments
-                nargs_tot = 3 + nargs;
-                args = (char **)malloc((nargs_tot + 1) * sizeof(char *));
-                args[nargs_tot] = NULL; // NULL-termination of args
-                for (i = 0; i < nargs_tot; i++)
-                    args[i] = malloc(BUFFER_SIZE);
-                // Two first command line arguments
-                strcpy(args[0], "python");
-                strcpy(args[1], inp_programFile);
-                sprintf(args[2], "%d", taskNumber);
-                // Tokenize arguments_cpy
-                token = strtok(arguments_cpy, ",");
-                // Copy the token to its place in args
-                for (i = 3; i < nargs_tot; i++) {
-                    strcpy(args[i], token);
-                    token = strtok(NULL, ",");
-                }
-
-                // Call the execution and check for errors
-                err = execvp(args[0], args);
+                /* PYTHON */
+                err = pythonProcess(taskNumber, inp_programFile, arguments, custom_path_ptr);
                 perror("ERROR:: child Python process");
                 exit(err);
-
-                /* PARI/GP */
             } else if (task_type == 3) {
-                // NULL-terminated array of strings
-                char **args;
-                char filename[FNAME_SIZE];
-                sprintf(filename, "%s/auxprog-%d.gp", out_dir, taskNumber);
-                // 0: gp, 1: -f, 2: -s400G, 3: file, 4: NULL
-                int nargs = 4;
-                args = (char **)malloc((nargs + 1) * sizeof(char *));
-                // Do not malloc for NULL
-                for (i = 0; i < nargs; i++)
-                    args[i] = malloc(BUFFER_SIZE);
-                // Fill up the array with strings
-                sprintf(args[0], "gp");
-                sprintf(args[1], "-f");
-                sprintf(args[2], "-s400G");
-                sprintf(args[3], "%s", filename);
-                args[4] = NULL;
-
-                // Call the execution and check for errors
-                err = execvp(args[0], args);
+                /* PARI/GP */
+                err = pariProcess(taskNumber, out_dir, custom_path_ptr);
                 perror("ERROR:: child PARI process");
                 exit(err);
-
-                /* SAGE */
             } else if (task_type == 4) {
-                // NULL-terminated array of strings
-                char **args;
-                char filename[FNAME_SIZE];
-                sprintf(filename, "%s/auxprog-%d.sage", out_dir, taskNumber);
-                // 0: sage, 1: file, 2: NULL
-                int nargs = 2;
-                args = (char **)malloc((nargs + 1) * sizeof(char *));
-                // Do not malloc for NULL
-                for (i = 0; i < nargs; i++)
-                    args[i] = malloc(BUFFER_SIZE);
-                // Fill up the array with strings
-                sprintf(args[0], "sage");
-                sprintf(args[1], "%s", filename);
-                // sprintf(args[1],"-c
-                // \"taskId=%d;taskArgs:=[%s];load('%s')\"",taskNumber,arguments,inp_programFile);
-                args[2] = NULL;
-
-                // Call the execution and check for errors
-                err = execvp(args[0], args);
+                /* SAGE */
+                err = sageProcess(taskNumber, out_dir, custom_path_ptr);
                 perror("ERROR:: child Sage process");
                 exit(err);
-
-                /* OCTAVE */
             } else if (task_type == 5) {
-                // NULL-terminated array of strings
-                char **args;
-                char filename[FNAME_SIZE];
-                sprintf(filename,"%s/auxprog-%d.m",out_dir,taskNumber);
-                // 0: octave, 1: -qf, 2: file, 3: NULL
-                int nargs = 3;
-                args = (char**)malloc((nargs+1)*sizeof(char*));
-                // Do not malloc for NULL
-                for (i=0;i<nargs;i++)
-                args[i]=malloc(BUFFER_SIZE);
-                // Fill up the array with strings
-                sprintf(args[0],"octave");
-                sprintf(args[1],"-qf");
-                sprintf(args[2],"%s",filename);
-                args[3]=NULL;
-
-                // Call the execution and check for errors
-                err=execvp(args[0],args);
+                /* OCTAVE */
+                err = octaveProcess(taskNumber, out_dir, custom_path_ptr);
                 perror("ERROR:: child Octave process");
                 exit(err);
             }

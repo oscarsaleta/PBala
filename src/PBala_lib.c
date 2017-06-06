@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 /**
  * Count how many lines a textfile has
@@ -306,50 +307,209 @@ int killPBala(void)
 {
     char nodes[NNODES][4] = {"a01", "a02", "a03", "a04",
                              "a05", "a06", "a07", "a08"};
-    int i;
+
+    char processes[7][15] = {"PBala_task", "pvmd", "mserver", "python",
+                             "gp",         "sage", "bash"};
+
+    int i, j;
     char buffer[300];
-    /* kill PBala_task processes */
     for (i = 0; i < NNODES; i++) {
-        sprintf(buffer, "ssh %s killall %s", nodes[i], "PBala_task");
-        system(buffer);
-    }
-    /* kill pvm processes */
-    for (i = 0; i < NNODES; i++) {
-        sprintf(buffer, "ssh %s killall %s", nodes[i], "pvmd");
-        system(buffer);
-    }
-    /* remove pvmd.uid files from /tmp */
-    for (i = 0; i < NNODES; i++) {
+        fprintf(stdout, "\n=== Cleaning PBala related processes from %s...\n",
+                nodes[i]);
+        /* kill processes from the list in every node */
+        for (j = 0; j < 7; j++) {
+            sprintf(buffer, "ssh %s killall %s", nodes[i], processes[j]);
+            system(buffer);
+        }
+        /* remove pvmd.uid files from /tmp */
         sprintf(buffer, "ssh %s rm -f /tmp/pvm*", nodes[i]);
         system(buffer);
     }
-    /* kill maple processes */
-    for (i = 0; i < NNODES; i++) {
-        sprintf(buffer, "ssh %s killall %s", nodes[i], "mserver");
-        system(buffer);
-    }
-    /* kill python processes */
-    for (i = 0; i < NNODES; i++) {
-        sprintf(buffer, "ssh %s killall %s", nodes[i], "python");
-        system(buffer);
-    }
-    /* kill pari processes */
-    for (i = 0; i < NNODES; i++) {
-        sprintf(buffer, "ssh %s killall %s", nodes[i], "gp");
-        system(buffer);
-    }
-    /* kill sage processes */
-    for (i = 0; i < NNODES; i++) {
-        sprintf(buffer, "ssh %s killall %s", nodes[i], "sage");
-        system(buffer);
-    }
-    /* kill bash processes */
-    for (i = 0; i < NNODES; i++) {
-        sprintf(buffer, "ssh %s killall %s", nodes[i], "bash");
-        system(buffer);
-    }
-    /* kill PBala process */
-    // system("killall PBala");
+
     return 0;
 }
+
+int mapleProcess(int taskNumber, char *inputFile, char *arguments,
+                 char *customPath)
+{
+    int i; // for loops
+    // NULL-terminated array of strings for calling the Maple script
+    char **args;
+    // 0: maple, 1: taskid, 2: X, 3: input, 4: NULL
+    int nargs = 4;
+    args = (char **)malloc((nargs + 1) * sizeof(char *));
+    // Do not malloc for NULL
+    for (i = 0; i < nargs; i++)
+        args[i] = malloc(BUFFER_SIZE);
+    // Fill up the array with strings
+    if (customPath != NULL)
+        sprintf(args[0], "%s", customPath);
+    else
+        sprintf(args[0], "maple");
+    sprintf(args[1], "-tc \"taskId:=%d\"", taskNumber);
+    sprintf(args[2], "-c \"taskArgs:=[%s]\"", arguments);
+    sprintf(args[3], "%s", inputFile);
+    args[4] = NULL;
+
+    // Call the execution and check for errors
+    return execvp(args[0], args);
+}
+
+int cProcess(int taskNumber, char *inputFile, char *arguments, char *customPath)
+{
+    int i; // for loops
+    // Preparations for C or Python execution
+    char *arguments_cpy;
+    arguments_cpy = malloc(strlen(arguments));
+    strcpy(arguments_cpy, arguments);
+    // This counts how many commas there are in arguments, giving
+    // the number
+    // of arguments passed to the program
+    for (i = 0; arguments_cpy[i];
+         arguments_cpy[i] == ',' ? i++ : *arguments_cpy++)
+        ;
+    int nargs = i + 1; // i = number of commas
+    int nargs_tot;     // will be the total number of arguments
+                       // (nargs+program name+etc)
+    char *token;       // used for tokenizing arguments
+    char **args;       // this is the NULL-terminated array of strings
+
+    /* In this case it's necessary to parse the arguments string
+     * breaking it into tokens and then arranging the args of the
+     * system call in a NULL-terminated array of strings which we
+     * pass to execvp
+     */
+    // Tokenizing breaks the original string so we make a copy
+    strcpy(arguments_cpy, arguments);
+    // Args in system call are (program tasknum arguments), so
+    // 2+nargs
+    nargs_tot = 2 + nargs;
+    args = (char **)malloc((nargs_tot + 1) * sizeof(char *));
+    args[nargs_tot] = NULL; // NULL-termination of args
+    for (i = 0; i < nargs_tot; i++)
+        args[i] = malloc(BUFFER_SIZE);
+    // Two first command line arguments
+    // strcpy(args[0],inp_programFile);
+    sprintf(args[0], "./%s", inputFile);
+    sprintf(args[1], "%d", taskNumber);
+    // Tokenize arguments_cpy
+    token = strtok(arguments_cpy, ",");
+    // Copy the token to its place in args
+    for (i = 2; i < nargs_tot; i++) {
+        strcpy(args[i], token);
+        token = strtok(NULL, ",");
+    }
+    return execvp(args[0], args);
+}
+
+int pythonProcess(int taskNumber, char *inputFile, char *arguments,
+                  char *customPath)
+{
+    int i; // for loops
+    /* Preparations for C or Python execution */
+    char *arguments_cpy;
+    arguments_cpy = malloc(strlen(arguments));
+    strcpy(arguments_cpy, arguments);
+    // This counts how many commas there are in arguments, giving
+    // the number
+    // of arguments passed to the program
+    for (i = 0; arguments_cpy[i];
+         arguments_cpy[i] == ',' ? i++ : *arguments_cpy++)
+        ;
+    int nargs = i + 1; // i = number of commas
+    int nargs_tot;     // will be the total number of arguments
+                       // (nargs+program name+etc)
+    char *token;       // used for tokenizing arguments
+    char **args;       // this is the NULL-terminated array of strings
+
+    // Same as in C, but adding "python" as first argument
+    // Tokenizing breaks the original string so we make a copy
+    strcpy(arguments_cpy, arguments);
+    // args: (0)-python (1)-program (2)-tasknumber
+    // (3..nargs+3)-arguments
+    nargs_tot = 3 + nargs;
+    args = (char **)malloc((nargs_tot + 1) * sizeof(char *));
+    args[nargs_tot] = NULL; // NULL-termination of args
+    for (i = 0; i < nargs_tot; i++)
+        args[i] = malloc(BUFFER_SIZE);
+    // Two first command line arguments
+    strcpy(args[0], "python");
+    strcpy(args[1], inputFile);
+    sprintf(args[2], "%d", taskNumber);
+    // Tokenize arguments_cpy
+    token = strtok(arguments_cpy, ",");
+    // Copy the token to its place in args
+    for (i = 3; i < nargs_tot; i++) {
+        strcpy(args[i], token);
+        token = strtok(NULL, ",");
+    }
+    return execvp(args[0], args);
+}
+
+int pariProcess(int taskNumber, char *outdir, char *customPath)
+{
+    int i;
+    // NULL-terminated array of strings
+    char **args;
+    char filename[FNAME_SIZE];
+    sprintf(filename, "%s/auxprog-%d.gp", outdir, taskNumber);
+    // 0: gp, 1: -f, 2: -s400G, 3: file, 4: NULL
+    int nargs = 4;
+    args = (char **)malloc((nargs + 1) * sizeof(char *));
+    // Do not malloc for NULL
+    for (i = 0; i < nargs; i++)
+        args[i] = malloc(BUFFER_SIZE);
+    // Fill up the array with strings
+    sprintf(args[0], "gp");
+    sprintf(args[1], "-f");
+    sprintf(args[2], "-s400G");
+    sprintf(args[3], "%s", filename);
+    args[4] = NULL;
+
+    return execvp(args[0], args);
+}
+
+int sageProcess(int taskNumber, char *outdir, char *customPath)
+{
+    int i;
+    // NULL-terminated array of strings
+    char **args;
+    char filename[FNAME_SIZE];
+    sprintf(filename, "%s/auxprog-%d.sage", outdir, taskNumber);
+    // 0: sage, 1: file, 2: NULL
+    int nargs = 2;
+    args = (char **)malloc((nargs + 1) * sizeof(char *));
+    // Do not malloc for NULL
+    for (i = 0; i < nargs; i++)
+        args[i] = malloc(BUFFER_SIZE);
+    // Fill up the array with strings
+    sprintf(args[0], "sage");
+    sprintf(args[1], "%s", filename);
+    args[2] = NULL;
+
+    return execvp(args[0], args);
+}
+
+int octaveProcess(int taskNumber, char *outdir, char *customPath)
+{
+    int i;
+    // NULL-terminated array of strings
+    char **args;
+    char filename[FNAME_SIZE];
+    sprintf(filename, "%s/auxprog-%d.m", outdir, taskNumber);
+    // 0: octave, 1: -qf, 2: file, 3: NULL
+    int nargs = 3;
+    args = (char **)malloc((nargs + 1) * sizeof(char *));
+    // Do not malloc for NULL
+    for (i = 0; i < nargs; i++)
+        args[i] = malloc(BUFFER_SIZE);
+    // Fill up the array with strings
+    sprintf(args[0], "octave");
+    sprintf(args[1], "-qf");
+    sprintf(args[2], "%s", filename);
+    args[3] = NULL;
+
+    return execvp(args[0], args);
+}
+
 #undef NNODES
