@@ -16,10 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file PBala_lib.c
- * \brief File with generic functions and constant definitions
- * \author Oscar Saleta Reig
- */
 #include "PBala_lib.h"
 
 #include <pvm3.h>
@@ -28,13 +24,18 @@
 #include <string.h>
 #include <unistd.h>
 
-/**
- * Count how many lines a textfile has
- *
- * @param[in] *fileName name of file to be counted
- *
- * \return int lineCount, -1 if an error occurred
- */
+int mapleSingleCPU(char *fname)
+{
+    char aux_str[BUFFER_SIZE];
+    sprintf(aux_str, "grep -q -F 'kernelopts(numcpus=1)' %s || (sed "
+                     "'1ikernelopts(numcpus=1);' %s > %s_tmp && mv %s "
+                     "%s.bak && mv %s_tmp %s)",
+            fname, fname, fname, fname, fname, fname, fname);
+    if (system(aux_str) == -1)
+        return -1;
+    return 0;
+}
+
 int getLineCount(char *fileName)
 {
     FILE *f_aux;
@@ -54,17 +55,6 @@ int getLineCount(char *fileName)
     return lineCount;
 }
 
-/**
- * Parse the node file and return an array of strings containing the names
- * of the nodes, and an array of ints containing their number of CPUs
- *
- * @param[in] *nodefile name of node file
- * @param[in] nNodes number of nodes
- * @param[in] ***nodes pointer to array of strings of node names
- * @param[in] **nodeCores pointer to array of ints of CPUs per node
- *
- * @returns 0 if successful, 1 if error opening file, 2 if error reading
- */
 int parseNodefile(char *nodefile, int nNodes, char ***nodes, int **nodeCores)
 {
     int i;
@@ -89,15 +79,6 @@ int parseNodefile(char *nodefile, int nNodes, char ***nodes, int **nodeCores)
     return 0;
 }
 
-/**
- * Memory check for tasks. If no guess is given, limit to 25% of max RAM
- *
- * @param[in] flag Tells the function if there is a guess by the user
- * @param[in] max_task_size If flag!=0 use this as constraint to memory
- *
- * @returns 0 if there is enough memory, 1 if there is not enough memory,
- * -1 if an error occurred
- */
 int memcheck(int flag, long int max_task_size)
 {
     FILE *f;
@@ -132,16 +113,34 @@ int memcheck(int flag, long int max_task_size)
     return 0;
 }
 
-/**
- * Print usage information to output file
- *
- * @param[in] pid Proccess identifier (within system)
- * @param[in] taskNumber Task identifier (within our program)
- * @param[in] usage Struct that contains all the resource usage information
- * @param[in] out_dir Output file name
- *
- * @returns 0 if successful
- */
+/* Subtract the ‘struct timespec’ values X and Y,
+   storing the result in RESULT.
+   Return 1 if the difference is negative, otherwise 0. */
+
+int timespec_subtract(struct timespec *result, struct timespec *x,
+                     struct timespec *y)
+{
+    /* Perform the carry for the later subtraction by updating y. */
+    if (x->tv_nsec < y->tv_nsec) {
+        int nsec = (y->tv_nsec - x->tv_nsec) / 1000000000 + 1;
+        y->tv_nsec -= 1000000000 * nsec;
+        y->tv_sec += nsec;
+    }
+    if (x->tv_nsec - y->tv_nsec > 1000000000) {
+        int nsec = (x->tv_nsec - y->tv_nsec) / 1000000000;
+        y->tv_nsec += 1000000000 * nsec;
+        y->tv_sec -= nsec;
+    }
+
+    /* Compute the time remaining to wait.
+       tv_nsec is certainly positive. */
+    result->tv_sec = x->tv_sec - y->tv_sec;
+    result->tv_nsec = x->tv_nsec - y->tv_nsec;
+
+    /* Return 1 if result is negative. */
+    return x->tv_sec < y->tv_sec;
+}
+
 int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage)
 {
     FILE *memlog;
@@ -188,16 +187,6 @@ int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage)
     return 0;
 }
 
-/**
- * Creates an auxiliary program for PARI execution
- *
- * @param[in] taskId Task number
- * @param[in] args Arguments string separated by commas
- * @param[in] programfile path to PARI script
- * @param[in] directory path to results directory
- *
- * @returns 0 if successful, -1 if error occurred
- */
 int parifile(int taskId, char *args, char *programfile, char *directory)
 {
     FILE *f;
@@ -216,16 +205,6 @@ int parifile(int taskId, char *args, char *programfile, char *directory)
     return 0;
 }
 
-/**
- * Creates an auxiliary program for SAGE execution
- *
- * @param[in] taskId Task number
- * @param[in] args Arguments string separated by commas
- * @param[in] programfile path to script
- * @param[in] directory path to results directory
- *
- * @returns 0 if successful
- */
 int sagefile(int taskId, char *args, char *programfile, char *directory)
 {
     FILE *f;
@@ -243,16 +222,6 @@ int sagefile(int taskId, char *args, char *programfile, char *directory)
     return 0;
 }
 
-/**
- * Creates an auxiliary program for Octave execution
- *
- * @param[in] taskId      Task number
- * @param[in] args        Arguments string separated by commas
- * @param[in] programfile Path to script
- * @param[in] directory   Path to the results directory
- *
- * @returns 0 if successful
- */
 int octavefile(int taskId, char *args, char *programfile, char *directory)
 {
     FILE *f;
@@ -271,16 +240,6 @@ int octavefile(int taskId, char *args, char *programfile, char *directory)
     return 0;
 }
 
-/**
- * Informs that a process has been killed or stopped
- * this function runs instead of prtusage()
- *
- * @param[in] pid Proccess identifier (within system)
- * @param[in] taskNumber Task identifier (within our program)
- * @param[in] out_dir Output file name
- *
- * @returns 0 if successful, -1 if file error
- */
 int prterror(int pid, int taskNumber, char *out_dir, double time)
 {
     FILE *memlog;
@@ -299,10 +258,6 @@ int prterror(int pid, int taskNumber, char *out_dir, double time)
 }
 
 #define NNODES 8
-/**
- * Kill every PBala related process from every antz node
- * @return  0
- */
 int killPBala(void)
 {
     char nodes[NNODES][4] = {"a01", "a02", "a03", "a04",
@@ -328,6 +283,7 @@ int killPBala(void)
 
     return 0;
 }
+#undef NNODES
 
 int mapleProcess(int taskNumber, char *inputFile, char *arguments,
                  char *customPath)
@@ -351,7 +307,6 @@ int mapleProcess(int taskNumber, char *inputFile, char *arguments,
     sprintf(args[3], "%s", inputFile);
     args[4] = NULL;
 
-    // Call the execution and check for errors
     return execvp(args[0], args);
 }
 
@@ -511,5 +466,3 @@ int octaveProcess(int taskNumber, char *outdir, char *customPath)
 
     return execvp(args[0], args);
 }
-
-#undef NNODES
