@@ -162,9 +162,9 @@ int main(int argc, char *argv[]) {
   char out_file[FNAME_SIZE];
   char cwd[FNAME_SIZE];
   // Files
-  FILE *f_data;
-  FILE *nodeInfoFile;
-  FILE *f_out;
+  FILE *f_data = NULL;
+  FILE *nodeInfoFile = NULL;
+  FILE *f_out = NULL;
   // Nodes variables
   char **nodes;
   int *nodeCores;
