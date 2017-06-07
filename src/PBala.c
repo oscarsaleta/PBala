@@ -355,7 +355,7 @@ int main(int argc, char *argv[]) {
       pvm_pkint(&(arguments.custom_path), 1, 1);
       if (arguments.custom_path) pvm_pkstr(arguments.program_path);
       pvm_send(taskId[itid], MSG_GREETING);
-      fprintf(stdout, "[CREATED_SLAVE] - created slave %d\n", itid);
+      fprintf(stdout, "[CREATED SLAVE] - created slave %d\n", itid);
       if (arguments.create_slave)
         fprintf(nodeInfoFile, "# Node %2d -> %s\n", numnode, nodes[i]);
       numnode++;
@@ -401,27 +401,27 @@ int main(int argc, char *argv[]) {
           return E_IO;  // i/o error
         fprintf(
             stdout,
-            "[CREATED_SCRIPT] - creating auxiliary Pari script for task %d\n",
+            "[CREATED SCRIPT] - creating auxiliary Pari script for task %d\n",
             taskNumber);
       } else if (task_type == 4) {
         if (sagefile(taskNumber, aux_str, inp_programFile, out_dir) == -1)
           return E_IO;  // i/o error
         fprintf(
             stdout,
-            "[CREATED_SCRIPT] - creating auxiliary Sage script for task %d\n",
+            "[CREATED SCRIPT] - creating auxiliary Sage script for task %d\n",
             taskNumber);
       } else if (task_type == 5) {
         if (octavefile(taskNumber, aux_str, inp_programFile, out_dir) == -1)
           return E_IO;
         fprintf(
             stdout,
-            "[CREATED_SCRIPT] - creating auxiliary Octave script for task %d\n",
+            "[CREATED SCRIPT] - creating auxiliary Octave script for task %d\n",
             taskNumber);
       }
 
       // send the job
       pvm_send(taskId[i], MSG_WORK);
-      fprintf(stdout, "[TASK_SENT] - sent task %4d for execution\n",
+      fprintf(stdout, "[TASK SENT] - sent task %4d for execution\n",
               taskNumber);
       if (arguments.create_slave)
         fprintf(nodeInfoFile, "%2d,%4d\n", i, taskNumber);
@@ -448,18 +448,17 @@ int main(int argc, char *argv[]) {
       pvm_upkstr(aux_str);
       // Check if response is error at forking
       if (status == ST_MEM_ERR) {
-        fprintf(stderr,
-                "[ERROR] - could not execute task %d in "
-                "slave %d (out of memory)\n",
-                taskNumber, itid);
+        fprintf(
+            stderr,
+            "[ERROR] - could not execute task %d in slave %d (out of memory)\n",
+            taskNumber, itid);
         unfinishedTasks = fopen(unfinishedTasks_name, "a");
         fprintf(unfinishedTasks, "%d,%s\n", taskNumber, aux_str);
         fclose(unfinishedTasks);
         unfinished_tasks_present = 1;
       } else if (status == ST_FORK_ERR) {
         fprintf(stderr,
-                "[ERROR] - could not fork process for task "
-                "%d in slave %d\n",
+                "[ERROR] - could not fork process for task %d in slave %d\n",
                 taskNumber, itid);
         unfinishedTasks = fopen(unfinishedTasks_name, "a");
         fprintf(unfinishedTasks, "%d,%s\n", taskNumber, aux_str);
@@ -477,8 +476,7 @@ int main(int argc, char *argv[]) {
           unfinished_tasks_present = 1;
         } else
           fprintf(stdout,
-                  "[TASK_COMPLETED] - task %4d completed "
-                  "in %14.9G seconds\n",
+                  "[TASK COMPLETED] - task %4d completed in %14.9G seconds\n",
                   taskNumber, exec_time);
       }
       // Assign more work until we're done
@@ -507,26 +505,26 @@ int main(int argc, char *argv[]) {
             return E_IO;  // i/o error
           fprintf(
               stdout,
-              "[CREATED_SCRIPT] - creating auxiliary Pari script for task %d\n",
+              "[CREATED SCRIPT] - creating auxiliary Pari script for task %d\n",
               taskNumber);
         } else if (task_type == 4) {
           if (sagefile(taskNumber, aux_str, inp_programFile, out_dir) == -1)
             return E_IO;  // i/o error
           fprintf(
               stdout,
-              "[CREATED_SCRIPT] - creating auxiliary Sage script for task %d\n",
+              "[CREATED SCRIPT] - creating auxiliary Sage script for task %d\n",
               taskNumber);
         } else if (task_type == 5) {
           if (octavefile(taskNumber, aux_str, inp_programFile, out_dir) == -1)
             return E_IO;
           fprintf(stdout,
-                  "[CREATED_SCRIPT] - creating auxiliary Octave script for "
+                  "[CREATED SCRIPT] - creating auxiliary Octave script for "
                   "task %d\n",
                   taskNumber);
         }
         // send the job
         pvm_send(taskId[itid], MSG_WORK);
-        fprintf(stdout, "[TASK_SENT] - sent task %3d for execution\n",
+        fprintf(stdout, "[TASK SENT] - sent task %3d for execution\n",
                 taskNumber);
         if (arguments.create_slave) {
           fprintf(nodeInfoFile, "%2d,%4d\n", itid, taskNumber);
@@ -564,7 +562,7 @@ int main(int argc, char *argv[]) {
                                out_dir) == -1)
                       return E_IO; // i/o error
                   fprintf(stdout,
-                          "[CREATED_SCRIPT] - creating auxiliary "
+                          "[CREATED SCRIPT] - creating auxiliary "
                           "Pari script for task %d\n",
                            taskNumber);
               } else if (task_type == 4) {
@@ -572,7 +570,7 @@ int main(int argc, char *argv[]) {
                                out_dir) == -1)
                       return E_IO; // i/o error
                   fprintf(stdout,
-                          "[CREATED_SCRIPT] - creating auxiliary "
+                          "[CREATED SCRIPT] - creating auxiliary "
                           "Sage script for task %d\n",
                            taskNumber);
               } else if (task_type == 5) {
@@ -580,14 +578,14 @@ int main(int argc, char *argv[]) {
                                  out_dir) == -1)
                       return E_IO;
                   fprintf(stdout,
-                          "[CREATED_SCRIPT] - creating auxiliary "
+                          "[CREATED SCRIPT] - creating auxiliary "
                           "Octave script for task %d\n",
                            taskNumber);
               }
               // send the job
               pvm_send(taskId[itid], MSG_WORK);
               fprintf(stdout,
-                      "[TASK_SENT] - sent task %3d for execution\n",
+                      "[TASK SENT] - sent task %3d for execution\n",
                        taskNumber);
               if (arguments.create_slave) {
                   fprintf(nodeInfoFile, "%2d,%4d\n", itid, taskNumber);
@@ -637,7 +635,7 @@ int main(int argc, char *argv[]) {
         unfinished_tasks_present = 1;
       } else
         fprintf(stdout,
-                "[TASK_COMPLETED] - task %4d completed in "
+                "[TASK COMPLETED] - task %4d completed in "
                 "%14.9G seconds\n",
                 taskNumber, exec_time);
     }
