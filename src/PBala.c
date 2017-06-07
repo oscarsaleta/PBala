@@ -421,7 +421,7 @@ int main(int argc, char *argv[]) {
 
       // send the job
       pvm_send(taskId[i], MSG_WORK);
-      fprintf(stdout, "%-20s sent task %4d for execution\n", "[TASK SENT]",
+      fprintf(stdout, "%-20s - sent task %4d for execution\n", "[TASK SENT]",
               taskNumber);
       if (arguments.create_slave)
         fprintf(nodeInfoFile, "%2d,%4d\n", i, taskNumber);
@@ -519,7 +519,7 @@ int main(int argc, char *argv[]) {
         }
         // send the job
         pvm_send(taskId[itid], MSG_WORK);
-        fprintf(stdout, "%-20s sent task %3d for execution\n", "[TASK SENT]",
+        fprintf(stdout, "%-20s - sent task %3d for execution\n", "[TASK SENT]",
                 taskNumber);
         if (arguments.create_slave) {
           fprintf(nodeInfoFile, "%2d,%4d\n", itid, taskNumber);
@@ -580,7 +580,7 @@ int main(int argc, char *argv[]) {
               // send the job
               pvm_send(taskId[itid], MSG_WORK);
               fprintf(stdout,
-                      "%-20s sent task %3d for execution\n","[TASK SENT]",
+                      "%-20s - sent task %3d for execution\n","[TASK SENT]",
                        taskNumber);
               if (arguments.create_slave) {
                   fprintf(nodeInfoFile, "%2d,%4d\n", itid, taskNumber);
