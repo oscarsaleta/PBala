@@ -200,7 +200,7 @@ int main(int argc, char *argv[]) {
       sscanf(arguments.args[2], "%s", inp_dataFile) != 1 ||
       sscanf(arguments.args[3], "%s", inp_nodes) != 1 ||
       sscanf(arguments.args[4], "%s", out_dir) != 1) {
-    fprintf(stderr, "[ERROR] - reading arguments\n");
+    fprintf(stderr, "%-20s - reading arguments\n", "[ERROR]");
     return E_ARGS;
   }
 
@@ -213,8 +213,9 @@ int main(int argc, char *argv[]) {
   if (task_type != 0 && task_type != 1 && task_type != 2 && task_type != 3 &&
       task_type != 4 && task_type != 5) {
     fprintf(stderr,
-            "[ERROR] - wrong task_type value (must be one of: "
-            "0,1,2,3,4,5)\n");
+            "%-20s - wrong task_type value (must be one of: "
+            "0,1,2,3,4,5)\n",
+            "[ERROR]");
     return E_WRONG_TASK;
   }
 
@@ -225,9 +226,9 @@ int main(int argc, char *argv[]) {
     nodeInfoFile = fopen(nodeInfoFileName, "w");
     if (nodeInfoFile == NULL) {
       fprintf(stderr,
-              "[ERROR] - cannot create file %s, make sure the output folder %s "
+              "%-20s - cannot create file %s, make sure the output folder %s "
               "exists\n",
-              nodeInfoFileName, out_dir);
+              "[ERROR]", nodeInfoFileName, out_dir);
       return E_OUTDIR;
     }
     fprintf(nodeInfoFile, "# NODE CODENAMES\n");
@@ -236,15 +237,16 @@ int main(int argc, char *argv[]) {
   /* Read node configuration file */
   // Get file length (number of nodes)
   if ((nNodes = getLineCount(inp_nodes)) == -1) {
-    fprintf(stderr, "[ERROR] - cannot open file %s\n", inp_nodes);
+    fprintf(stderr, "%-20s - cannot open file %s\n", "[ERROR]", inp_nodes);
     return E_NODE_LINES;
   }
   // Read node file
   if ((err = parseNodefile(inp_nodes, nNodes, &nodes, &nodeCores)) == 1) {
-    fprintf(stderr, "[ERROR] - cannot open file %s\n", inp_nodes);
+    fprintf(stderr, "%-20s - cannot open file %s\n", "[ERROR]", inp_nodes);
     return E_NODE_OPEN;
   } else if (err == 2) {
-    fprintf(stderr, "[ERROR] - while reading node file %s\n", inp_nodes);
+    fprintf(stderr, "%-20s - while reading node file %s\n", "[ERROR]",
+            inp_nodes);
     return E_NODE_READ;
   }
 
@@ -252,7 +254,7 @@ int main(int argc, char *argv[]) {
 
   /* get current working directory */
   if (getcwd(cwd, FNAME_SIZE) == NULL) {
-    fprintf(stderr, "[ERROR] - cannot resolve current directory\n");
+    fprintf(stderr, "%-20s - cannot resolve current directory\n", "[ERROR]");
     return E_CWD;
   }
 
@@ -276,7 +278,8 @@ int main(int argc, char *argv[]) {
   }
   sprintf(out_file, "%s/outfile.txt", out_dir);
   if ((f_out = fopen(out_file, "w")) == NULL) {
-    fprintf(stderr, "[ERROR] - cannot open output file %s\n", out_file);
+    fprintf(stderr, "%-20s - cannot open output file %s\n", "[ERROR]",
+            out_file);
     pvm_halt();
     return E_OUTFILE_OPEN;
   }
@@ -305,7 +308,8 @@ int main(int argc, char *argv[]) {
 
   // Read how many tasks we have to perform
   if ((nTasks = getLineCount(inp_dataFile)) == -1) {
-    fprintf(stderr, "[ERROR] - cannot open data file %s\n", inp_dataFile);
+    fprintf(stderr, "%-20s - cannot open data file %s\n", "[ERROR]",
+            inp_dataFile);
     pvm_halt();
     return E_DATAFILE_LINES;
   }
@@ -316,17 +320,19 @@ int main(int argc, char *argv[]) {
   for (i = 0; i < argc; i++) fprintf(stdout, "%s ", argv[i]);
   fprintf(stdout, "\n\n");
 
-  fprintf(stdout, "[INFO] - will use executable %s\n", inp_programFile);
-  fprintf(stdout, "[INFO] - will use datafile %s\n", inp_dataFile);
-  fprintf(stdout, "[INFO] - will use nodefile %s\n", inp_nodes);
-  fprintf(stdout, "[INFO] - results will be stored in %s\n\n", out_dir);
+  fprintf(stdout, "%-20s - will use executable %s\n", "[INFO]",
+          inp_programFile);
+  fprintf(stdout, "%-20s - will use datafile %s\n", "[INFO]", inp_dataFile);
+  fprintf(stdout, "%-20s - will use nodefile %s\n", "[INFO]", inp_nodes);
+  fprintf(stdout, "%-20s - results will be stored in %s\n\n", "[INFO]",
+          out_dir);
 
-  fprintf(stdout, "[INFO] - will use nodes ");
+  fprintf(stdout, "%-20s - will use nodes ", "[INFO]");
   for (i = 0; i < nNodes - 1; i++)
     fprintf(stdout, "%s (%d), ", nodes[i], nodeCores[i]);
   fprintf(stdout, "%s (%d)\n", nodes[nNodes - 1], nodeCores[nNodes - 1]);
-  fprintf(stdout, "[INFO] - will create %d tasks for %d slaves\n\n", nTasks,
-          maxConcurrentTasks);
+  fprintf(stdout, "%-20s - will create %d tasks for %d slaves\n\n", "[INFO]",
+          nTasks, maxConcurrentTasks);
 
   // Spawn all the tasks
   int taskId[maxConcurrentTasks];
@@ -338,8 +344,8 @@ int main(int argc, char *argv[]) {
       numt = pvm_spawn("PBala_task", NULL, PvmTaskHost, nodes[i], 1,
                        &taskId[itid]);
       if (numt != 1) {
-        fprintf(stderr, "[ERROR] - %d creating task %4d in node %s\n", numt,
-                taskId[itid], nodes[i]);
+        fprintf(stderr, "%-20s - %d creating task %4d in node %s\n", "[ERROR]",
+                numt, taskId[itid], nodes[i]);
         fflush(stderr);
         pvm_perror(argv[0]);
         pvm_halt();
@@ -355,7 +361,7 @@ int main(int argc, char *argv[]) {
       pvm_pkint(&(arguments.custom_path), 1, 1);
       if (arguments.custom_path) pvm_pkstr(arguments.program_path);
       pvm_send(taskId[itid], MSG_GREETING);
-      fprintf(stdout, "[CREATED SLAVE] - created slave %d\n", itid);
+      fprintf(stdout, "%-20s - created slave %d\n", "[CREATED SLAVE]", itid);
       if (arguments.create_slave)
         fprintf(nodeInfoFile, "# Node %2d -> %s\n", numnode, nodes[i]);
       numnode++;
@@ -367,7 +373,7 @@ int main(int argc, char *argv[]) {
       itid++;
     }
   }
-  fprintf(stdout, "[INFO] - all slaves created successfully\n\n");
+  fprintf(stdout, "%-20s - all slaves created successfully\n\n", "[INFO]");
 
   // First batch of work sent at once (we will listen to answers later)
   f_data = fopen(inp_dataFile, "r");
@@ -378,8 +384,8 @@ int main(int argc, char *argv[]) {
   for (i = 0; i < firstBatchSize; i++) {
     if (fgets(buffer, BUFFER_SIZE, f_data) != NULL) {
       if (sscanf(buffer, "%d", &taskNumber) != 1) {
-        fprintf(stderr,
-                "[ERROR] - first column of data file must be task id\n");
+        fprintf(stderr, "%-20s - first column of data file must be task id\n",
+                "[ERROR]");
         pvm_halt();
         return E_DATAFILE_FIRSTCOL;
       }
@@ -399,35 +405,29 @@ int main(int argc, char *argv[]) {
       if (task_type == 3) {
         if (parifile(taskNumber, aux_str, inp_programFile, out_dir) == -1)
           return E_IO;  // i/o error
-        fprintf(
-            stdout,
-            "[CREATED SCRIPT] - creating auxiliary Pari script for task %d\n",
-            taskNumber);
+        fprintf(stdout, "%-20s creating auxiliary Pari script for task %d\n",
+                "[CREATED SCRIPT]", taskNumber);
       } else if (task_type == 4) {
         if (sagefile(taskNumber, aux_str, inp_programFile, out_dir) == -1)
           return E_IO;  // i/o error
-        fprintf(
-            stdout,
-            "[CREATED SCRIPT] - creating auxiliary Sage script for task %d\n",
-            taskNumber);
+        fprintf(stdout, "%-20s creating auxiliary Sage script for task %d\n",
+                "[CREATED SCRIPT]", taskNumber);
       } else if (task_type == 5) {
         if (octavefile(taskNumber, aux_str, inp_programFile, out_dir) == -1)
           return E_IO;
-        fprintf(
-            stdout,
-            "[CREATED SCRIPT] - creating auxiliary Octave script for task %d\n",
-            taskNumber);
+        fprintf(stdout, "%-20s creating auxiliary Octave script for task %d\n",
+                "[CREATED SCRIPT]", taskNumber);
       }
 
       // send the job
       pvm_send(taskId[i], MSG_WORK);
-      fprintf(stdout, "[TASK SENT] - sent task %4d for execution\n",
+      fprintf(stdout, "%-20s sent task %4d for execution\n", "[TASK SENT]",
               taskNumber);
       if (arguments.create_slave)
         fprintf(nodeInfoFile, "%2d,%4d\n", i, taskNumber);
     }
   }
-  fprintf(stdout, "[INFO] - first batch of work sent\n\n");
+  fprintf(stdout, "%-20s - first batch of work sent\n\n", "[INFO]");
 
   // Close nodeInfoFile so it updates in file system
   if (arguments.create_slave) fclose(nodeInfoFile);
@@ -450,16 +450,16 @@ int main(int argc, char *argv[]) {
       if (status == ST_MEM_ERR) {
         fprintf(
             stderr,
-            "[ERROR] - could not execute task %d in slave %d (out of memory)\n",
-            taskNumber, itid);
+            "%-20s - could not execute task %d in slave %d (out of memory)\n",
+            "[ERROR]", taskNumber, itid);
         unfinishedTasks = fopen(unfinishedTasks_name, "a");
         fprintf(unfinishedTasks, "%d,%s\n", taskNumber, aux_str);
         fclose(unfinishedTasks);
         unfinished_tasks_present = 1;
       } else if (status == ST_FORK_ERR) {
         fprintf(stderr,
-                "[ERROR] - could not fork process for task %d in slave %d\n",
-                taskNumber, itid);
+                "%-20s - could not fork process for task %d in slave %d\n",
+                "[ERROR]", taskNumber, itid);
         unfinishedTasks = fopen(unfinishedTasks_name, "a");
         fprintf(unfinishedTasks, "%d,%s\n", taskNumber, aux_str);
         fclose(unfinishedTasks);
@@ -468,24 +468,23 @@ int main(int argc, char *argv[]) {
         pvm_upkdouble(&exec_time, 1, 1);
         // Check if task was killed or completed
         if (status == ST_TASK_KILLED) {
-          fprintf(stderr, "[ERROR] - task %4d was stopped or killed\n",
+          fprintf(stderr, "%-20s - task %4d was stopped or killed\n", "[ERROR]",
                   taskNumber);
           unfinishedTasks = fopen(unfinishedTasks_name, "a");
           fprintf(unfinishedTasks, "%d,%s\n", taskNumber, aux_str);
           fclose(unfinishedTasks);
           unfinished_tasks_present = 1;
         } else
-          fprintf(stdout,
-                  "[TASK COMPLETED] - task %4d completed in %14.9G seconds\n",
-                  taskNumber, exec_time);
+          fprintf(stdout, "%-20s - task %4d completed in %14.9G seconds\n",
+                  "[TASK COMPLETED]", taskNumber, exec_time);
       }
       // Assign more work until we're done
       if (fgets(buffer, BUFFER_SIZE, f_data) != NULL) {
         // Open nodeInfoFile for appending work
         if (arguments.create_slave) nodeInfoFile = fopen(nodeInfoFileName, "a");
         if (sscanf(buffer, "%d", &taskNumber) != 1) {
-          fprintf(stderr,
-                  "[ERROR] - first column of data file must be task id\n");
+          fprintf(stderr, "%-20s - first column of data file must be task id\n",
+                  "[ERROR]");
           pvm_halt();
           return E_DATAFILE_FIRSTCOL;
         }
@@ -503,28 +502,24 @@ int main(int argc, char *argv[]) {
         if (task_type == 3) {
           if (parifile(taskNumber, aux_str, inp_programFile, out_dir) == -1)
             return E_IO;  // i/o error
-          fprintf(
-              stdout,
-              "[CREATED SCRIPT] - creating auxiliary Pari script for task %d\n",
-              taskNumber);
+          fprintf(stdout, "%-20s creating auxiliary Pari script for task %d\n",
+                  "[CREATED SCRIPT]", taskNumber);
         } else if (task_type == 4) {
           if (sagefile(taskNumber, aux_str, inp_programFile, out_dir) == -1)
             return E_IO;  // i/o error
-          fprintf(
-              stdout,
-              "[CREATED SCRIPT] - creating auxiliary Sage script for task %d\n",
-              taskNumber);
+          fprintf(stdout, "%-20s creating auxiliary Sage script for task %d\n",
+                  "[CREATED SCRIPT]", taskNumber);
         } else if (task_type == 5) {
           if (octavefile(taskNumber, aux_str, inp_programFile, out_dir) == -1)
             return E_IO;
           fprintf(stdout,
-                  "[CREATED SCRIPT] - creating auxiliary Octave script for "
+                  "%-20s creating auxiliary Octave script for "
                   "task %d\n",
-                  taskNumber);
+                  "[CREATED SCRIPT]", taskNumber);
         }
         // send the job
         pvm_send(taskId[itid], MSG_WORK);
-        fprintf(stdout, "[TASK SENT] - sent task %3d for execution\n",
+        fprintf(stdout, "%-20s sent task %3d for execution\n", "[TASK SENT]",
                 taskNumber);
         if (arguments.create_slave) {
           fprintf(nodeInfoFile, "%2d,%4d\n", itid, taskNumber);
@@ -540,7 +535,7 @@ int main(int argc, char *argv[]) {
                   nodeInfoFile = fopen(nodeInfoFileName, "a");
               if (sscanf(buffer, "%d", &taskNumber) != 1) {
                   fprintf(stderr,
-                          "[ERROR] - first column of data file "
+                          "%-20s - first column of data file "
                           "must be task id\n",
                           argv[0]);
                   pvm_halt();
@@ -562,30 +557,30 @@ int main(int argc, char *argv[]) {
                                out_dir) == -1)
                       return E_IO; // i/o error
                   fprintf(stdout,
-                          "[CREATED SCRIPT] - creating auxiliary "
-                          "Pari script for task %d\n",
+                          "%-20s creating auxiliary Pari script for
+      task %d\n","[CREATED SCRIPT]",
                            taskNumber);
               } else if (task_type == 4) {
                   if (sagefile(taskNumber, aux_str, inp_programFile,
                                out_dir) == -1)
                       return E_IO; // i/o error
                   fprintf(stdout,
-                          "[CREATED SCRIPT] - creating auxiliary "
-                          "Sage script for task %d\n",
+                          "%-20s creating auxiliary Sage script for
+      task %d\n","[CREATED SCRIPT]",
                            taskNumber);
               } else if (task_type == 5) {
                   if (octavefile(taskNumber, aux_str, inp_programFile,
                                  out_dir) == -1)
                       return E_IO;
                   fprintf(stdout,
-                          "[CREATED SCRIPT] - creating auxiliary "
-                          "Octave script for task %d\n",
+                          "%-20s creating auxiliary Octave script
+      for task %d\n","[CREATED SCRIPT]",
                            taskNumber);
               }
               // send the job
               pvm_send(taskId[itid], MSG_WORK);
               fprintf(stdout,
-                      "[TASK SENT] - sent task %3d for execution\n",
+                      "%-20s sent task %3d for execution\n","[TASK SENT]",
                        taskNumber);
               if (arguments.create_slave) {
                   fprintf(nodeInfoFile, "%2d,%4d\n", itid, taskNumber);
@@ -608,17 +603,16 @@ int main(int argc, char *argv[]) {
     // Check if response is error at forking
     if (status == ST_MEM_ERR) {
       fprintf(stderr,
-              "[ERROR] - could not execute task %d in "
-              "slave %d (out of memory)\n",
-              taskNumber, itid);
+              "%-20s - could not execute task %d in slave %d (out of memory)\n",
+              "[ERROR]", taskNumber, itid);
       unfinishedTasks = fopen(unfinishedTasks_name, "a");
       fprintf(unfinishedTasks, "%d,%s\n", taskNumber, aux_str);
       fclose(unfinishedTasks);
       unfinished_tasks_present = 1;
     } else if (status == ST_FORK_ERR) {
       fprintf(stderr,
-              "[ERROR] - could not fork process for task %d in slave %d\n",
-              taskNumber, itid);
+              "%-20s - could not fork process for task %d in slave %d\n",
+              "[ERROR]", taskNumber, itid);
       unfinishedTasks = fopen(unfinishedTasks_name, "a");
       fprintf(unfinishedTasks, "%d,%s\n", taskNumber, aux_str);
       fclose(unfinishedTasks);
@@ -627,17 +621,15 @@ int main(int argc, char *argv[]) {
       pvm_upkdouble(&exec_time, 1, 1);
       // Check if task was killed or completed
       if (status == ST_TASK_KILLED) {
-        fprintf(stderr, "[ERROR] - task %4d was stopped or killed\n",
+        fprintf(stderr, "%-20s - task %4d was stopped or killed\n", "[ERROR]",
                 taskNumber);
         unfinishedTasks = fopen(unfinishedTasks_name, "a");
         fprintf(unfinishedTasks, "%d,%s\n", taskNumber, aux_str);
         fclose(unfinishedTasks);
         unfinished_tasks_present = 1;
       } else
-        fprintf(stdout,
-                "[TASK COMPLETED] - task %4d completed in "
-                "%14.9G seconds\n",
-                taskNumber, exec_time);
+        fprintf(stdout, "%-20s - task %4d completed in %14.9G seconds\n",
+                "[TASK COMPLETED]", taskNumber, exec_time);
     }
     pvm_upkdouble(&total_time, 1, 1);
     // Shut down slave
@@ -645,9 +637,9 @@ int main(int argc, char *argv[]) {
     pvm_pkint(&work_code, 1, 1);
     pvm_send(taskId[itid], MSG_STOP);
     fprintf(stdout,
-            "[INFO] - shutting down slave %2d (total execution "
-            "time: %13.5G seconds)\n",
-            itid, total_time);
+            "%-20s - shutting down slave %2d (total execution time: %13.5G "
+            "seconds)\n",
+            "[INFO]", itid, total_time);
     total_total_time += total_time;
   }
 
@@ -673,8 +665,8 @@ int main(int argc, char *argv[]) {
             inp_programFile, inp_programFile);
     if (system(aux_str))
       fprintf(stderr,
-              "[ERROR] - could not clean up Maple single CPU "
-              "aux scripts\n");
+              "%-20s - could not clean up Maple single CPU aux scripts\n",
+              "[ERROR]");
   }
   // remove tmp pari/sage/octave programs (if created)
   if (task_type == 3 || task_type == 4 || task_type == 5) {
@@ -694,7 +686,8 @@ int main(int argc, char *argv[]) {
     sprintf(aux_str, "rm %s", unfinishedTasks_name);
     if (system(aux_str))
       fprintf(stderr,
-              "[ERROR] - could not clean up empty unfinished tasks file\n");
+              "%-20s - could not clean up empty unfinished tasks file\n",
+              "[ERROR]");
   }
 
   pvm_catchout(0);
