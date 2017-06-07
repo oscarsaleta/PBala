@@ -321,7 +321,7 @@ int main(int argc, char *argv[]) {
   fprintf(stdout, "[INFO] - will use nodefile %s\n", inp_nodes);
   fprintf(stdout, "[INFO] - results will be stored in %s\n\n", out_dir);
 
-  fprintf(stdout, "[INFO] - will use nodes ", argv[0]);
+  fprintf(stdout, "[INFO] - will use nodes ");
   for (i = 0; i < nNodes - 1; i++)
     fprintf(stdout, "%s (%d), ", nodes[i], nodeCores[i]);
   fprintf(stdout, "%s (%d)\n", nodes[nNodes - 1], nodeCores[nNodes - 1]);
