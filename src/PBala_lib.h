@@ -201,4 +201,7 @@ int sageProcess(int taskNumber, char *outdir, char *customPath);
  */
 int octaveProcess(int taskNumber, char *outdir, char *customPath);
 
+double recieveResults(char *unfinishedTasks_name, int *unfinished_tasks_present);
+
+
 #endif /* PBALA_LIB_H */

@@ -17,6 +17,7 @@
  */
 
 #include "PBala_lib.h"
+#include "PBala_errcodes.h"
 
 #include <pvm3.h>
 #include <stdio.h>
@@ -118,7 +119,7 @@ int memcheck(int flag, long int max_task_size)
    Return 1 if the difference is negative, otherwise 0. */
 
 int timespec_subtract(struct timespec *result, struct timespec *x,
-                     struct timespec *y)
+                      struct timespec *y)
 {
     /* Perform the carry for the later subtraction by updating y. */
     if (x->tv_nsec < y->tv_nsec) {
@@ -465,4 +466,54 @@ int octaveProcess(int taskNumber, char *outdir, char *customPath)
     args[3] = NULL;
 
     return execvp(args[0], args);
+}
+
+double recieveResults(char *unfinishedTasks_name, int *unfinished_tasks_present)
+{
+    int itid, taskNumber, status;
+    char aux_str[BUFFER_SIZE];
+    double exec_time, total_time;
+    FILE *unfinishedTasks;
+
+    // Receive answer from slaves
+    pvm_recv(-1, MSG_RESULT);
+    pvm_upkint(&itid, 1, 1);
+    pvm_upkint(&taskNumber, 1, 1);
+    pvm_upkint(&status, 1, 1);
+    pvm_upkstr(aux_str);
+    // Check if response is error at forking
+    if (status == ST_MEM_ERR) {
+        fprintf(stderr, "%-20s - could not execute task %d in slave %d "
+                        "(out of memory)\n",
+                "[ERROR]", taskNumber, itid);
+        unfinishedTasks = fopen(unfinishedTasks_name, "a");
+        fprintf(unfinishedTasks, "%d,%s\n", taskNumber, aux_str);
+        fclose(unfinishedTasks);
+        *unfinished_tasks_present = 1;
+    } else if (status == ST_FORK_ERR) {
+        fprintf(stderr,
+                "%-20s - could not fork process for task %d in slave %d\n",
+                "[ERROR]", taskNumber, itid);
+        unfinishedTasks = fopen(unfinishedTasks_name, "a");
+        if (unfinishedTasks != NULL)
+            fprintf(unfinishedTasks, "%d,%s\n", taskNumber, aux_str);
+        fclose(unfinishedTasks);
+        *unfinished_tasks_present = 1;
+    } else {
+        pvm_upkdouble(&exec_time, 1, 1);
+        // Check if task was killed or completed
+        if (status == ST_TASK_KILLED) {
+            fprintf(stderr, "%-20s - task %4d was stopped or killed\n",
+                    "[ERROR]", taskNumber);
+            unfinishedTasks = fopen(unfinishedTasks_name, "a");
+            if (unfinishedTasks != NULL)
+                fprintf(unfinishedTasks, "%d,%s\n", taskNumber, aux_str);
+            fclose(unfinishedTasks);
+            *unfinished_tasks_present = 1;
+        } else
+            fprintf(stdout, "%-20s - task %4d completed in %14.9G seconds\n",
+                    "[TASK COMPLETED]", taskNumber, exec_time);
+    }
+    pvm_upkdouble(&total_time, 1, 1);
+    return total_time;
 }
