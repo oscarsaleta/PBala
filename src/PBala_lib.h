@@ -23,8 +23,8 @@
  * \author Oscar Saleta Reig
  */
 
-#include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/time.h>
 
 #define PVM_ENCODING PvmDataRaw ///< Little Endian encoding
 #define MAX_NODE_LENGTH 6       ///< Max length of node names (a0X)
@@ -78,7 +78,7 @@ int memcheck(int flag, long int max_task_size);
  * @return       1 if the difference is negative, otherwise 0
  */
 int timespec_subtract(struct timespec *result, struct timespec *x,
-                     struct timespec *y);
+                      struct timespec *y);
 /**
  * Print usage information to output file
  *
