@@ -18,6 +18,10 @@
 -->
 
 # Releases and changelog
+* **v6.0.0**:
+    - Total overhaul of how PBala handles tasks. Before it used to be file I/O based: get one line, pass it as arguments to a PVM slave, etc. Now we have a linked list of tasks, we only read the input datafile once, and we are able to dynamically remove the completed tasks from the list or readd the tasks that were unable to complete due to error/lack of memory.
+    - PBala can look for the executable `PBala_task` in the current directory and in ~/bin/. If it does not find the executable in these directories, it will print a clear error.
+    - Redesign of logging functions, so PBala output looks cleaner and easier to understand.
 * **v5.1.0**:
     - Add new option to PBala: `-c, --custom-process=/path/to/exec` for specifying a custom path to the Maple/Sage/Python/etc executable to use
     - Changed timers to nanoseconds resolution
