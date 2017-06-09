@@ -22,10 +22,22 @@
 
 # Current version
 
-Current version is 5.1.0. 
+Current version is 6.0.0. 
 
 # Download and install
-Go to the [latest release](https://www.github.com/oscarsaleta/PBala/releases/latest "Latest release") for download links and installation instructions.
+Go to the [latest release](https://www.github.com/oscarsaleta/PBala/releases/latest "Latest release") for download links.
+
+To install PBala, simply extract the contents of one of the attached downloads in the release page and copy the executables `PBala` and `PBala_task` to the directory where you want to work (you can ignore the `include` directory).
+
+Also, make sure you have these lines in your `.bashrc` (for _sh_ users):
+```
+export PVM_ROOT=/usr/lib/pvm3
+export PVM_DPATH=$PVM_ROOT/lib/pvmd
+```
+or this in your `.cshrc` (for _csh_ users):
+```
+setenv PVM_ROOT /usr/lib/pvm3
+```
 
 # Examples
 See [the examples directory](Examples "Examples") the examples directory.
