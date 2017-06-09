@@ -45,10 +45,9 @@
  */
 int main(int argc, char *argv[])
 {
-    int myparent, taskNumber; // myparent is the master
-    int me;                   // me is the PVM id of this child
-    // work_code is a flag that tells the child what to do
-    int work_code;
+    int myparent, taskNumber, tries; // myparent is the master
+    int me;                          // me is the PVM id of this child
+    int work_code; // work_code is a flag that tells the child what to do
     char inp_programFile[FNAME_SIZE]; // name of the program
     char out_dir[FNAME_SIZE];         // name of output directory
     char arguments[BUFFER_SIZE]; // string of arguments as read from data file
@@ -93,33 +92,29 @@ int main(int argc, char *argv[])
          *  both conclude that there is enough because they see the same
          *  output, but maybe there is not enough memory for 2 tasks.
          */
-        if ((mcheck = memcheck(memcheck_flag, max_task_size)) == 1) {
-            sleep(60); // arbitrary number that could be much lower
-            continue;
-        } else if (mcheck == -1) {
+        if ((mcheck = memcheck(memcheck_flag, max_task_size)) != 0) {
             /* if memcheck fails, return to master to try another node */
-            int state = ST_MEM_ERR;
-            pvm_initsend(PVM_ENCODING);
-            pvm_pkint(&me, 1, 1);
-            pvm_pkint(&taskNumber, 1, 1);
-            pvm_pkint(&state, 1, 1);
-            pvm_pkstr(arguments);
-            pvm_pkdouble(&totalt, 1, 1);
-            pvm_send(myparent, MSG_RESULT);
-            pvm_exit();
-            exit(1); // i/o error
+            sleep(1);
+            continue;
         }
+
+        // send ready message
+        pvm_initsend(PVM_ENCODING);
+        pvm_pkint(&me, 1, 1);
+        pvm_send(myparent, MSG_READY);
+
         // Receive inputs
         pvm_recv(myparent, MSG_WORK);
         pvm_upkint(&work_code, 1, 1);
         if (work_code == MSG_STOP) // if master tells task to shutdown
             break;
         pvm_upkint(&taskNumber, 1, 1);
+        pvm_upkint(&tries, 1, 1);
         pvm_upkstr(inp_programFile);
         pvm_upkstr(out_dir);
         pvm_upkstr(arguments); // string of comma-separated arguments read from
                                // datafile
-
+        tries++;
         clock_gettime(CLOCK_REALTIME, &tspec_before);
 
         /* Fork one process that will do the execution
@@ -136,17 +131,16 @@ int main(int argc, char *argv[])
             pvm_initsend(PVM_ENCODING);
             pvm_pkint(&me, 1, 1);
             pvm_pkint(&taskNumber, 1, 1);
+            pvm_pkint(&tries, 1, 1);
             pvm_pkint(&state, 1, 1);
             pvm_pkstr(arguments);
             pvm_pkdouble(&totalt, 1, 1);
             pvm_send(myparent, MSG_RESULT);
-            pvm_exit();
-            exit(1);
+            continue;
         }
         // Child code (work done here)
         if (pid == 0) {
             char output_file[BUFFER_SIZE];
-            int err; // for executions
 
             // Move stdout to taskNumber_out.txt
             sprintf(output_file, "%s/task%d_stdout.txt", out_dir, taskNumber);
@@ -168,37 +162,31 @@ int main(int argc, char *argv[])
              */
             if (task_type == 0) {
                 /* MAPLE */
-                err = mapleProcess(taskNumber, inp_programFile, arguments,
-                                   custom_path_ptr);
+                mapleProcess(taskNumber, inp_programFile, arguments,
+                             custom_path_ptr);
                 perror("ERROR:: child Maple process");
-                exit(err);
             } else if (task_type == 1) {
                 /* C */
-                err = cProcess(taskNumber, inp_programFile, arguments,
-                               custom_path_ptr);
+                cProcess(taskNumber, inp_programFile, arguments,
+                         custom_path_ptr);
                 perror("ERROR:: child C process");
-                exit(err);
             } else if (task_type == 2) {
                 /* PYTHON */
-                err = pythonProcess(taskNumber, inp_programFile, arguments,
-                                    custom_path_ptr);
+                pythonProcess(taskNumber, inp_programFile, arguments,
+                              custom_path_ptr);
                 perror("ERROR:: child Python process");
-                exit(err);
             } else if (task_type == 3) {
                 /* PARI/GP */
-                err = pariProcess(taskNumber, out_dir, custom_path_ptr);
+                pariProcess(taskNumber, out_dir, custom_path_ptr);
                 perror("ERROR:: child PARI process");
-                exit(err);
             } else if (task_type == 4) {
                 /* SAGE */
-                err = sageProcess(taskNumber, out_dir, custom_path_ptr);
+                sageProcess(taskNumber, out_dir, custom_path_ptr);
                 perror("ERROR:: child Sage process");
-                exit(err);
             } else if (task_type == 5) {
                 /* OCTAVE */
-                err = octaveProcess(taskNumber, out_dir, custom_path_ptr);
+                octaveProcess(taskNumber, out_dir, custom_path_ptr);
                 perror("ERROR:: child Octave process");
-                exit(err);
             }
         }
 
@@ -233,6 +221,7 @@ int main(int argc, char *argv[])
         pvm_initsend(PVM_ENCODING);
         pvm_pkint(&me, 1, 1);
         pvm_pkint(&taskNumber, 1, 1);
+        pvm_pkint(&tries, 1, 1);
         pvm_pkint(&state, 1, 1);
         pvm_pkstr(arguments);
         pvm_pkdouble(&difft, 1, 1);
