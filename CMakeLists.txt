@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.6)
 
 project (PBala)
 
-set (PBala_VERSION_MAJOR 5)
-set (PBala_VERSION_MINOR 1)
+set (PBala_VERSION_MAJOR 6)
+set (PBala_VERSION_MINOR 0)
 set (PBala_VERSION_PATCH 0)
 
 set(CMAKE_C_FLAGS "-O3 -Wall -Wno-unused-result")
