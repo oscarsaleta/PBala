@@ -24,26 +24,26 @@
  */
 
 /* ERROR CODES FOR PBala.c MAIN RETURN VALUES */
+//FIXME: arreglar numeros
 #define E_ARGS 10
-#define E_NODE_LINES 11
-#define E_NODE_OPEN 12
-#define E_NODE_READ 13
-#define E_CWD 14
-#define E_PVM_MYTID 15
-#define E_PVM_PARENT 16
-#define E_DATAFILE_LINES 17
-#define E_OUTFILE_OPEN 18
-#define E_PVM_SPAWN 19
-#define E_DATAFILE_FIRSTCOL 20
-#define E_OUTDIR 21
-#define E_WRONG_TASK 22
-#define E_IO 23
-#define E_MPL 24
-#define E_PVM_DUP 25
+#define E_NODEFILE 11
+#define E_CWD 12
+#define E_PVM_MYTID 13
+#define E_PVM_PARENT 14
+#define E_DATAFILE 15
+#define E_OUTFILE_OPEN 16
+#define E_PVM_SPAWN 17
+#define E_OUTDIR 18
+#define E_WRONG_TASK 19
+#define E_IO 20
+#define E_MPL 21
+#define E_PVM_DUP 22
+#define E_NO_PBALA_TASK 23
 
 /* ERROR CODES FOR PBala_task.c SLAVE RETURN STATUS */
-#define ST_FORK_ERR 10
-#define ST_TASK_KILLED 11
-#define ST_MEM_ERR 12
+#define ST_READY 10
+#define ST_FORK_ERR 11
+#define ST_TASK_KILLED 12
+#define ST_MEM_ERR 13
 
 #endif /* PBALA_ERRCODES_H */
