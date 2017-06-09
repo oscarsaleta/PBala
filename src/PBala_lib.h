@@ -23,17 +23,30 @@
  * \author Oscar Saleta Reig
  */
 
+#include "stdio.h"
 #include <sys/resource.h>
 #include <sys/time.h>
 
 #define PVM_ENCODING PvmDataRaw ///< Little Endian encoding
 #define MAX_NODE_LENGTH 6       ///< Max length of node names (a0X)
+#define MAX_TASK_TRIES 3        ///< Max number of tries per task
 #define FNAME_SIZE 150          ///< Max length of filename (including path)
 #define BUFFER_SIZE 2048        ///< Max size of buffer for reading files
 #define MSG_GREETING 1          ///< Flag for initializing task
 #define MSG_WORK 2              ///< Flag for telling task to do work
 #define MSG_RESULT 3 ///< Flag that indicates that message contains results
 #define MSG_STOP 4   ///< Flag for stopping a task
+/**
+ * Flag that indicates that message is a ready sign for master
+ */
+#define MSG_READY 5
+
+typedef struct task_ {
+    char args[BUFFER_SIZE];
+    int number;
+    int tries;
+    struct task_ *next;
+} task, *task_ptr;
 
 /**
  * Prepare Maple scripts for single CPU executions
@@ -54,12 +67,11 @@ int getLineCount(char *fname);
  * of the nodes, and an array of ints containing their number of CPUs
  *
  * @param nodefile  name of node file
- * @param nNodes    number of nodes
  * @param nodes     pointer to array of strings of node names
  * @param nodeCores pointer to array of ints of CPUs per node
- * @return          0 if successful, 1 if error opening file, 2 if error reading
+ * @return          number of nodes, -1 if error
  */
-int parseNodefile(char *nodefile, int nNodes, char ***nodes, int **nodeCores);
+int parseNodeFile(char *nodefile, char ***nodes, int **nodeCores);
 /**
  * Memory check for tasks. If no guess is given, limit to 25% of max RAM
  *
@@ -200,8 +212,75 @@ int sageProcess(int taskNumber, char *outdir, char *customPath);
  * @return            output of execvp of the generated string
  */
 int octaveProcess(int taskNumber, char *outdir, char *customPath);
-
-double recieveResults(char *unfinishedTasks_name, int *unfinished_tasks_present);
-
+/**
+ * Get tasks from file and create a linked list
+ *
+ * We avoid additional file I/O by storing all the tasks in a linked list. This
+ * also enables us to remove (pop) or add (push) tasks on runtime, in case tasks
+ * are completed or fail.
+ *
+ * @param  filename    name of input data file
+ * @param  currentTask pointer to the head of the task linked list
+ * @return             number of tasks recorded
+ */
+int getDataFromFile(char *filename, task_ptr *currentTask);
+/**
+ * Print an abort message in case a fatal error occurred
+ */
+void printAbort(void);
+/**
+ * Add (push) task to the linked list
+ *
+ * The task added is the new current task
+ *
+ * @param currentTask pointer to head of linked list
+ * @param tasknumber  task number
+ * @param taskargs    string of comma separated arguments
+ * @param tries       number of tries done for this task
+ */
+void addTask(task_ptr *currentTask, int tasknumber, char *taskargs, int tries);
+/**
+ * Pop a task from the linked list
+ *
+ * The new current task is currentTask->next
+ *
+ * @param currentTask pointer to head of linked list
+ */
+void removeTask(task_ptr *currentTask);
+/**
+ * Create a new task
+ *
+ * Allocate memory for a new task, and assign tasknumber, args and next task
+ * pointer (next can be NULL)
+ *
+ * @param  number task number
+ * @param  args   task arguments
+ * @param  tries  number of tries performed for this task
+ * @param  next   next task in linked list
+ * @return        the created task
+ */
+task_ptr newTask(int number, char *args, int tries,task_ptr next);
+/**
+ * Print all tasks (for debugging purposes)
+ *
+ * Goes through the whole linked list and prints the task number and args of
+ * each element
+ *
+ * @param currentTask current task head
+ */
+void printTasks(task_ptr currentTask);
+/**
+ * Write an unfinished task to a file
+ *
+ * If execution of a task failed and cannot be retried, we write the task in the
+ * same format as the input file in a separate file, so the user can later
+ * execute PBala with that file as input to finish all computations. The name of
+ * the file is the name of the input filename with the suffix "unfinished_"
+ *
+ * @param fname      input file name
+ * @param tasknumber task number
+ * @param args       task arguments
+ */
+void addUnfinishedTask(char *fname, int tasknumber, char *args);
 
 #endif /* PBALA_LIB_H */

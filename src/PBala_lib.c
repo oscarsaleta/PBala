@@ -19,8 +19,8 @@
 #include "PBala_lib.h"
 #include "PBala_errcodes.h"
 
+#include <fcntl.h>
 #include <pvm3.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -56,28 +56,36 @@ int getLineCount(char *fileName)
     return lineCount;
 }
 
-int parseNodefile(char *nodefile, int nNodes, char ***nodes, int **nodeCores)
+int parseNodeFile(char *nodefile, char ***nodes, int **nodeCores)
 {
-    int i;
+    int i, nNodes;
     FILE *f_nodes;
+    // count number of nodes
+    if ((nNodes = getLineCount(nodefile)) < 0) {
+        fprintf(stderr, "%-20s - cannot open file %s\n", "[ERROR]", nodefile);
+        return -1;
+    }
     // Open node file
     f_nodes = fopen(nodefile, "r");
     if (f_nodes == NULL) {
-        return 1;
+        fprintf(stderr, "%-20s - cannot open file %s\n", "[ERROR]", nodefile);
+        return -1;
     }
     // Allocate memory for node and cpu array
+    *nodeCores = (int *)malloc(nNodes * sizeof(int));
     *nodes = (char **)malloc(nNodes * sizeof(char *));
     for (i = 0; i < nNodes; i++)
         (*nodes)[i] = (char *)malloc(MAX_NODE_LENGTH * sizeof(char));
-    *nodeCores = (int *)malloc(nNodes * sizeof(int));
     // Read node file and store the info
     for (i = 0; i < nNodes; i++) {
         if (fscanf(f_nodes, "%s %d", (*nodes)[i], &(*nodeCores)[i]) != 2) {
-            return 2;
+            fprintf(stderr, "%-20s - while reading node file %s\n", "[ERROR]",
+                    nodefile);
+            return -1;
         }
     }
     fclose(f_nodes);
-    return 0;
+    return nNodes;
 }
 
 int memcheck(int flag, long int max_task_size)
@@ -86,7 +94,7 @@ int memcheck(int flag, long int max_task_size)
     char buffer[1024];
     char *token;
 
-    int maxmem, freemem;
+    long int maxmem, freemem;
 
     f = fopen("/proc/meminfo", "r");
     if (f == NULL)
@@ -95,13 +103,13 @@ int memcheck(int flag, long int max_task_size)
         return -1;
     token = strtok(buffer, " ");
     token = strtok(NULL, " ");
-    if (sscanf(token, "%d", &maxmem) != 1)
+    if (sscanf(token, "%ld", &maxmem) != 1)
         return -1;
     if (fgets(buffer, 1024, f) == NULL) // reads free memory
         return -1;
     token = strtok(buffer, " ");
     token = strtok(NULL, " ");
-    if (sscanf(token, "%d", &freemem) != 1)
+    if (sscanf(token, "%ld", &freemem) != 1)
         return -1;
     fclose(f);
     if (flag == 0) {
@@ -113,10 +121,6 @@ int memcheck(int flag, long int max_task_size)
     }
     return 0;
 }
-
-/* Subtract the ‘struct timespec’ values X and Y,
-   storing the result in RESULT.
-   Return 1 if the difference is negative, otherwise 0. */
 
 int timespec_subtract(struct timespec *result, struct timespec *x,
                       struct timespec *y)
@@ -468,52 +472,84 @@ int octaveProcess(int taskNumber, char *outdir, char *customPath)
     return execvp(args[0], args);
 }
 
-double recieveResults(char *unfinishedTasks_name, int *unfinished_tasks_present)
+int getDataFromFile(char *filename, task_ptr *currentTask)
 {
-    int itid, taskNumber, status;
-    char aux_str[BUFFER_SIZE];
-    double exec_time, total_time;
-    FILE *unfinishedTasks;
+    int i, nArgs;
+    FILE *f;
+    int tasknumber;
+    char arguments[BUFFER_SIZE];
 
-    // Receive answer from slaves
-    pvm_recv(-1, MSG_RESULT);
-    pvm_upkint(&itid, 1, 1);
-    pvm_upkint(&taskNumber, 1, 1);
-    pvm_upkint(&status, 1, 1);
-    pvm_upkstr(aux_str);
-    // Check if response is error at forking
-    if (status == ST_MEM_ERR) {
-        fprintf(stderr, "%-20s - could not execute task %d in slave %d "
-                        "(out of memory)\n",
-                "[ERROR]", taskNumber, itid);
-        unfinishedTasks = fopen(unfinishedTasks_name, "a");
-        fprintf(unfinishedTasks, "%d,%s\n", taskNumber, aux_str);
-        fclose(unfinishedTasks);
-        *unfinished_tasks_present = 1;
-    } else if (status == ST_FORK_ERR) {
-        fprintf(stderr,
-                "%-20s - could not fork process for task %d in slave %d\n",
-                "[ERROR]", taskNumber, itid);
-        unfinishedTasks = fopen(unfinishedTasks_name, "a");
-        if (unfinishedTasks != NULL)
-            fprintf(unfinishedTasks, "%d,%s\n", taskNumber, aux_str);
-        fclose(unfinishedTasks);
-        *unfinished_tasks_present = 1;
-    } else {
-        pvm_upkdouble(&exec_time, 1, 1);
-        // Check if task was killed or completed
-        if (status == ST_TASK_KILLED) {
-            fprintf(stderr, "%-20s - task %4d was stopped or killed\n",
-                    "[ERROR]", taskNumber);
-            unfinishedTasks = fopen(unfinishedTasks_name, "a");
-            if (unfinishedTasks != NULL)
-                fprintf(unfinishedTasks, "%d,%s\n", taskNumber, aux_str);
-            fclose(unfinishedTasks);
-            *unfinished_tasks_present = 1;
-        } else
-            fprintf(stdout, "%-20s - task %4d completed in %14.9G seconds\n",
-                    "[TASK COMPLETED]", taskNumber, exec_time);
+    // get argument count
+    if ((nArgs = getLineCount(filename)) < 0)
+        return -1;
+
+    // fill arguments array with data from file
+    f = fopen(filename, "r");
+    if (f == NULL) {
+        fprintf(stderr, "%-20s - cannot open file %s\n", "[ERROR]", filename);
+        return -1;
     }
-    pvm_upkdouble(&total_time, 1, 1);
-    return total_time;
+
+    for (i = 0; i < nArgs; i++) {
+        if (fscanf(f, "%d,%s\n", &tasknumber, arguments) != 2) {
+            fprintf(stderr, "%-20s - cannot read line %d in file %s\n",
+                    "[ERROR]", i, filename);
+            return -1;
+        }
+        addTask(currentTask, tasknumber, arguments, 0);
+    }
+
+    fclose(f);
+    return nArgs;
+}
+
+void printAbort(void) { fprintf(stderr, "\n== EXECUTION ABORTED ==\n"); }
+
+task_ptr newTask(int number, char *args, int tries, task_ptr next)
+{
+    task_ptr new_task = (task_ptr)malloc(sizeof(task));
+    strcpy(new_task->args, args);
+    new_task->number = number;
+    new_task->next = next;
+    new_task->tries = tries;
+    return new_task;
+}
+
+void addTask(task_ptr *currentTask, int tasknumber, char *taskargs, int tries)
+{
+    task_ptr new_task = newTask(tasknumber, taskargs, tries, *currentTask);
+    *currentTask = new_task;
+}
+
+void removeTask(task_ptr *currentTask)
+{
+    if (*currentTask == NULL)
+        return;
+    task_ptr aux = *currentTask;
+    *currentTask = (*currentTask)->next;
+    free(aux);
+}
+
+void printTasks(task_ptr currentTask)
+{
+    task_ptr t = currentTask;
+    fprintf(stdout, "\nPRINTING TASKS\n");
+
+    while (t != NULL) {
+        fprintf(stdout, "task:%d,%s\n", t->number, t->args);
+        t = t->next;
+    }
+}
+
+void addUnfinishedTask(char *fname, int tasknumber, char *args)
+{
+    char fname2[FNAME_SIZE];
+    int fd;
+    FILE *f;
+    sprintf(fname2, "unfinished_%s", fname);
+    fd = open(fname2, O_WRONLY | O_APPEND | O_CREAT, 0644);
+    f = fdopen(fd, "a");
+    fprintf(f, "%d,%s\n", tasknumber, args);
+    fclose(f);
+    close(fd);
 }
