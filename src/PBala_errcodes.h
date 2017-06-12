@@ -24,7 +24,6 @@
  */
 
 /* ERROR CODES FOR PBala.c MAIN RETURN VALUES */
-//FIXME: arreglar numeros
 #define E_ARGS 10
 #define E_NODEFILE 11
 #define E_CWD 12
