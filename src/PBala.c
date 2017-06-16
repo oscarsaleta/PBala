@@ -400,7 +400,7 @@ int main(int argc, char *argv[])
     int status, taskNumber, tries;
     work_code = MSG_GREETING;
     while (currentTask != NULL || runningTasks != 0) {
-        if (runningTasks != maxConcurrentTasks) {
+        if (runningTasks != maxConcurrentTasks && currentTask != NULL) {
             // wait for a ready signal
             if (pvm_nrecv(-1, MSG_READY)) {
                 pvm_upkint(&itid, 1, 1);
