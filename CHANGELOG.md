@@ -18,6 +18,8 @@
 -->
 
 # Releases and changelog
+* **v6.0.1**:
+    - Solved bug that caused the `PBala` master process to use 100% CPU while waiting for slaves to finish their work.
 * **v6.0.0**:
     - Total overhaul of how PBala handles tasks. Before it used to be file I/O based: get one line, pass it as arguments to a PVM slave, etc. Now we have a linked list of tasks, we only read the input datafile once, and we are able to dynamically remove the completed tasks from the list or readd the tasks that were unable to complete due to error/lack of memory.
     - PBala can look for the executable `PBala_task` in the current directory and in ~/bin/. If it does not find the executable in these directories, it will print a clear error.
