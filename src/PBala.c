@@ -400,101 +400,161 @@ int main(int argc, char *argv[])
     int status, taskNumber, tries;
     work_code = MSG_GREETING;
     while (currentTask != NULL || runningTasks != 0) {
-        // wait for a ready signal
-        if (pvm_nrecv(-1, MSG_READY)) {
-            pvm_upkint(&itid, 1, 1);
-            // send a job if there is one
-            if (currentTask != NULL) {
-                pvm_initsend(PVM_ENCODING);
-                pvm_pkint(&work_code, 1, 1);
-                pvm_pkint(&currentTask->number, 1, 1);
-                pvm_pkint(&currentTask->tries, 1, 1);
-                pvm_pkstr(inp_programFile);
-                pvm_pkstr(out_dir);
-                pvm_pkstr(currentTask->args);
-                // create file for pari execution if needed
-                if (task_type == 3) {
-                    if (parifile(currentTask->number, currentTask->args,
-                                 inp_programFile, out_dir) == -1)
-                        return E_IO; // i/o error
-                    printf("%-20s Creating auxiliary Pari script for task "
-                           "%d\n",
-                           "[CREATED SCRIPT]", currentTask->number);
-                } else if (task_type == 4) {
-                    if (sagefile(currentTask->number, currentTask->args,
-                                 inp_programFile, out_dir) == -1)
-                        return E_IO; // i/o error
-                    printf("%-20s Creating auxiliary Sage script for task "
-                           "%d\n",
-                           "[CREATED SCRIPT]", currentTask->number);
-                } else if (task_type == 5) {
-                    if (octavefile(currentTask->number, currentTask->args,
-                                   inp_programFile, out_dir) == -1)
-                        return E_IO;
-                    printf("%-20s Creating auxiliary Octave script for "
-                           "task %d\n",
-                           "[CREATED SCRIPT]", currentTask->number);
-                }
-
-                // send the job
-                pvm_send(slaveId[itid], MSG_WORK);
-                printf("%-20s - Sent task %3d for execution in slave %d\n",
-                       "[TASK SENT]", currentTask->number, itid);
-                if (arguments.create_slave)
-                    fprintf(nodeInfoFile, "%2d,%4d\n", i, currentTask->number);
-
-                removeTask(&currentTask);
-                runningTasks++;
-            }
-        }
-        // wait for a job result
-        if (pvm_nrecv(-1, MSG_RESULT)) {
-            pvm_upkint(&itid, 1, 1);
-            pvm_upkint(&taskNumber, 1, 1);
-            pvm_upkint(&tries, 1, 1);
-            pvm_upkint(&status, 1, 1);
-            pvm_upkstr(aux_str);
-            // Check if response is error at forking
-            if (status == ST_MEM_ERR) {
-                fprintf(stderr, "%-20s - Could not execute task %d in slave %d "
-                                "(out of memory)\n",
-                        "[ERROR]", taskNumber, itid);
-                if (tries < MAX_TASK_TRIES)
-                    addTask(&currentTask, taskNumber, aux_str, tries);
-                else {
-                    addUnfinishedTask(inp_dataFile, taskNumber, aux_str);
-                    unfinished_tasks_present = 1;
-                }
-            } else if (status == ST_FORK_ERR) {
-                fprintf(stderr, "%-20s - Could not fork process for task "
-                                "%d in slave %d\n",
-                        "[ERROR]", taskNumber, itid);
-                if (tries < MAX_TASK_TRIES)
-                    addTask(&currentTask, taskNumber, aux_str, tries);
-                else {
-                    addUnfinishedTask(inp_dataFile, taskNumber, aux_str);
-                    unfinished_tasks_present = 1;
-                }
-            } else {
-                pvm_upkdouble(&exec_time, 1, 1);
-                // Check if task was killed or completed
-                if (status == ST_TASK_KILLED) {
-                    // no retry if task was killed (was killed for a
-                    // reason!)
-                    fprintf(stderr, "%-20s - Task %4d was stopped or killed "
-                                    "after %14.9G seconds\n",
-                            "[ERROR]", taskNumber, exec_time);
-                    addUnfinishedTask(inp_dataFile, taskNumber, aux_str);
-                    unfinished_tasks_present = 1;
-                } else {
-                    printf("%-20s - Task %4d completed in %14.9G seconds\n",
-                           "[TASK COMPLETED]", taskNumber, exec_time);
-                    if (arguments.create_slave) {
-                        fprintf(nodeInfoFile, "%2d,%4d\n", itid, taskNumber);
+        if (runningTasks != maxConcurrentTasks) {
+            // wait for a ready signal
+            if (pvm_nrecv(-1, MSG_READY)) {
+                pvm_upkint(&itid, 1, 1);
+                // send a job if there is one
+                if (currentTask != NULL) {
+                    pvm_initsend(PVM_ENCODING);
+                    pvm_pkint(&work_code, 1, 1);
+                    pvm_pkint(&currentTask->number, 1, 1);
+                    pvm_pkint(&currentTask->tries, 1, 1);
+                    pvm_pkstr(inp_programFile);
+                    pvm_pkstr(out_dir);
+                    pvm_pkstr(currentTask->args);
+                    // create file for pari execution if needed
+                    if (task_type == 3) {
+                        if (parifile(currentTask->number, currentTask->args,
+                                     inp_programFile, out_dir) == -1)
+                            return E_IO; // i/o error
+                        printf("%-20s Creating auxiliary Pari script for task "
+                               "%d\n",
+                               "[CREATED SCRIPT]", currentTask->number);
+                    } else if (task_type == 4) {
+                        if (sagefile(currentTask->number, currentTask->args,
+                                     inp_programFile, out_dir) == -1)
+                            return E_IO; // i/o error
+                        printf("%-20s Creating auxiliary Sage script for task "
+                               "%d\n",
+                               "[CREATED SCRIPT]", currentTask->number);
+                    } else if (task_type == 5) {
+                        if (octavefile(currentTask->number, currentTask->args,
+                                       inp_programFile, out_dir) == -1)
+                            return E_IO;
+                        printf("%-20s Creating auxiliary Octave script for "
+                               "task %d\n",
+                               "[CREATED SCRIPT]", currentTask->number);
                     }
+
+                    // send the job
+                    pvm_send(slaveId[itid], MSG_WORK);
+                    printf("%-20s - Sent task %3d for execution in slave %d\n",
+                           "[TASK SENT]", currentTask->number, itid);
+                    if (arguments.create_slave)
+                        fprintf(nodeInfoFile, "%2d,%4d\n", i,
+                                currentTask->number);
+
+                    removeTask(&currentTask);
+                    runningTasks++;
                 }
-                total_time += exec_time;
-                runningTasks--;
+            }
+            // wait for a job result
+            if (pvm_nrecv(-1, MSG_RESULT)) {
+                pvm_upkint(&itid, 1, 1);
+                pvm_upkint(&taskNumber, 1, 1);
+                pvm_upkint(&tries, 1, 1);
+                pvm_upkint(&status, 1, 1);
+                pvm_upkstr(aux_str);
+                // Check if response is error at forking
+                if (status == ST_MEM_ERR) {
+                    fprintf(stderr,
+                            "%-20s - Could not execute task %d in slave %d "
+                            "(out of memory)\n",
+                            "[ERROR]", taskNumber, itid);
+                    if (tries < MAX_TASK_TRIES)
+                        addTask(&currentTask, taskNumber, aux_str, tries);
+                    else {
+                        addUnfinishedTask(inp_dataFile, taskNumber, aux_str);
+                        unfinished_tasks_present = 1;
+                    }
+                } else if (status == ST_FORK_ERR) {
+                    fprintf(stderr, "%-20s - Could not fork process for task "
+                                    "%d in slave %d\n",
+                            "[ERROR]", taskNumber, itid);
+                    if (tries < MAX_TASK_TRIES)
+                        addTask(&currentTask, taskNumber, aux_str, tries);
+                    else {
+                        addUnfinishedTask(inp_dataFile, taskNumber, aux_str);
+                        unfinished_tasks_present = 1;
+                    }
+                } else {
+                    pvm_upkdouble(&exec_time, 1, 1);
+                    // Check if task was killed or completed
+                    if (status == ST_TASK_KILLED) {
+                        // no retry if task was killed (was killed for a
+                        // reason!)
+                        fprintf(stderr,
+                                "%-20s - Task %4d was stopped or killed "
+                                "after %14.9G seconds\n",
+                                "[ERROR]", taskNumber, exec_time);
+                        addUnfinishedTask(inp_dataFile, taskNumber, aux_str);
+                        unfinished_tasks_present = 1;
+                    } else {
+                        printf("%-20s - Task %4d completed in %14.9G seconds\n",
+                               "[TASK COMPLETED]", taskNumber, exec_time);
+                        if (arguments.create_slave) {
+                            fprintf(nodeInfoFile, "%2d,%4d\n", itid,
+                                    taskNumber);
+                        }
+                    }
+                    total_time += exec_time;
+                    runningTasks--;
+                }
+            }
+        } else {
+            // wait for a job result
+            if (pvm_recv(-1, MSG_RESULT)) {
+                pvm_upkint(&itid, 1, 1);
+                pvm_upkint(&taskNumber, 1, 1);
+                pvm_upkint(&tries, 1, 1);
+                pvm_upkint(&status, 1, 1);
+                pvm_upkstr(aux_str);
+                // Check if response is error at forking
+                if (status == ST_MEM_ERR) {
+                    fprintf(stderr,
+                            "%-20s - Could not execute task %d in slave %d "
+                            "(out of memory)\n",
+                            "[ERROR]", taskNumber, itid);
+                    if (tries < MAX_TASK_TRIES)
+                        addTask(&currentTask, taskNumber, aux_str, tries);
+                    else {
+                        addUnfinishedTask(inp_dataFile, taskNumber, aux_str);
+                        unfinished_tasks_present = 1;
+                    }
+                } else if (status == ST_FORK_ERR) {
+                    fprintf(stderr, "%-20s - Could not fork process for task "
+                                    "%d in slave %d\n",
+                            "[ERROR]", taskNumber, itid);
+                    if (tries < MAX_TASK_TRIES)
+                        addTask(&currentTask, taskNumber, aux_str, tries);
+                    else {
+                        addUnfinishedTask(inp_dataFile, taskNumber, aux_str);
+                        unfinished_tasks_present = 1;
+                    }
+                } else {
+                    pvm_upkdouble(&exec_time, 1, 1);
+                    // Check if task was killed or completed
+                    if (status == ST_TASK_KILLED) {
+                        // no retry if task was killed (was killed for a
+                        // reason!)
+                        fprintf(stderr,
+                                "%-20s - Task %4d was stopped or killed "
+                                "after %14.9G seconds\n",
+                                "[ERROR]", taskNumber, exec_time);
+                        addUnfinishedTask(inp_dataFile, taskNumber, aux_str);
+                        unfinished_tasks_present = 1;
+                    } else {
+                        printf("%-20s - Task %4d completed in %14.9G seconds\n",
+                               "[TASK COMPLETED]", taskNumber, exec_time);
+                        if (arguments.create_slave) {
+                            fprintf(nodeInfoFile, "%2d,%4d\n", itid,
+                                    taskNumber);
+                        }
+                    }
+                    total_time += exec_time;
+                    runningTasks--;
+                }
             }
         }
     }
