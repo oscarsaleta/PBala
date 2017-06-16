@@ -4,7 +4,7 @@ project (PBala)
 
 set (PBala_VERSION_MAJOR 6)
 set (PBala_VERSION_MINOR 0)
-set (PBala_VERSION_PATCH 0)
+set (PBala_VERSION_PATCH 1)
 
 set(CMAKE_C_FLAGS "-O3 -Wall -Wno-unused-result")
 
