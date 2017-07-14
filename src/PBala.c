@@ -587,7 +587,7 @@ int main(int argc, char *argv[])
      * CLEANUP
      */
     // free memory
-    printf("%-20s - Freeing used memory", "[CLEANUP]");
+    printf("%-20s - Freeing used memory\n", "[CLEANUP]");
     while (currentTask != NULL)
         removeTask(&currentTask);
     free(nodes);
