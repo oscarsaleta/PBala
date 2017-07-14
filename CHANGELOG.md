@@ -18,6 +18,8 @@
 -->
 
 # Releases and changelog
+* **v6.0.2**:
+    - Solved bug that caused PBala to crash after executions, leaving PVM in a potentially corrupt state for following executions.
 * **v6.0.1**:
     - Solved bug that caused the `PBala` master process to use 100% CPU while waiting for slaves to finish their work.
 * **v6.0.0**:
