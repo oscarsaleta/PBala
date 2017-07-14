@@ -587,13 +587,15 @@ int main(int argc, char *argv[])
      * CLEANUP
      */
     // free memory
+    printf("%-20s - Freeing used memory", "[CLEANUP]");
     while (currentTask != NULL)
         removeTask(&currentTask);
     free(nodes);
     free(nodeCores);
     // close files
     fclose(f_out);
-    fclose(nodeInfoFile);
+    if (arguments.create_slave)
+        fclose(nodeInfoFile);
     // remove tmp program (if modified)
     if (arguments.maple_single_cpu) {
         printf("%-20s - Removing temporary Maple program\n", "[CLEANUP]");
