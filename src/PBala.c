@@ -596,6 +596,7 @@ int main(int argc, char *argv[])
     fclose(nodeInfoFile);
     // remove tmp program (if modified)
     if (arguments.maple_single_cpu) {
+        printf("%-20s - Removing temporary Maple program\n", "[CLEANUP]");
         sprintf(aux_str, "[ ! -f %s.bak ] || mv %s.bak %s", inp_programFile,
                 inp_programFile, inp_programFile);
         if (system(aux_str))
@@ -605,6 +606,7 @@ int main(int argc, char *argv[])
     }
     // remove tmp pari/sage/octave programs (if created)
     if (task_type == 3 || task_type == 4 || task_type == 5) {
+        printf("%-20s - Removing PARI/Sage/Octave aux programs\n", "[CLEANUP]");
         DIR *dir;
         struct dirent *ent;
         dir = opendir(out_dir);
