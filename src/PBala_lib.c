@@ -474,13 +474,13 @@ int octaveProcess(int taskNumber, char *outdir, char *customPath)
 
 int getDataFromFile(char *filename, task_ptr *currentTask)
 {
-    int i, nArgs;
+    int i, nTasks;
     FILE *f;
     int tasknumber;
     char arguments[BUFFER_SIZE];
 
     // get argument count
-    if ((nArgs = getLineCount(filename)) < 0)
+    if ((nTasks = getLineCount(filename)) < 0)
         return -1;
 
     // fill arguments array with data from file
@@ -490,7 +490,7 @@ int getDataFromFile(char *filename, task_ptr *currentTask)
         return -1;
     }
 
-    for (i = 0; i < nArgs; i++) {
+    for (i = 0; i < nTasks; i++) {
         if (fscanf(f, "%d,%s\n", &tasknumber, arguments) != 2) {
             fprintf(stderr, "%-20s - cannot read line %d in file %s\n",
                     "[ERROR]", i, filename);
@@ -500,7 +500,7 @@ int getDataFromFile(char *filename, task_ptr *currentTask)
     }
 
     fclose(f);
-    return nArgs;
+    return nTasks;
 }
 
 void printAbort(void) { fprintf(stderr, "\n== EXECUTION ABORTED ==\n"); }
