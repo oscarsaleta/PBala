@@ -189,6 +189,7 @@ int main(int argc, char *argv[])
 
     /* set stderr as a line buffered output stream */
     setlinebuf(stderr);
+    setlinebuf(stdout);
     // setvbuf(stderr, NULL, _IOLBF, BUFFER_SIZE);
 
     /* Read command line arguments */
