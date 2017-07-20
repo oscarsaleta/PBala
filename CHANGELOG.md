@@ -18,6 +18,8 @@
 -->
 
 # Releases and changelog
+* **v6.0.3**:
+    - Solved bug that caused PBala output to not be correctly redirected to a file in case of an execution with redirection (`PBala ... > file`).
 * **v6.0.2**:
     - Solved bug that caused PBala to crash after executions, leaving PVM in a potentially corrupt state for following executions.
 * **v6.0.1**:
