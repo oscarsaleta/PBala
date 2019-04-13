@@ -1,5 +1,11 @@
-include_directories(${PROJECT_SOURCE_DIR}/src)
-link_directories(${PROJECT_SOURCE_DIR}/src)
+include_directories (
+    ${PROJECT_SOURCE_DIR}/src
+    $ENV{PVM_ROOT}/include
+)
+link_directories (
+    ${PROJECT_SOURCE_DIR}/src
+    $ENV{PVM_ROOT}/lib/LINUX64
+)
 
 configure_file (
     "${PROJECT_SOURCE_DIR}/src/PBala_config.h.in"
