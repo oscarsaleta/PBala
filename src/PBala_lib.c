@@ -252,10 +252,11 @@ int prterror(int pid, int taskNumber, char *out_dir, double time) {
     return 0;
 }
 
-#define NNODES 8
+#define NNODES 9
 int killPBala(void) {
     char nodes[NNODES][4] = {"a01", "a02", "a03", "a04",
-                             "a05", "a06", "a07", "a08"};
+                             "a05", "a06", "a07", "a08",
+                             "a09"};
     char processes[8][15] = {"PBala_task", "pvmd", "mserver",  "python",
                              "gp",         "sage", "Singular", "bash"};
     int i, j;
