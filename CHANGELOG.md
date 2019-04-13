@@ -18,6 +18,8 @@
 -->
 
 # Releases and changelog
+* **v6.0.4**:
+    - Added new node `a09` to `PBala -k` command.
 * **v6.0.3**:
     - Solved bug that caused PBala output to not be correctly redirected to a file in case of an execution with redirection (`PBala ... > file`).
 * **v6.0.2**:
