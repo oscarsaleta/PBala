@@ -43,8 +43,7 @@
  *
  * \return 0 if successful
  */
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     int myparent, taskNumber, tries; // myparent is the master
     int me;                          // me is the PVM id of this child
     int work_code; // work_code is a flag that tells the child what to do
@@ -160,33 +159,42 @@ int main(int argc, char *argv[])
             /*
              * GENERATE EXECUTION OF PROGRAM
              */
-            if (task_type == 0) {
+            switch (task_type) {
+            case 0:
                 /* MAPLE */
                 mapleProcess(taskNumber, inp_programFile, arguments,
                              custom_path_ptr);
                 perror("ERROR:: child Maple process");
-            } else if (task_type == 1) {
+                break;
+            case 1:
                 /* C */
                 cProcess(taskNumber, inp_programFile, arguments,
                          custom_path_ptr);
                 perror("ERROR:: child C process");
-            } else if (task_type == 2) {
+                break;
+            case 2:
                 /* PYTHON */
                 pythonProcess(taskNumber, inp_programFile, arguments,
                               custom_path_ptr);
                 perror("ERROR:: child Python process");
-            } else if (task_type == 3) {
+                break;
+            case 3:
                 /* PARI/GP */
                 pariProcess(taskNumber, out_dir, custom_path_ptr);
                 perror("ERROR:: child PARI process");
-            } else if (task_type == 4) {
+                break;
+            case 4:
                 /* SAGE */
                 sageProcess(taskNumber, out_dir, custom_path_ptr);
                 perror("ERROR:: child Sage process");
-            } else if (task_type == 5) {
+                break;
+            case 5:
                 /* OCTAVE */
                 octaveProcess(taskNumber, out_dir, custom_path_ptr);
                 perror("ERROR:: child Octave process");
+                break;
+            default:
+                /* This should never happen */
             }
         }
 
