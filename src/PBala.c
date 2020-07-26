@@ -51,10 +51,11 @@ static char args_doc[] = "programflag programfile datafile nodefile outdir";
 
 /* Options we understand */
 static struct argp_option options[] = {
-    {"kill", 'k', 0, 0, "Kill remainig PBala/PVM processes (WARNING: use at "
-                        "own risk! Use only if something goes wrong during an "
-                        "execution and PVM stops working and you have no other "
-                        "important processes running)"},
+    {"kill", 'k', 0, 0,
+     "Kill remainig PBala/PVM processes (WARNING: use at "
+     "own risk! Use only if something goes wrong during an "
+     "execution and PVM stops working and you have no other "
+     "important processes running)"},
     {"max-mem-size", 'm', "MAX_MEM", 0, "Max memory size of a task (KB)"},
     {"maple-single-core", 's', 0, 0, "Force single core Maple"},
     {"create-errfiles", 'e', 0, 0, "Create stderr files"},
@@ -75,8 +76,7 @@ struct arguments {
 };
 
 /* Parse a single option */
-static error_t parse_opt(int key, char *arg, struct argp_state *state)
-{
+static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     struct arguments *arguments = state->input;
 
     switch (key) {
@@ -140,8 +140,7 @@ static struct argp argp = {options, parse_opt, args_doc, doc};
  *
  * \return 0 if successful
  */
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     // Program options and arguments
     struct arguments arguments;
     arguments.kill = 0;
@@ -216,8 +215,9 @@ int main(int argc, char *argv[])
     // check if task type is correct
     if (task_type != 0 && task_type != 1 && task_type != 2 && task_type != 3 &&
         task_type != 4 && task_type != 5) {
-        fprintf(stderr, "%-20s - Wrong task_type value (must be one of: "
-                        "0,1,2,3,4,5)\n",
+        fprintf(stderr,
+                "%-20s - Wrong task_type value (must be one of: "
+                "0,1,2,3,4,5)\n",
                 "[ERROR]");
         return E_WRONG_TASK;
     }
@@ -355,9 +355,10 @@ int main(int argc, char *argv[])
                     numt = pvm_spawn(auxchar, NULL, PvmTaskHost, nodes[i], 1,
                                      &slaveId[itid]);
                 } else {
-                    fprintf(stderr, "%-20s - Cannot find executable PBala_task "
-                                    "in working directory or in %s. Make "
-                                    "sure you place it correctly.\n",
+                    fprintf(stderr,
+                            "%-20s - Cannot find executable PBala_task "
+                            "in working directory or in %s. Make "
+                            "sure you place it correctly.\n",
                             "[ERROR]", auxchar);
                     printAbort();
                     return E_NO_PBALA_TASK;
@@ -469,8 +470,9 @@ int main(int argc, char *argv[])
                         unfinished_tasks_present = 1;
                     }
                 } else if (status == ST_FORK_ERR) {
-                    fprintf(stderr, "%-20s - Could not fork process for task "
-                                    "%d in slave %d\n",
+                    fprintf(stderr,
+                            "%-20s - Could not fork process for task "
+                            "%d in slave %d\n",
                             "[ERROR]", taskNumber, itid);
                     if (tries < MAX_TASK_TRIES)
                         addTask(&currentTask, taskNumber, aux_str, tries);
@@ -523,8 +525,9 @@ int main(int argc, char *argv[])
                         unfinished_tasks_present = 1;
                     }
                 } else if (status == ST_FORK_ERR) {
-                    fprintf(stderr, "%-20s - Could not fork process for task "
-                                    "%d in slave %d\n",
+                    fprintf(stderr,
+                            "%-20s - Could not fork process for task "
+                            "%d in slave %d\n",
                             "[ERROR]", taskNumber, itid);
                     if (tries < MAX_TASK_TRIES)
                         addTask(&currentTask, taskNumber, aux_str, tries);

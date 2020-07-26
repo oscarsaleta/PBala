@@ -25,20 +25,19 @@
 #include <string.h>
 #include <unistd.h>
 
-int mapleSingleCPU(char *fname)
-{
+int mapleSingleCPU(char *fname) {
     char aux_str[BUFFER_SIZE];
-    sprintf(aux_str, "grep -q -F 'kernelopts(numcpus=1)' %s || (sed "
-                     "'1ikernelopts(numcpus=1);' %s > %s_tmp && mv %s "
-                     "%s.bak && mv %s_tmp %s)",
+    sprintf(aux_str,
+            "grep -q -F 'kernelopts(numcpus=1)' %s || (sed "
+            "'1ikernelopts(numcpus=1);' %s > %s_tmp && mv %s "
+            "%s.bak && mv %s_tmp %s)",
             fname, fname, fname, fname, fname, fname, fname);
     if (system(aux_str) == -1)
         return -1;
     return 0;
 }
 
-int getLineCount(char *fileName)
-{
+int getLineCount(char *fileName) {
     FILE *f_aux;
     char str_tmp[BUFFER_SIZE];
     // char *str_aux;
@@ -56,8 +55,7 @@ int getLineCount(char *fileName)
     return lineCount;
 }
 
-int parseNodeFile(char *nodefile, char ***nodes, int **nodeCores)
-{
+int parseNodeFile(char *nodefile, char ***nodes, int **nodeCores) {
     int i, nNodes;
     FILE *f_nodes;
     // count number of nodes
@@ -88,8 +86,7 @@ int parseNodeFile(char *nodefile, char ***nodes, int **nodeCores)
     return nNodes;
 }
 
-int memcheck(int flag, long int max_task_size)
-{
+int memcheck(int flag, long int max_task_size) {
     FILE *f;
     char buffer[1024];
     char *token;
@@ -123,8 +120,7 @@ int memcheck(int flag, long int max_task_size)
 }
 
 int timespec_subtract(struct timespec *result, struct timespec *x,
-                      struct timespec *y)
-{
+                      struct timespec *y) {
     /* Perform the carry for the later subtraction by updating y. */
     if (x->tv_nsec < y->tv_nsec) {
         int nsec = (y->tv_nsec - x->tv_nsec) / 1000000000 + 1;
@@ -146,8 +142,7 @@ int timespec_subtract(struct timespec *result, struct timespec *x,
     return x->tv_sec < y->tv_sec;
 }
 
-int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage)
-{
+int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage) {
     FILE *memlog;
     char memlogfilename[FNAME_SIZE];
 
@@ -192,8 +187,7 @@ int prtusage(int pid, int taskNumber, char *out_dir, struct rusage usage)
     return 0;
 }
 
-int parifile(int taskId, char *args, char *programfile, char *directory)
-{
+int parifile(int taskId, char *args, char *programfile, char *directory) {
     FILE *f;
     char aux[FNAME_SIZE];
 
@@ -210,8 +204,7 @@ int parifile(int taskId, char *args, char *programfile, char *directory)
     return 0;
 }
 
-int sagefile(int taskId, char *args, char *programfile, char *directory)
-{
+int sagefile(int taskId, char *args, char *programfile, char *directory) {
     FILE *f;
     char aux[FNAME_SIZE];
 
@@ -227,8 +220,7 @@ int sagefile(int taskId, char *args, char *programfile, char *directory)
     return 0;
 }
 
-int octavefile(int taskId, char *args, char *programfile, char *directory)
-{
+int octavefile(int taskId, char *args, char *programfile, char *directory) {
     FILE *f;
     char aux[FNAME_SIZE];
 
@@ -245,8 +237,7 @@ int octavefile(int taskId, char *args, char *programfile, char *directory)
     return 0;
 }
 
-int prterror(int pid, int taskNumber, char *out_dir, double time)
-{
+int prterror(int pid, int taskNumber, char *out_dir, double time) {
     FILE *memlog;
     char memlogfname[FNAME_SIZE];
 
@@ -263,8 +254,7 @@ int prterror(int pid, int taskNumber, char *out_dir, double time)
 }
 
 #define NNODES 8
-int killPBala(void)
-{
+int killPBala(void) {
     char nodes[NNODES][4] = {"a01", "a02", "a03", "a04",
                              "a05", "a06", "a07", "a08"};
 
@@ -291,8 +281,7 @@ int killPBala(void)
 #undef NNODES
 
 int mapleProcess(int taskNumber, char *inputFile, char *arguments,
-                 char *customPath)
-{
+                 char *customPath) {
     int i; // for loops
     // NULL-terminated array of strings for calling the Maple script
     char **args;
@@ -315,8 +304,8 @@ int mapleProcess(int taskNumber, char *inputFile, char *arguments,
     return execvp(args[0], args);
 }
 
-int cProcess(int taskNumber, char *inputFile, char *arguments, char *customPath)
-{
+int cProcess(int taskNumber, char *inputFile, char *arguments,
+             char *customPath) {
     int i; // for loops
     // Preparations for C or Python execution
     char *arguments_cpy;
@@ -363,8 +352,7 @@ int cProcess(int taskNumber, char *inputFile, char *arguments, char *customPath)
 }
 
 int pythonProcess(int taskNumber, char *inputFile, char *arguments,
-                  char *customPath)
-{
+                  char *customPath) {
     int i; // for loops
     /* Preparations for C or Python execution */
     char *arguments_cpy;
@@ -406,8 +394,7 @@ int pythonProcess(int taskNumber, char *inputFile, char *arguments,
     return execvp(args[0], args);
 }
 
-int pariProcess(int taskNumber, char *outdir, char *customPath)
-{
+int pariProcess(int taskNumber, char *outdir, char *customPath) {
     int i;
     // NULL-terminated array of strings
     char **args;
@@ -429,8 +416,7 @@ int pariProcess(int taskNumber, char *outdir, char *customPath)
     return execvp(args[0], args);
 }
 
-int sageProcess(int taskNumber, char *outdir, char *customPath)
-{
+int sageProcess(int taskNumber, char *outdir, char *customPath) {
     int i;
     // NULL-terminated array of strings
     char **args;
@@ -450,8 +436,7 @@ int sageProcess(int taskNumber, char *outdir, char *customPath)
     return execvp(args[0], args);
 }
 
-int octaveProcess(int taskNumber, char *outdir, char *customPath)
-{
+int octaveProcess(int taskNumber, char *outdir, char *customPath) {
     int i;
     // NULL-terminated array of strings
     char **args;
@@ -472,8 +457,7 @@ int octaveProcess(int taskNumber, char *outdir, char *customPath)
     return execvp(args[0], args);
 }
 
-int getDataFromFile(char *filename, task_ptr *currentTask)
-{
+int getDataFromFile(char *filename, task_ptr *currentTask) {
     int i, nTasks;
     FILE *f;
     int tasknumber;
@@ -505,8 +489,7 @@ int getDataFromFile(char *filename, task_ptr *currentTask)
 
 void printAbort(void) { fprintf(stderr, "\n== EXECUTION ABORTED ==\n"); }
 
-task_ptr newTask(int number, char *args, int tries, task_ptr next)
-{
+task_ptr newTask(int number, char *args, int tries, task_ptr next) {
     task_ptr new_task = (task_ptr)malloc(sizeof(task));
     strcpy(new_task->args, args);
     new_task->number = number;
@@ -515,14 +498,12 @@ task_ptr newTask(int number, char *args, int tries, task_ptr next)
     return new_task;
 }
 
-void addTask(task_ptr *currentTask, int tasknumber, char *taskargs, int tries)
-{
+void addTask(task_ptr *currentTask, int tasknumber, char *taskargs, int tries) {
     task_ptr new_task = newTask(tasknumber, taskargs, tries, *currentTask);
     *currentTask = new_task;
 }
 
-void removeTask(task_ptr *currentTask)
-{
+void removeTask(task_ptr *currentTask) {
     if (*currentTask == NULL)
         return;
     task_ptr aux = *currentTask;
@@ -530,8 +511,7 @@ void removeTask(task_ptr *currentTask)
     free(aux);
 }
 
-void printTasks(task_ptr currentTask)
-{
+void printTasks(task_ptr currentTask) {
     task_ptr t = currentTask;
     fprintf(stdout, "\nPRINTING TASKS\n");
 
@@ -541,8 +521,7 @@ void printTasks(task_ptr currentTask)
     }
 }
 
-void addUnfinishedTask(char *fname, int tasknumber, char *args)
-{
+void addUnfinishedTask(char *fname, int tasknumber, char *args) {
     char fname2[FNAME_SIZE];
     int fd;
     FILE *f;

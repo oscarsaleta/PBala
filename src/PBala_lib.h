@@ -259,7 +259,7 @@ void removeTask(task_ptr *currentTask);
  * @param  next   next task in linked list
  * @return        the created task
  */
-task_ptr newTask(int number, char *args, int tries,task_ptr next);
+task_ptr newTask(int number, char *args, int tries, task_ptr next);
 /**
  * Print all tasks (for debugging purposes)
  *
